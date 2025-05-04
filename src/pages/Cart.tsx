@@ -47,20 +47,38 @@ const Cart = () => {
     try {
       setIsLoading(true);
       
-      // Use a more generic typing approach to avoid TypeScript errors with Supabase
-      const { data, error } = await supabase
+      // Use direct query without foreign references to avoid type issues
+      const { data: cartData, error: cartError } = await supabase
         .from('cart')
-        .select(`
-          *,
-          perfume:perfume_id(*)
-        `)
+        .select('*')
         .eq('user_id', user?.id);
         
-      if (error) {
-        throw error;
+      if (cartError) throw cartError;
+
+      // Fetch all perfumes referenced in the cart
+      if (cartData && cartData.length > 0) {
+        const perfumeIds = cartData.map(item => item.perfume_id);
+        
+        const { data: perfumesData, error: perfumesError } = await supabase
+          .from('perfumes')
+          .select('*')
+          .in('id', perfumeIds);
+          
+        if (perfumesError) throw perfumesError;
+        
+        // Manually construct the cart items with the perfume data
+        const items = cartData.map(cartItem => {
+          const perfume = perfumesData.find(p => p.id === cartItem.perfume_id);
+          return {
+            ...cartItem,
+            perfume: perfume
+          } as CartItem;
+        });
+        
+        setCartItems(items);
+      } else {
+        setCartItems([]);
       }
-      
-      setCartItems(data || []);
     } catch (error: any) {
       console.error('Error fetching cart:', error);
       toast.error('Failed to load cart', {
@@ -119,20 +137,26 @@ const Cart = () => {
   const checkout = async () => {
     try {
       // Create order
-      const { data: order, error: orderError } = await supabase
+      const orderData = {
+        user_id: user?.id,
+        status: 'completed',
+        total: calculateTotal()
+      };
+
+      const { data: orderResult, error: orderError } = await supabase
         .from('orders')
-        .insert({
-          user_id: user?.id,
-          status: 'completed',
-          total: calculateTotal()
-        })
+        .insert(orderData)
         .select();
         
-      if (orderError || !order || !order[0]) throw orderError || new Error('Failed to create order');
+      if (orderError || !orderResult || orderResult.length === 0) {
+        throw orderError || new Error('Failed to create order');
+      }
+      
+      const orderId = orderResult[0].id;
       
       // Create order items
       const orderItems = cartItems.map(item => ({
-        order_id: order[0].id,
+        order_id: orderId,
         perfume_id: item.perfume_id,
         quantity: item.quantity,
         price: item.perfume.price_value
