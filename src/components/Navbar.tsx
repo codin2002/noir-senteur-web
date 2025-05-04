@@ -1,10 +1,24 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -14,6 +28,25 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleSignIn = () => {
+    navigate('/auth');
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/');
+  };
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'SN';
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
 
   return (
     <nav
@@ -38,6 +71,44 @@ const Navbar = () => {
           <a href="#contact" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
             Contact
           </a>
+          
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Avatar className="h-9 w-9 cursor-pointer border border-gold/20">
+                  <AvatarImage src={user.user_metadata.avatar_url || undefined} />
+                  <AvatarFallback className="bg-gold/20 text-white">
+                    {getInitials(user.user_metadata.full_name)}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56 bg-darker text-white border-gold/20">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem className="focus:bg-gold/10 focus:text-white">
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="focus:bg-gold/10 focus:text-white">
+                    Account
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator className="bg-gold/20" />
+                <DropdownMenuItem 
+                  className="focus:bg-gold/10 focus:text-white cursor-pointer"
+                  onClick={handleSignOut}
+                >
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button 
+              variant="outline" 
+              onClick={handleSignIn}
+              className="border-gold text-gold hover:bg-gold hover:text-darker"
+            >
+              Sign In
+            </Button>
+          )}
         </div>
 
         {/* Mobile Menu Toggle */}
@@ -82,6 +153,23 @@ const Navbar = () => {
             >
               Contact
             </a>
+            {user ? (
+              <Button 
+                variant="outline" 
+                onClick={handleSignOut}
+                className="border-gold text-gold hover:bg-gold hover:text-darker"
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Button 
+                variant="outline" 
+                onClick={handleSignIn}
+                className="border-gold text-gold hover:bg-gold hover:text-darker"
+              >
+                Sign In
+              </Button>
+            )}
           </div>
         </div>
       )}
