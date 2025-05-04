@@ -5,31 +5,12 @@ import Footer from '@/components/Footer';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { ShoppingCart, Trash, Minus, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-
-// Define interfaces for our data types
-interface Perfume {
-  id: string;
-  name: string;
-  notes: string;
-  description: string;
-  image: string;
-  price: string;
-  price_value: number;
-}
-
-interface CartItem {
-  id: string;
-  user_id: string;
-  perfume_id: string;
-  quantity: number;
-  created_at: string;
-  perfume: Perfume;
-}
+import CartItem, { CartItemType } from '@/components/cart/CartItem';
+import CartSummary from '@/components/cart/CartSummary';
+import CartEmpty from '@/components/cart/CartEmpty';
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
@@ -47,7 +28,7 @@ const Cart = () => {
     try {
       setIsLoading(true);
       
-      // Use direct query without foreign references to avoid type issues
+      // Query the database directly for cart items
       const { data: cartData, error: cartError } = await supabase
         .from('cart')
         .select('*')
@@ -55,7 +36,7 @@ const Cart = () => {
         
       if (cartError) throw cartError;
 
-      // Fetch all perfumes referenced in the cart
+      // If we have cart items, fetch the associated perfume details
       if (cartData && cartData.length > 0) {
         const perfumeIds = cartData.map(item => item.perfume_id);
         
@@ -66,13 +47,13 @@ const Cart = () => {
           
         if (perfumesError) throw perfumesError;
         
-        // Manually construct the cart items with the perfume data
+        // Combine cart items with perfume details
         const items = cartData.map(cartItem => {
           const perfume = perfumesData.find(p => p.id === cartItem.perfume_id);
           return {
             ...cartItem,
-            perfume: perfume
-          } as CartItem;
+            perfume
+          } as CartItemType;
         });
         
         setCartItems(items);
@@ -89,49 +70,14 @@ const Cart = () => {
     }
   };
 
-  const updateQuantity = async (id: string, newQuantity: number) => {
-    if (newQuantity < 1) return;
-    
-    try {
-      const { error } = await supabase
-        .from('cart')
-        .update({ quantity: newQuantity })
-        .eq('id', id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      setCartItems(cartItems.map(item => 
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      ));
-    } catch (error: any) {
-      console.error('Error updating quantity:', error);
-      toast.error('Failed to update quantity', {
-        description: error.message
-      });
-    }
+  const handleUpdateItem = (updatedItem: CartItemType) => {
+    setCartItems(cartItems.map(item => 
+      item.id === updatedItem.id ? updatedItem : item
+    ));
   };
 
-  const removeFromCart = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('cart')
-        .delete()
-        .eq('id', id);
-        
-      if (error) {
-        throw error;
-      }
-      
-      setCartItems(cartItems.filter(item => item.id !== id));
-      toast.success('Item removed from cart');
-    } catch (error: any) {
-      console.error('Error removing from cart:', error);
-      toast.error('Failed to remove from cart', {
-        description: error.message
-      });
-    }
+  const handleRemoveItem = (id: string) => {
+    setCartItems(cartItems.filter(item => item.id !== id));
   };
 
   const checkout = async () => {
@@ -208,112 +154,30 @@ const Cart = () => {
             <div className="flex justify-center items-center py-12">
               <div className="w-10 h-10 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin"></div>
             </div>
-          ) : !user ? (
-            <div className="text-center py-12">
-              <h2 className="text-xl mb-4">Please sign in to view your cart</h2>
-              <Button 
-                variant="outline"
-                className="border-gold text-gold hover:bg-gold hover:text-darker"
-                onClick={() => window.location.href = '/auth'}
-              >
-                Sign In
-              </Button>
-            </div>
-          ) : cartItems.length === 0 ? (
-            <div className="text-center py-12">
-              <ShoppingCart className="mx-auto h-12 w-12 text-gold mb-4 opacity-50" />
-              <h2 className="text-xl mb-2">Your cart is empty</h2>
-              <p className="text-muted-foreground mb-6">Add items to your cart to proceed to checkout.</p>
-              <Button 
-                variant="outline"
-                className="border-gold text-gold hover:bg-gold hover:text-darker"
-                onClick={() => window.location.href = '/'}
-              >
-                Browse Collection
-              </Button>
-            </div>
+          ) : !user || cartItems.length === 0 ? (
+            <CartEmpty isAuthenticated={!!user} />
           ) : (
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Cart items */}
               <div className="flex-grow">
                 <div className="space-y-4">
                   {cartItems.map((item) => (
-                    <div key={item.id} className="flex flex-col sm:flex-row bg-darker border border-gold/20 rounded-lg overflow-hidden">
-                      <div className="sm:w-1/4 h-[140px] sm:h-auto">
-                        <img 
-                          src={item.perfume.image} 
-                          alt={item.perfume.name} 
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="flex-grow p-4 flex flex-col justify-between">
-                        <div>
-                          <h3 className="text-sm uppercase tracking-widest text-gold">{item.perfume.notes}</h3>
-                          <h2 className="text-xl font-serif">{item.perfume.name}</h2>
-                          <p className="text-lg font-light text-gold mt-2">{item.perfume.price}</p>
-                        </div>
-                        <div className="flex items-center justify-between mt-4">
-                          <div className="flex items-center space-x-3">
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              className="h-8 w-8 border-gold/50"
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                              disabled={item.quantity <= 1}
-                            >
-                              <Minus className="h-3 w-3" />
-                            </Button>
-                            <span className="text-lg w-8 text-center">{item.quantity}</span>
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              className="h-8 w-8 border-gold/50"
-                              onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            >
-                              <Plus className="h-3 w-3" />
-                            </Button>
-                          </div>
-                          <Button 
-                            variant="outline"
-                            size="icon"
-                            className="border-red-500/50 hover:bg-red-500/10"
-                            onClick={() => removeFromCart(item.id)}
-                          >
-                            <Trash className="h-4 w-4 text-red-400" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                    <CartItem 
+                      key={item.id} 
+                      item={item} 
+                      onItemUpdate={handleUpdateItem}
+                      onItemRemove={handleRemoveItem}
+                    />
                   ))}
                 </div>
               </div>
               
               {/* Order summary */}
-              <div className="lg:w-1/3 bg-darker border border-gold/20 rounded-lg p-6 h-fit">
-                <h2 className="text-xl font-serif mb-6">Order Summary</h2>
-                
-                <div className="space-y-3">
-                  {cartItems.map((item) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span>{item.perfume.name} × {item.quantity}</span>
-                      <span>${item.perfume.price_value * item.quantity}</span>
-                    </div>
-                  ))}
-                  
-                  <div className="border-t border-gold/20 pt-3 mt-3">
-                    <div className="flex justify-between font-medium">
-                      <span>Total</span>
-                      <span className="text-gold">${calculateTotal()}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <Button 
-                  className="w-full bg-gold text-darker hover:bg-gold/80 mt-6"
-                  onClick={checkout}
-                >
-                  Checkout
-                </Button>
+              <div className="lg:w-1/3">
+                <CartSummary 
+                  cartItems={cartItems} 
+                  onCheckout={checkout} 
+                />
               </div>
             </div>
           )}
