@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { toast as sonnerToast } from "sonner";
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -12,16 +13,15 @@ const AuthCallback = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        console.log("Processing authentication callback...");
         // Get the session and handle any errors
         const { data, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError) {
           console.error('Session error:', sessionError);
           setError(sessionError.message);
-          toast({
-            title: "Authentication error",
-            description: sessionError.message,
-            variant: "destructive",
+          sonnerToast.error("Authentication error", {
+            description: sessionError.message
           });
           navigate('/auth');
           return;
@@ -30,27 +30,32 @@ const AuthCallback = () => {
         if (!data.session) {
           console.error('No session found');
           setError('No session found. Please try signing in again.');
-          toast({
-            title: "Authentication error",
-            description: "No session found. Please try signing in again.",
-            variant: "destructive",
+          sonnerToast.error("Authentication error", {
+            description: "No session found. Please try signing in again."
           });
           navigate('/auth');
           return;
         }
 
-        console.log('Authentication successful, session:', data.session);
-        toast({
-          title: "Successfully signed in",
+        console.log('Authentication successful, session:', data.session.user.email);
+        sonnerToast.success("Successfully signed in", {
+          description: `Welcome back, ${data.session.user.email}`
         });
-        navigate('/');
+        
+        // Check if there was a previous location the user was trying to access
+        const storedPath = localStorage.getItem('auth_redirect_path');
+        const redirectTo = storedPath || '/';
+        
+        if (storedPath) {
+          localStorage.removeItem('auth_redirect_path');
+        }
+        
+        navigate(redirectTo);
       } catch (err: any) {
         console.error('Unexpected error during authentication:', err);
         setError(err.message || 'An unexpected error occurred');
-        toast({
-          title: "Authentication error",
-          description: err.message || 'An unexpected error occurred',
-          variant: "destructive",
+        sonnerToast.error("Authentication error", {
+          description: err.message || 'An unexpected error occurred'
         });
         navigate('/auth');
       }

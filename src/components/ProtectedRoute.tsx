@@ -11,6 +11,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { user, isLoading } = useAuth();
   const location = useLocation();
 
+  // Store the current path in localStorage when redirecting to auth
+  useEffect(() => {
+    if (!isLoading && !user) {
+      localStorage.setItem('auth_redirect_path', location.pathname);
+    }
+  }, [user, isLoading, location.pathname]);
+
   // Show loading state while checking authentication
   if (isLoading) {
     return (
