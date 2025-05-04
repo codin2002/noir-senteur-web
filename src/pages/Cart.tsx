@@ -9,21 +9,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { ShoppingCart, Trash, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+// Define clear interfaces for our data types based on database schema
+interface Perfume {
+  id: string;
+  name: string;
+  notes: string;
+  description: string;
+  image: string;
+  price: string;
+  price_value: number;
+}
+
 interface CartItem {
   id: string;
   user_id: string;
   perfume_id: string;
   quantity: number;
   created_at: string;
-  perfume: {
-    id: string;
-    name: string;
-    notes: string;
-    description: string;
-    image: string;
-    price: string;
-    price_value: number; // Actual numeric price for calculations
-  };
+  perfume: Perfume;
 }
 
 const Cart = () => {
@@ -46,6 +49,7 @@ const Cart = () => {
     try {
       setIsLoading(true);
       
+      // Use the raw query method to join cart with perfumes
       const { data, error } = await supabase
         .from('cart')
         .select(`
@@ -277,7 +281,7 @@ const Cart = () => {
                   {cartItems.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.perfume.name} × {item.quantity}</span>
-                      <span>${extractNumericPrice(item.perfume.price) * item.quantity}</span>
+                      <span>${item.perfume.price_value * item.quantity}</span>
                     </div>
                   ))}
                   

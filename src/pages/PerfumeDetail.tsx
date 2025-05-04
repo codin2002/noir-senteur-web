@@ -3,19 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useToast } from '@/hooks/use-toast';
-import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Heart, ShoppingCart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface Perfume {
   id: string;
   name: string;
   notes: string;
   description: string;
-  detailed_description?: string;
   image: string;
   price: string;
   price_value: number;
@@ -25,162 +22,90 @@ const PerfumeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [perfume, setPerfume] = useState<Perfume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isInWishlist, setIsInWishlist] = useState(false);
-  const [quantity, setQuantity] = useState(1);
+  const [addingToCart, setAddingToCart] = useState(false);
   const { user } = useAuth();
-  const { toast: uiToast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPerfume();
-    if (user) {
-      checkWishlistStatus();
-    }
-  }, [id, user]);
-
-  const fetchPerfume = async () => {
-    try {
-      setIsLoading(true);
-      
-      if (!id) return;
-      
-      const { data, error } = await supabase
-        .from('perfumes')
-        .select('*')
-        .eq('id', id)
-        .single();
+    const fetchPerfume = async () => {
+      try {
+        setIsLoading(true);
         
-      if (error) throw error;
-      
-      setPerfume(data);
-      document.title = `${data.name} | Senteur Fragrances`;
-    } catch (error: any) {
-      console.error('Error fetching perfume details:', error);
-      toast.error('Failed to load perfume details', {
-        description: error.message
-      });
-      navigate('/');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const checkWishlistStatus = async () => {
-    try {
-      if (!id || !user) return;
-      
-      const { data, error } = await supabase
-        .from('wishlist')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('perfume_id', id)
-        .single();
-        
-      setIsInWishlist(!!data);
-    } catch (error) {
-      // Not in wishlist - this is fine, we'll just show "Add to Wishlist" option
-      setIsInWishlist(false);
-    }
-  };
-
-  const toggleWishlist = async () => {
-    try {
-      if (!user) {
-        toast('Please sign in', {
-          description: 'You need to be signed in to add items to your wishlist',
-          action: {
-            label: 'Sign In',
-            onClick: () => navigate('/auth')
-          }
-        });
-        return;
-      }
-      
-      if (isInWishlist) {
-        // Remove from wishlist
         const { data, error } = await supabase
-          .from('wishlist')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('perfume_id', id)
-          .select();
+          .from('perfumes')
+          .select('*')
+          .eq('id', id)
+          .single();
           
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
         
-        setIsInWishlist(false);
-        toast.success('Removed from wishlist');
-      } else {
-        // Add to wishlist
-        const { error } = await supabase
-          .from('wishlist')
-          .insert({
-            user_id: user.id,
-            perfume_id: id
-          });
-          
-        if (error) throw error;
-        
-        setIsInWishlist(true);
-        toast.success('Added to wishlist');
+        if (data) {
+          setPerfume(data);
+          document.title = `${data.name} | Senteur Fragrances`;
+        }
+      } catch (error: any) {
+        console.error('Error fetching perfume:', error);
+        toast.error('Failed to load perfume details', {
+          description: error.message
+        });
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error: any) {
-      console.error('Error updating wishlist:', error);
-      toast.error('Failed to update wishlist', {
-        description: error.message
-      });
+    };
+
+    if (id) {
+      fetchPerfume();
     }
-  };
+  }, [id]);
 
   const addToCart = async () => {
+    if (!user) {
+      // Store the redirect path for after login
+      localStorage.setItem('auth_redirect_path', `/perfume/${id}`);
+      navigate('/auth');
+      return;
+    }
+    
     try {
-      if (!user) {
-        toast('Please sign in', {
-          description: 'You need to be signed in to add items to your cart',
-          action: {
-            label: 'Sign In',
-            onClick: () => navigate('/auth')
-          }
-        });
-        return;
-      }
+      setAddingToCart(true);
       
-      // Check if already in cart
-      const { data: existingItem, error: checkError } = await supabase
+      // Check if the item is already in the cart
+      const { data: existingCartItems, error: checkError } = await supabase
         .from('cart')
         .select('*')
         .eq('user_id', user.id)
-        .eq('perfume_id', id)
-        .maybeSingle();
+        .eq('perfume_id', id);
         
       if (checkError) throw checkError;
       
-      if (existingItem) {
+      if (existingCartItems && existingCartItems.length > 0) {
         // Update quantity if already in cart
-        const newQuantity = existingItem.quantity + quantity;
-        const { error } = await supabase
+        const { error: updateError } = await supabase
           .from('cart')
-          .update({ quantity: newQuantity })
-          .eq('id', existingItem.id);
+          .update({ quantity: existingCartItems[0].quantity + 1 })
+          .eq('id', existingCartItems[0].id);
           
-        if (error) throw error;
+        if (updateError) throw updateError;
         
         toast.success('Cart updated', {
-          description: `${perfume?.name} quantity increased to ${newQuantity}`
+          description: 'Item quantity increased in your cart'
         });
       } else {
         // Add new item to cart
-        const { error } = await supabase
+        const { error: insertError } = await supabase
           .from('cart')
           .insert({
             user_id: user.id,
             perfume_id: id,
-            quantity: quantity
+            quantity: 1
           });
           
-        if (error) throw error;
+        if (insertError) throw insertError;
         
         toast.success('Added to cart', {
-          description: `${perfume?.name} added to your cart`
+          description: 'Item added to your cart successfully'
         });
       }
     } catch (error: any) {
@@ -188,15 +113,17 @@ const PerfumeDetail = () => {
       toast.error('Failed to add to cart', {
         description: error.message
       });
+    } finally {
+      setAddingToCart(false);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark text-white flex flex-col">
+      <div className="min-h-screen bg-dark text-white">
         <Navbar />
-        <div className="flex-1 pt-24 pb-12 px-6 flex items-center justify-center">
-          <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin"></div>
+        <div className="pt-24 pb-12 flex justify-center items-center min-h-[50vh]">
+          <div className="w-10 h-10 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin"></div>
         </div>
         <Footer />
       </div>
@@ -205,19 +132,18 @@ const PerfumeDetail = () => {
 
   if (!perfume) {
     return (
-      <div className="min-h-screen bg-dark text-white flex flex-col">
+      <div className="min-h-screen bg-dark text-white">
         <Navbar />
-        <div className="flex-1 pt-24 pb-12 px-6 flex items-center justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-serif mb-4">Perfume not found</h2>
-            <Button
-              variant="outline"
-              className="border-gold text-gold hover:bg-gold hover:text-darker"
-              onClick={() => navigate('/')}
-            >
-              Return to Home
-            </Button>
-          </div>
+        <div className="pt-24 pb-12 px-6 flex flex-col justify-center items-center min-h-[50vh]">
+          <h2 className="text-3xl font-serif mb-4">Perfume Not Found</h2>
+          <p className="text-muted-foreground mb-6">The perfume you're looking for doesn't exist or has been removed.</p>
+          <Button 
+            variant="outline"
+            className="border-gold text-gold hover:bg-gold hover:text-darker"
+            onClick={() => navigate('/')}
+          >
+            Back to Collection
+          </Button>
         </div>
         <Footer />
       </div>
@@ -225,14 +151,14 @@ const PerfumeDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark text-white flex flex-col">
+    <div className="min-h-screen bg-dark text-white">
       <Navbar />
-      <div className="flex-1 pt-24 pb-12 px-6">
+      <div className="pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-12">
-            {/* Image section */}
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+            {/* Left - Image */}
             <div className="w-full lg:w-1/2">
-              <div className="relative h-[500px] md:h-[600px] overflow-hidden rounded-lg">
+              <div className="relative h-[500px] lg:h-[700px] overflow-hidden rounded-lg">
                 <img 
                   src={perfume.image} 
                   alt={perfume.name} 
@@ -241,68 +167,40 @@ const PerfumeDetail = () => {
               </div>
             </div>
             
-            {/* Details section */}
-            <div className="w-full lg:w-1/2 space-y-8">
+            {/* Right - Details */}
+            <div className="w-full lg:w-1/2 space-y-6 lg:pt-12">
               <div>
-                <h3 className="text-sm uppercase tracking-widest text-gold mb-2">{perfume.notes}</h3>
-                <h1 className="text-4xl md:text-5xl font-serif mb-4">{perfume.name}</h1>
-                <p className="text-2xl font-light text-gold">{perfume.price}</p>
+                <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
+                <h1 className="text-4xl md:text-5xl font-serif mt-2">{perfume.name}</h1>
+                <p className="text-2xl font-light text-gold mt-4">{perfume.price}</p>
               </div>
               
-              <div className="space-y-4">
-                <h3 className="text-xl font-serif">Description</h3>
+              <div className="h-px bg-gold/30 w-full"></div>
+              
+              <div>
+                <h3 className="text-xl font-serif mb-3">Description</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  {perfume.detailed_description || perfume.description}
+                  {perfume.description}
                 </p>
               </div>
               
-              <div className="pt-4 space-y-6">
-                <div className="flex space-x-4 items-center">
-                  <div className="flex border border-gold/30 rounded-md">
-                    <Button
-                      variant="ghost"
-                      className="px-3 text-gold hover:bg-gold/10"
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    >
-                      -
-                    </Button>
-                    <div className="w-12 flex items-center justify-center text-lg">
-                      {quantity}
-                    </div>
-                    <Button
-                      variant="ghost"
-                      className="px-3 text-gold hover:bg-gold/10"
-                      onClick={() => setQuantity(quantity + 1)}
-                    >
-                      +
-                    </Button>
-                  </div>
-                  
-                  <Button 
-                    className="bg-gold text-darker hover:bg-gold/80 flex-1"
-                    onClick={addToCart}
-                  >
-                    <ShoppingCart className="h-4 w-4 mr-2" />
-                    Add to Cart
-                  </Button>
-                  
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className={isInWishlist ? 
-                      "border-gold bg-gold/10 text-gold" : 
-                      "border-gold/50 hover:bg-gold/10"
-                    }
-                    onClick={toggleWishlist}
-                  >
-                    <Heart className="h-5 w-5" fill={isInWishlist ? "currentColor" : "none"} />
-                  </Button>
-                </div>
-                
-                <div className="text-sm text-muted-foreground">
-                  <p>Free shipping on orders over $100</p>
-                  <p>30-day returns for unopened products</p>
-                </div>
+              <div className="h-px bg-gold/30 w-full"></div>
+              
+              <div>
+                <h3 className="text-xl font-serif mb-3">Notes</h3>
+                <p className="text-muted-foreground">
+                  {perfume.notes}
+                </p>
+              </div>
+              
+              <div className="pt-6">
+                <Button 
+                  className="w-full bg-gold text-darker hover:bg-gold/80"
+                  onClick={addToCart}
+                  disabled={addingToCart}
+                >
+                  {addingToCart ? 'Adding...' : 'Add to Cart'}
+                </Button>
               </div>
             </div>
           </div>
