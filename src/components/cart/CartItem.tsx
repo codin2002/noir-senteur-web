@@ -35,7 +35,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove })
     if (newQuantity < 1) return;
     
     try {
-      // Use the raw REST API to avoid type issues
+      // Use the stored procedure to update cart item quantity
       const { error } = await supabase.rpc('update_cart_item', {
         cart_id: item.id,
         new_quantity: newQuantity
@@ -56,7 +56,7 @@ const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove })
 
   const handleRemove = async () => {
     try {
-      // Use the raw REST API to avoid type issues
+      // Use the stored procedure to delete cart item
       const { error } = await supabase.rpc('delete_cart_item', {
         cart_id: item.id
       });

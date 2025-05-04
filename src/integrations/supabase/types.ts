@@ -154,7 +154,29 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_order_with_items: {
+        Args: { user_uuid: string; cart_items: Json; order_total: number }
+        Returns: string
+      }
+      delete_cart_item: {
+        Args: { cart_id: string }
+        Returns: undefined
+      }
+      get_cart_with_perfumes: {
+        Args: { user_uuid: string }
+        Returns: {
+          id: string
+          user_id: string
+          perfume_id: string
+          quantity: number
+          created_at: string
+          perfume: Json
+        }[]
+      }
+      update_cart_item: {
+        Args: { cart_id: string; new_quantity: number }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

@@ -28,7 +28,7 @@ const Cart = () => {
     try {
       setIsLoading(true);
       
-      // Use raw SQL query to fetch cart items with their associated perfumes
+      // Use the stored procedure to get cart items with their associated perfumes
       const { data, error } = await supabase.rpc('get_cart_with_perfumes', {
         user_uuid: user?.id
       });
@@ -65,11 +65,11 @@ const Cart = () => {
       // Create order using a stored procedure
       const { data, error } = await supabase.rpc('create_order_with_items', {
         user_uuid: user?.id,
-        cart_items: cartItems.map(item => ({
+        cart_items: JSON.stringify(cartItems.map(item => ({
           perfume_id: item.perfume_id,
           quantity: item.quantity,
           price: item.perfume.price_value
-        })),
+        }))),
         order_total: calculateTotal()
       });
         

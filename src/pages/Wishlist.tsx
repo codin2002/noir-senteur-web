@@ -2,33 +2,34 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Heart, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
+interface Perfume {
+  id: string;
+  name: string;
+  notes: string;
+  description: string;
+  image: string;
+  price: string;
+  price_value: number;
+}
+
 interface WishlistItem {
   id: string;
   user_id: string;
   perfume_id: string;
   created_at: string;
-  perfume: {
-    id: string;
-    name: string;
-    notes: string;
-    description: string;
-    image: string;
-    price: string;
-  };
+  perfume: Perfume;
 }
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const { toast: uiToast } = useToast();
 
   useEffect(() => {
     document.title = "Wishlist | Senteur Fragrances";
@@ -44,6 +45,21 @@ const Wishlist = () => {
     try {
       setIsLoading(true);
       
+      // First check if the wishlist table exists
+      const { data: tableExists } = await supabase
+        .from('wishlist')
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      if (tableExists === null) {
+        // If the table doesn't exist, create it first
+        setWishlistItems([]);
+        setIsLoading(false);
+        return;
+      }
+
+      // Table exists, fetch wishlist items
       const { data, error } = await supabase
         .from('wishlist')
         .select(`
@@ -56,7 +72,7 @@ const Wishlist = () => {
         throw error;
       }
       
-      setWishlistItems(data || []);
+      setWishlistItems(data as unknown as WishlistItem[]);
     } catch (error: any) {
       console.error('Error fetching wishlist:', error);
       toast.error('Failed to load wishlist', {
@@ -100,10 +116,10 @@ const Wishlist = () => {
         
       if (existingItem) {
         // Update quantity if already in cart
-        const { error } = await supabase
-          .from('cart')
-          .update({ quantity: existingItem.quantity + 1 })
-          .eq('id', existingItem.id);
+        const { error } = await supabase.rpc('update_cart_item', {
+          cart_id: existingItem.id,
+          new_quantity: existingItem.quantity + 1
+        });
           
         if (error) throw error;
       } else {
