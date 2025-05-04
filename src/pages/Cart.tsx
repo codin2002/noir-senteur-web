@@ -28,35 +28,15 @@ const Cart = () => {
     try {
       setIsLoading(true);
       
-      // Query the database directly for cart items
-      const { data: cartData, error: cartError } = await supabase
-        .from('cart')
-        .select('*')
-        .eq('user_id', user?.id);
-        
-      if (cartError) throw cartError;
-
-      // If we have cart items, fetch the associated perfume details
-      if (cartData && cartData.length > 0) {
-        const perfumeIds = cartData.map(item => item.perfume_id);
-        
-        const { data: perfumesData, error: perfumesError } = await supabase
-          .from('perfumes')
-          .select('*')
-          .in('id', perfumeIds);
-          
-        if (perfumesError) throw perfumesError;
-        
-        // Combine cart items with perfume details
-        const items = cartData.map(cartItem => {
-          const perfume = perfumesData.find(p => p.id === cartItem.perfume_id);
-          return {
-            ...cartItem,
-            perfume
-          } as CartItemType;
-        });
-        
-        setCartItems(items);
+      // Use raw SQL query to fetch cart items with their associated perfumes
+      const { data, error } = await supabase.rpc('get_cart_with_perfumes', {
+        user_uuid: user?.id
+      });
+      
+      if (error) throw error;
+      
+      if (data) {
+        setCartItems(data as CartItemType[]);
       } else {
         setCartItems([]);
       }
@@ -82,45 +62,20 @@ const Cart = () => {
 
   const checkout = async () => {
     try {
-      // Create order
-      const orderData = {
-        user_id: user?.id,
-        status: 'completed',
-        total: calculateTotal()
-      };
-
-      const { data: orderResult, error: orderError } = await supabase
-        .from('orders')
-        .insert(orderData)
-        .select();
+      // Create order using a stored procedure
+      const { data, error } = await supabase.rpc('create_order_with_items', {
+        user_uuid: user?.id,
+        cart_items: cartItems.map(item => ({
+          perfume_id: item.perfume_id,
+          quantity: item.quantity,
+          price: item.perfume.price_value
+        })),
+        order_total: calculateTotal()
+      });
         
-      if (orderError || !orderResult || orderResult.length === 0) {
-        throw orderError || new Error('Failed to create order');
+      if (error) {
+        throw error;
       }
-      
-      const orderId = orderResult[0].id;
-      
-      // Create order items
-      const orderItems = cartItems.map(item => ({
-        order_id: orderId,
-        perfume_id: item.perfume_id,
-        quantity: item.quantity,
-        price: item.perfume.price_value
-      }));
-      
-      const { error: itemsError } = await supabase
-        .from('order_items')
-        .insert(orderItems);
-        
-      if (itemsError) throw itemsError;
-      
-      // Clear cart
-      const { error: clearError } = await supabase
-        .from('cart')
-        .delete()
-        .eq('user_id', user?.id);
-        
-      if (clearError) throw clearError;
       
       setCartItems([]);
       toast.success('Order placed successfully!', {

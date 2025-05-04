@@ -35,10 +35,11 @@ const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove })
     if (newQuantity < 1) return;
     
     try {
-      const { error } = await supabase
-        .from('cart')
-        .update({ quantity: newQuantity })
-        .eq('id', item.id);
+      // Use the raw REST API to avoid type issues
+      const { error } = await supabase.rpc('update_cart_item', {
+        cart_id: item.id,
+        new_quantity: newQuantity
+      });
         
       if (error) {
         throw error;
@@ -55,10 +56,10 @@ const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove })
 
   const handleRemove = async () => {
     try {
-      const { error } = await supabase
-        .from('cart')
-        .delete()
-        .eq('id', item.id);
+      // Use the raw REST API to avoid type issues
+      const { error } = await supabase.rpc('delete_cart_item', {
+        cart_id: item.id
+      });
         
       if (error) {
         throw error;
