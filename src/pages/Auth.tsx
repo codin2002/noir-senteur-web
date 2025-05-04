@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -36,12 +36,19 @@ type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 const Auth = () => {
   const { user, isLoading, signIn, signUp, signInWithGoogle, forgotPassword } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
+  const navigate = useNavigate();
+  const location = useLocation();
   
-  // If user is already logged in, redirect to home page
-  if (user && !isLoading) {
-    return <Navigate to="/" />;
-  }
-
+  // Get the path to return to after successful login
+  const from = location.state?.from || '/';
+  
+  // If user is already logged in, redirect to requested page or home page
+  useEffect(() => {
+    if (user && !isLoading) {
+      navigate(from, { replace: true });
+    }
+  }, [user, isLoading, navigate, from]);
+  
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -69,6 +76,7 @@ const Auth = () => {
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
       await signIn(data.email, data.password);
+      // Navigation will happen automatically in useEffect when user state changes
     } catch (error) {
       console.error('Login error:', error);
     }
@@ -90,6 +98,17 @@ const Auth = () => {
       console.error('Forgot password error:', error);
     }
   };
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-serif mb-4">Loading...</h2>
+          <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col">
