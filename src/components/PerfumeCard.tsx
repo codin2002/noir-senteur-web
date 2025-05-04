@@ -1,8 +1,10 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface PerfumeCardProps {
+  id: string; // Added id prop
   name: string;
   notes: string;
   description: string;
@@ -13,6 +15,7 @@ interface PerfumeCardProps {
 }
 
 const PerfumeCard: React.FC<PerfumeCardProps> = ({
+  id, // New id prop
   name,
   notes,
   description,
@@ -21,6 +24,12 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   delay = 0,
   invert = false
 }) => {
+  const navigate = useNavigate();
+
+  const handleExplore = () => {
+    navigate(`/perfume/${id}`);
+  };
+
   return (
     <div 
       className={cn(
@@ -48,7 +57,12 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           {description}
         </p>
         <p className="text-xl font-light text-gold mt-4">{price}</p>
-        <button className="btn-outline mt-6">EXPLORE</button>
+        <button 
+          className="btn-outline mt-6" 
+          onClick={handleExplore}
+        >
+          EXPLORE
+        </button>
       </div>
     </div>
   );

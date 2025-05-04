@@ -5,6 +5,7 @@ import PerfumeCard from './PerfumeCard';
 const Collection = () => {
   const perfumes = [
     {
+      id: "1", // Added ID for each perfume
       name: "Noir Mystique",
       notes: "Oud • Amber • Vanilla",
       description: "An intoxicating blend that opens with warm spices and evolves into a rich heart of amber and oud, finally settling into a velvety base of vanilla and musk.",
@@ -12,6 +13,7 @@ const Collection = () => {
       price: "$240"
     },
     {
+      id: "2", // Added ID
       name: "Vespera",
       notes: "Bergamot • Rose • Patchouli",
       description: "A sophisticated floral fragrance that captures the essence of dusk with delicate notes of bergamot, rose, and a subtle undertone of patchouli.",
@@ -19,6 +21,7 @@ const Collection = () => {
       price: "$220",
     },
     {
+      id: "3", // Added ID
       name: "Bois Nocturne",
       notes: "Cedar • Vetiver • Leather",
       description: "A bold and distinctive scent that combines the freshness of cedar with the earthy depth of vetiver and the warm richness of leather.",
@@ -39,7 +42,8 @@ const Collection = () => {
         <div className="space-y-24">
           {perfumes.map((perfume, index) => (
             <PerfumeCard
-              key={perfume.name}
+              key={perfume.id}
+              id={perfume.id} // Pass the ID
               name={perfume.name}
               notes={perfume.notes}
               description={perfume.description}

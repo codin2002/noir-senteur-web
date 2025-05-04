@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+import { Heart, ShoppingCart, History, User } from 'lucide-react';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -56,9 +57,9 @@ const Navbar = () => {
       )}
     >
       <div className="flex items-center justify-between">
-        <a href="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
+        <Link to="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
           SENTEUR<span className="gold-text">.</span>
-        </a>
+        </Link>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-8 items-center">
@@ -72,6 +73,17 @@ const Navbar = () => {
             Contact
           </a>
           
+          {/* Wishlist and Cart Icons */}
+          <div className="flex items-center space-x-4">
+            <Link to="/wishlist" className="text-white hover:text-gold transition-colors relative">
+              <Heart className="h-5 w-5" />
+            </Link>
+            
+            <Link to="/cart" className="text-white hover:text-gold transition-colors relative">
+              <ShoppingCart className="h-5 w-5" />
+            </Link>
+          </div>
+          
           {user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -84,11 +96,19 @@ const Navbar = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-56 bg-darker text-white border-gold/20">
                 <DropdownMenuGroup>
-                  <DropdownMenuItem className="focus:bg-gold/10 focus:text-white">
-                    Profile
+                  <DropdownMenuItem 
+                    className="focus:bg-gold/10 focus:text-white cursor-pointer"
+                    onClick={() => navigate('/profile')}
+                  >
+                    <User className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="focus:bg-gold/10 focus:text-white">
-                    Account
+                  <DropdownMenuItem 
+                    className="focus:bg-gold/10 focus:text-white cursor-pointer"
+                    onClick={() => navigate('/profile?tab=history')}
+                  >
+                    <History className="mr-2 h-4 w-4" />
+                    <span>Purchase History</span>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator className="bg-gold/20" />
@@ -112,20 +132,30 @@ const Navbar = () => {
         </div>
 
         {/* Mobile Menu Toggle */}
-        <button 
-          className="md:hidden text-white"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        >
-          {isMobileMenuOpen ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          )}
-        </button>
+        <div className="md:hidden flex items-center space-x-4">
+          <Link to="/wishlist" className="text-white hover:text-gold transition-colors">
+            <Heart className="h-5 w-5" />
+          </Link>
+          
+          <Link to="/cart" className="text-white hover:text-gold transition-colors">
+            <ShoppingCart className="h-5 w-5" />
+          </Link>
+          
+          <button 
+            className="text-white"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -153,14 +183,25 @@ const Navbar = () => {
             >
               Contact
             </a>
+            
             {user ? (
-              <Button 
-                variant="outline" 
-                onClick={handleSignOut}
-                className="border-gold text-gold hover:bg-gold hover:text-darker"
-              >
-                Sign Out
-              </Button>
+              <>
+                <Link
+                  to="/profile"
+                  className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider flex items-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Profile
+                </Link>
+                <Button 
+                  variant="outline" 
+                  onClick={handleSignOut}
+                  className="border-gold text-gold hover:bg-gold hover:text-darker"
+                >
+                  Sign Out
+                </Button>
+              </>
             ) : (
               <Button 
                 variant="outline" 
