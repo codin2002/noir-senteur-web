@@ -2,14 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { useToast } from '@/hooks/use-toast';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ShoppingCart, Trash, Minus, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-// Define clear interfaces for our data types based on database schema
+// Define interfaces for our data types
 interface Perfume {
   id: string;
   name: string;
@@ -33,7 +32,6 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
-  const { toast: uiToast } = useToast();
 
   useEffect(() => {
     document.title = "Shopping Cart | Senteur Fragrances";
@@ -49,12 +47,12 @@ const Cart = () => {
     try {
       setIsLoading(true);
       
-      // Use the raw query method to join cart with perfumes
+      // Use a more generic typing approach to avoid TypeScript errors with Supabase
       const { data, error } = await supabase
         .from('cart')
         .select(`
           *,
-          perfume:perfumes(*)
+          perfume:perfume_id(*)
         `)
         .eq('user_id', user?.id);
         
@@ -128,14 +126,13 @@ const Cart = () => {
           status: 'completed',
           total: calculateTotal()
         })
-        .select()
-        .single();
+        .select();
         
-      if (orderError) throw orderError;
+      if (orderError || !order || !order[0]) throw orderError || new Error('Failed to create order');
       
       // Create order items
       const orderItems = cartItems.map(item => ({
-        order_id: order.id,
+        order_id: order[0].id,
         perfume_id: item.perfume_id,
         quantity: item.quantity,
         price: item.perfume.price_value
@@ -171,12 +168,6 @@ const Cart = () => {
     return cartItems.reduce((sum, item) => 
       sum + (item.perfume.price_value * item.quantity), 0
     );
-  };
-
-  const extractNumericPrice = (priceString: string): number => {
-    // Extract numeric value from price string (e.g. "$240" -> 240)
-    const match = priceString.match(/\d+/);
-    return match ? parseInt(match[0]) : 0;
   };
 
   return (

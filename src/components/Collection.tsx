@@ -5,7 +5,7 @@ import PerfumeCard from './PerfumeCard';
 const Collection = () => {
   const perfumes = [
     {
-      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", // Updated UUID to match database
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", // UUID that matches our database
       name: "Noir Mystique",
       notes: "Oud • Amber • Vanilla",
       description: "An intoxicating blend that opens with warm spices and evolves into a rich heart of amber and oud, finally settling into a velvety base of vanilla and musk.",
@@ -13,7 +13,7 @@ const Collection = () => {
       price: "$240"
     },
     {
-      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12", // Updated UUID to match database
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12", // UUID that matches our database
       name: "Vespera",
       notes: "Bergamot • Rose • Patchouli",
       description: "A sophisticated floral fragrance that captures the essence of dusk with delicate notes of bergamot, rose, and a subtle undertone of patchouli.",
@@ -21,7 +21,7 @@ const Collection = () => {
       price: "$220",
     },
     {
-      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13", // Updated UUID to match database
+      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13", // UUID that matches our database
       name: "Bois Nocturne",
       notes: "Cedar • Vetiver • Leather",
       description: "A bold and distinctive scent that combines the freshness of cedar with the earthy depth of vetiver and the warm richness of leather.",
