@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -13,12 +12,11 @@ import { Label } from '@/components/ui/label';
 import { ShoppingBag, History, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-interface Order {
+interface Perfume {
   id: string;
-  created_at: string;
-  status: string;
-  total: number;
-  items: OrderItem[];
+  name: string;
+  notes: string;
+  image: string;
 }
 
 interface OrderItem {
@@ -27,12 +25,15 @@ interface OrderItem {
   perfume_id: string;
   quantity: number;
   price: number;
-  perfume: {
-    id: string;
-    name: string;
-    notes: string;
-    image: string;
-  };
+  perfume: Perfume;
+}
+
+interface Order {
+  id: string;
+  created_at: string;
+  status: string;
+  total: number;
+  items: OrderItem[];
 }
 
 interface Profile {
@@ -93,10 +94,16 @@ const Profile = () => {
             
           if (itemsError) throw itemsError;
           
+          // Process items to match OrderItem type
+          const processedItems: OrderItem[] = (itemsData || []).map(item => ({
+            ...item,
+            perfume: item.perfume as unknown as Perfume
+          }));
+          
           return {
             ...order,
-            items: itemsData || []
-          };
+            items: processedItems
+          } as Order;
         })
       );
       

@@ -36,7 +36,13 @@ const Cart = () => {
       if (error) throw error;
       
       if (data) {
-        setCartItems(data as CartItemType[]);
+        // Convert the JSON data to the expected CartItemType format
+        const typedData = data.map(item => ({
+          ...item,
+          perfume: item.perfume as unknown as CartItemType['perfume']
+        }));
+        
+        setCartItems(typedData);
       } else {
         setCartItems([]);
       }

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -45,34 +44,25 @@ const Wishlist = () => {
     try {
       setIsLoading(true);
       
-      // First check if the wishlist table exists
-      const { data: tableExists } = await supabase
-        .from('wishlist')
-        .select('id')
-        .limit(1)
-        .maybeSingle();
-
-      if (tableExists === null) {
-        // If the table doesn't exist, create it first
-        setWishlistItems([]);
-        setIsLoading(false);
-        return;
-      }
-
-      // Table exists, fetch wishlist items
-      const { data, error } = await supabase
-        .from('wishlist')
-        .select(`
-          *,
-          perfume:perfumes(*)
-        `)
-        .eq('user_id', user?.id);
+      // Use the get_wishlist_with_perfumes RPC function
+      const { data, error } = await supabase.rpc('get_wishlist_with_perfumes', {
+        user_uuid: user?.id
+      });
         
       if (error) {
         throw error;
       }
       
-      setWishlistItems(data as unknown as WishlistItem[]);
+      if (data) {
+        // Convert the JSON data to the expected WishlistItem format
+        const typedData = data.map(item => ({
+          ...item,
+          perfume: item.perfume as unknown as Perfume
+        }));
+        setWishlistItems(typedData);
+      } else {
+        setWishlistItems([]);
+      }
     } catch (error: any) {
       console.error('Error fetching wishlist:', error);
       toast.error('Failed to load wishlist', {
