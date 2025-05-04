@@ -1,0 +1,34 @@
+
+import React from 'react';
+import { Perfume } from '@/types/perfume';
+
+interface OrderItemProps {
+  id: string;
+  perfume: Perfume;
+  price: number;
+  quantity: number;
+}
+
+const OrderItem: React.FC<OrderItemProps> = ({ id, perfume, price, quantity }) => {
+  return (
+    <div key={id} className="flex items-center gap-4">
+      <div className="w-16 h-16 rounded overflow-hidden">
+        <img 
+          src={perfume.image} 
+          alt={perfume.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <div className="flex-grow">
+        <h4 className="font-serif">{perfume.name}</h4>
+        <p className="text-sm text-muted-foreground">{perfume.notes}</p>
+      </div>
+      <div className="text-right">
+        <p>${price} × {quantity}</p>
+        <p className="text-gold">${(price * quantity).toFixed(2)}</p>
+      </div>
+    </div>
+  );
+};
+
+export default OrderItem;
