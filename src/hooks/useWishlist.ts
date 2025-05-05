@@ -19,16 +19,18 @@ export const useWishlist = (userId?: string) => {
     try {
       setIsLoading(true);
       
-      // Use the get_wishlist_with_perfumes RPC function
-      const { data, error } = await supabase.rpc('get_wishlist_with_perfumes', {
-        user_uuid: userId
-      });
+      // Use the get_wishlist_with_perfumes RPC function as a custom query
+      // since it's not in the type definitions
+      const { data, error } = await supabase.rpc(
+        'get_wishlist_with_perfumes' as any, 
+        { user_uuid: userId }
+      );
         
       if (error) {
         throw error;
       }
       
-      if (data) {
+      if (data && Array.isArray(data)) {
         // Convert the JSON data to the expected WishlistItem format
         const typedData = data.map((item: any) => ({
           ...item,
@@ -51,8 +53,9 @@ export const useWishlist = (userId?: string) => {
   // Remove item from wishlist
   const removeFromWishlist = async (id: string) => {
     try {
+      // Use a raw query with from() since the wishlist table isn't in the types
       const { error } = await supabase
-        .from('wishlist')
+        .from('wishlist' as any)
         .delete()
         .eq('id', id);
         
@@ -85,10 +88,13 @@ export const useWishlist = (userId?: string) => {
         
       if (existingItem) {
         // Update quantity if already in cart
-        const { error } = await supabase.rpc('update_cart_item', {
-          cart_id: existingItem.id,
-          new_quantity: existingItem.quantity + 1
-        });
+        const { error } = await supabase.rpc(
+          'update_cart_item', 
+          {
+            cart_id: existingItem.id,
+            new_quantity: existingItem.quantity + 1
+          }
+        );
           
         if (error) throw error;
       } else {
