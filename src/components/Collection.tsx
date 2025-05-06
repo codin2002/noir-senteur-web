@@ -1,34 +1,39 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PerfumeCard from './PerfumeCard';
+import { supabase } from '@/integrations/supabase/client';
+import { Perfume } from '@/types/perfume';
+import { Loader } from 'lucide-react';
 
 const Collection = () => {
-  const perfumes = [
-    {
-      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11", // UUID that matches our database
-      name: "Noir Mystique",
-      notes: "Oud • Amber • Vanilla",
-      description: "An intoxicating blend that opens with warm spices and evolves into a rich heart of amber and oud, finally settling into a velvety base of vanilla and musk.",
-      image: "https://images.unsplash.com/photo-1563170351-be82bc888aa4?q=80&w=1976",
-      price: "$240"
-    },
-    {
-      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12", // UUID that matches our database
-      name: "Vespera",
-      notes: "Bergamot • Rose • Patchouli",
-      description: "A sophisticated floral fragrance that captures the essence of dusk with delicate notes of bergamot, rose, and a subtle undertone of patchouli.",
-      image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1974",
-      price: "$220",
-    },
-    {
-      id: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13", // UUID that matches our database
-      name: "Bois Nocturne",
-      notes: "Cedar • Vetiver • Leather",
-      description: "A bold and distinctive scent that combines the freshness of cedar with the earthy depth of vetiver and the warm richness of leather.",
-      image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=1974",
-      price: "$260"
-    }
-  ];
+  const [perfumes, setPerfumes] = useState<Perfume[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPerfumes = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('perfumes')
+          .select('*')
+          .order('name');
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          setPerfumes(data);
+        }
+      } catch (error) {
+        console.error('Error fetching perfumes:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPerfumes();
+  }, []);
 
   return (
     <section id="collection" className="section bg-dark">
@@ -39,21 +44,27 @@ const Collection = () => {
           <div className="w-24 h-0.5 bg-gold mx-auto"></div>
         </div>
 
-        <div className="space-y-24">
-          {perfumes.map((perfume, index) => (
-            <PerfumeCard
-              key={perfume.id}
-              id={perfume.id}
-              name={perfume.name}
-              notes={perfume.notes}
-              description={perfume.description}
-              image={perfume.image}
-              price={perfume.price}
-              invert={index % 2 !== 0}
-              delay={index * 200}
-            />
-          ))}
-        </div>
+        {isLoading ? (
+          <div className="flex justify-center items-center py-16">
+            <Loader className="h-8 w-8 animate-spin text-gold" />
+          </div>
+        ) : (
+          <div className="space-y-24">
+            {perfumes.map((perfume, index) => (
+              <PerfumeCard
+                key={perfume.id}
+                id={perfume.id}
+                name={perfume.name}
+                notes={perfume.notes}
+                description={perfume.description}
+                image={perfume.image}
+                price={perfume.price}
+                invert={index % 2 !== 0}
+                delay={index * 200}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
