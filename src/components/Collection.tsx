@@ -4,6 +4,7 @@ import PerfumeCard from './PerfumeCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Perfume } from '@/types/perfume';
 import { Loader } from 'lucide-react';
+import LoadingSpinner from './common/LoadingSpinner';
 
 const Collection = () => {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
@@ -25,6 +26,7 @@ const Collection = () => {
         }
         
         if (data) {
+          console.log("Fetched perfumes:", data);
           setPerfumes(data);
         }
       } catch (error) {
@@ -38,6 +40,9 @@ const Collection = () => {
     fetchPerfumes();
   }, []);
 
+  // Display only the first 3 perfumes in the main section
+  const featuredPerfumes = perfumes.slice(0, 3);
+
   return (
     <section id="collection" className="section bg-cartier-red">
       <div className="max-w-7xl mx-auto">
@@ -48,20 +53,18 @@ const Collection = () => {
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center items-center py-16">
-            <Loader className="h-8 w-8 animate-spin text-gold" />
-          </div>
+          <LoadingSpinner />
         ) : error ? (
           <div className="text-center py-16">
             <p className="text-white/80">{error}</p>
           </div>
-        ) : perfumes.length === 0 ? (
+        ) : featuredPerfumes.length === 0 ? (
           <div className="text-center py-16">
             <p className="text-white/80">No perfumes found in the collection.</p>
           </div>
         ) : (
           <div className="space-y-24">
-            {perfumes.map((perfume, index) => (
+            {featuredPerfumes.map((perfume, index) => (
               <PerfumeCard
                 key={perfume.id}
                 id={perfume.id}
