@@ -8,11 +8,13 @@ import { Loader } from 'lucide-react';
 const Collection = () => {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPerfumes = async () => {
       try {
         setIsLoading(true);
+        setError(null);
         const { data, error } = await supabase
           .from('perfumes')
           .select('*')
@@ -27,6 +29,7 @@ const Collection = () => {
         }
       } catch (error) {
         console.error('Error fetching perfumes:', error);
+        setError('Failed to load perfumes. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -36,7 +39,7 @@ const Collection = () => {
   }, []);
 
   return (
-    <section id="collection" className="section bg-dark">
+    <section id="collection" className="section bg-cartier-red">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-sm uppercase tracking-widest text-gold mb-3">Our Collection</h2>
@@ -47,6 +50,14 @@ const Collection = () => {
         {isLoading ? (
           <div className="flex justify-center items-center py-16">
             <Loader className="h-8 w-8 animate-spin text-gold" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-16">
+            <p className="text-white/80">{error}</p>
+          </div>
+        ) : perfumes.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-white/80">No perfumes found in the collection.</p>
           </div>
         ) : (
           <div className="space-y-24">

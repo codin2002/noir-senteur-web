@@ -61,6 +61,7 @@ export default {
 				darker: '#080808',
 				gold: '#C9A980',
 				'gold-light': '#E7D7B8',
+				'cartier-red': '#801B2B',
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

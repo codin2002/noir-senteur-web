@@ -43,6 +43,8 @@
     --sidebar-accent-foreground: 240 6% 10%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 217 91% 60%;
+    
+    --cartier-red: 350 65% 30%;
   }
 }
 
@@ -56,7 +58,7 @@
   }
   
   body {
-    @apply bg-dark text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -79,7 +81,7 @@
 }
 
 .bg-gradient {
-  background: linear-gradient(to bottom, rgba(15, 15, 17, 0.3), rgba(8, 8, 8, 0.95));
+  background: linear-gradient(to bottom, rgba(128, 27, 43, 0.3), rgba(128, 27, 43, 0.95));
 }
 
 .section {
@@ -91,5 +93,5 @@
 }
 
 .btn-outline {
-  @apply border border-gold text-gold hover:bg-gold hover:text-darker transition-colors px-6 py-3 inline-block uppercase tracking-widest text-xs font-sans;
+  @apply border border-gold text-gold hover:bg-gold hover:text-cartier-red transition-colors px-6 py-3 inline-block uppercase tracking-widest text-xs font-sans;
 }
