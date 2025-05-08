@@ -110,6 +110,28 @@ const Navbar = () => {
                     <History className="mr-2 h-4 w-4" />
                     <span>Purchase History</span>
                   </DropdownMenuItem>
+                  {/* Add admin link */}
+                  <DropdownMenuItem 
+                    className="focus:bg-gold/10 focus:text-white cursor-pointer"
+                    onClick={() => navigate('/admin')}
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round" 
+                      className="mr-2 h-4 w-4"
+                    >
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <span>Admin</span>
+                  </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator className="bg-gold/20" />
                 <DropdownMenuItem 
@@ -193,6 +215,29 @@ const Navbar = () => {
                 >
                   <User className="h-4 w-4 mr-2" />
                   Profile
+                </Link>
+                {/* Add admin link to mobile menu */}
+                <Link
+                  to="/admin"
+                  className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider flex items-center"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    className="mr-2 h-4 w-4"
+                  >
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                  Admin
                 </Link>
                 <Button 
                   variant="outline" 
