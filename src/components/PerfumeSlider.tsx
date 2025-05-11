@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Perfume } from '@/types/perfume';
@@ -51,6 +52,11 @@ const PerfumeSlider = () => {
       : perfume.image;
   };
 
+  // Display Arabic "313" for Signature First perfume
+  const getDisplayName = (perfume: Perfume) => {
+    return perfume.name === "Signature First" ? "٣١٣" : perfume.name;
+  };
+
   return (
     <section className="section bg-cartier-red py-24">
       <div className="max-w-7xl mx-auto">
@@ -85,7 +91,7 @@ const PerfumeSlider = () => {
                     </div>
                     <div className="flex-1 flex flex-col">
                       <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
-                      <h3 className="text-xl font-serif mb-2">{perfume.name}</h3>
+                      <h3 className="text-xl font-serif mb-2">{getDisplayName(perfume)}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
                       <p className="text-gold font-light mb-4 mt-auto">{perfume.price}</p>
                       <button 

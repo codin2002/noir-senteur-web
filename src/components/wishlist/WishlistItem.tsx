@@ -29,6 +29,9 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
     ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
     : item.perfume.image;
 
+  // Display Arabic "313" for Signature First perfume
+  const displayName = item.perfume.name === "Signature First" ? "٣١٣" : item.perfume.name;
+
   return (
     <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
       <div className="h-[240px] relative overflow-hidden">
@@ -41,7 +44,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
       </div>
       <div className="p-4">
         <h3 className="text-sm uppercase tracking-widest text-gold">{item.perfume.notes}</h3>
-        <h2 className="text-xl font-serif mb-2">{item.perfume.name}</h2>
+        <h2 className="text-xl font-serif mb-2">{displayName}</h2>
         <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
           {item.perfume.description}
         </p>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -48,6 +49,9 @@ const CartItem: React.FC<CartItemProps> = ({
     // Otherwise use the image from the database
     return item.perfume.image;
   };
+
+  // Display Arabic "313" for Signature First perfume
+  const displayName = item.perfume.name === "Signature First" ? "٣١٣" : item.perfume.name;
 
   const updateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
@@ -139,7 +143,7 @@ const CartItem: React.FC<CartItemProps> = ({
       
       {/* Product details */}
       <div className="flex-grow">
-        <h3 className="font-serif text-lg">{item.perfume.name}</h3>
+        <h3 className="font-serif text-lg">{displayName}</h3>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
         <p className="text-gold mt-1">
           {item.perfume.price.replace('$', 'AED ')}

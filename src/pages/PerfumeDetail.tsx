@@ -345,6 +345,11 @@ const PerfumeDetail = () => {
     return perfume?.image;
   };
 
+  // Display Arabic "313" for Signature First perfume
+  const getDisplayName = () => {
+    return perfume?.name === "Signature First" ? "٣١٣" : perfume?.name;
+  };
+
   return (
     <div className="min-h-screen bg-dark text-white">
       <Navbar />
@@ -366,7 +371,7 @@ const PerfumeDetail = () => {
             <div className="w-full lg:w-1/2 space-y-6 lg:pt-12">
               <div>
                 <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
-                <h1 className="text-4xl md:text-5xl font-serif mt-2">{perfume.name}</h1>
+                <h1 className="text-4xl md:text-5xl font-serif mt-2">{getDisplayName()}</h1>
                 <p className="text-2xl font-light text-gold mt-4">
                   {perfume.price.replace('$', 'AED ')}
                 </p>

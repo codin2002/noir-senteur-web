@@ -47,6 +47,9 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
     return image;
   };
 
+  // Display Arabic "313" for Signature First perfume
+  const displayName = name === "Signature First" ? "٣١٣" : name;
+
   return (
     <div 
       className={cn(
@@ -71,7 +74,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       <div className="w-full md:w-1/2 space-y-4 text-left md:text-center">
         <div className="mb-2">
           <h3 className="text-sm uppercase tracking-widest text-gold">{notes}</h3>
-          <h2 className="text-3xl md:text-4xl font-serif">{name}</h2>
+          <h2 className="text-3xl md:text-4xl font-serif">{displayName}</h2>
         </div>
         <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
           {description}
