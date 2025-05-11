@@ -44,6 +44,13 @@ const PerfumeSlider = () => {
     navigate(`/perfume/${id}`);
   };
 
+  // Function to get the correct image URL
+  const getPerfumeImage = (perfume: Perfume) => {
+    return perfume.name === "Signature First" 
+      ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
+      : perfume.image;
+  };
+
   return (
     <section className="section bg-cartier-red py-24">
       <div className="max-w-7xl mx-auto">
@@ -71,7 +78,7 @@ const PerfumeSlider = () => {
                   <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
                     <div className="relative h-64 w-full overflow-hidden mb-4">
                       <img 
-                        src={perfume.image} 
+                        src={getPerfumeImage(perfume)} 
                         alt={perfume.name} 
                         className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                       />

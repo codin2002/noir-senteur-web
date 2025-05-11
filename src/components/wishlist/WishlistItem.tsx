@@ -23,11 +23,16 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
   onAddToCart, 
   onRemoveFromWishlist 
 }) => {
+  // Check if this is the first signature perfume to use the custom image
+  const perfumeImage = item.perfume.name === "Signature First" 
+    ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
+    : item.perfume.image;
+
   return (
     <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
       <div className="h-[240px] relative overflow-hidden">
         <img 
-          src={item.perfume.image}
+          src={perfumeImage}
           alt={item.perfume.name} 
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />

@@ -337,6 +337,14 @@ const PerfumeDetail = () => {
     );
   }
 
+  // Get the correct image URL based on the perfume name
+  const getPerfumeImage = () => {
+    if (perfume?.name === "Signature First") {
+      return "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png";
+    }
+    return perfume?.image;
+  };
+
   return (
     <div className="min-h-screen bg-dark text-white">
       <Navbar />
@@ -347,7 +355,7 @@ const PerfumeDetail = () => {
             <div className="w-full lg:w-1/2">
               <div className="relative h-[500px] lg:h-[700px] overflow-hidden rounded-lg">
                 <img 
-                  src="/lovable-uploads/7f9b1f70-6972-49da-83b7-90ffd656d640.png" 
+                  src={getPerfumeImage()} 
                   alt={perfume.name} 
                   className="w-full h-full object-cover"
                 />

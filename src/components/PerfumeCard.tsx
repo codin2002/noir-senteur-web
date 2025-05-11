@@ -30,6 +30,11 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
     navigate(`/perfume/${id}`);
   };
 
+  // Use the custom uploaded image for the first perfume (Signature First)
+  const perfumeImage = name === "Signature First" 
+    ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
+    : image;
+
   return (
     <div 
       className={cn(
@@ -41,7 +46,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       <div className="w-full md:w-1/2 overflow-hidden">
         <div className="relative h-[400px] overflow-hidden">
           <img 
-            src={image} 
+            src={perfumeImage} 
             alt={name} 
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
