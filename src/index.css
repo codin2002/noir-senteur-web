@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,6 +84,26 @@
   text-orientation: mixed;
 }
 
+/* Banner styling for video hero */
+.banner {
+  @apply relative w-full h-screen overflow-hidden;
+}
+
+/* Video overlay with gradient */
+.video-overlay {
+  @apply absolute inset-0 bg-gradient pointer-events-none;
+}
+
+/* Content styling */
+.content {
+  @apply absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-10 animate-fade-in;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  @apply absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-10;
+}
+
 .bg-gradient {
   background: linear-gradient(to bottom, rgba(128, 27, 43, 0.3), rgba(128, 27, 43, 0.95));
 }
@@ -108,16 +129,10 @@
   @apply w-full h-auto object-cover;
 }
 
-/* Video styling for hero section */
-video {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  min-width: 100%;
-  min-height: 100%;
-  width: auto;
-  height: auto;
-  z-index: 0;
+/* Video styling */
+.banner video {
+  @apply absolute top-0 left-0 min-w-full min-h-full w-auto h-auto object-cover;
+  z-index: -1;
 }
 
 /* Ensure iOS Safari plays the video */
@@ -127,14 +142,14 @@ video[playsinline] {
 
 /* Media query for video responsiveness */
 @media (min-aspect-ratio: 16/9) {
-  video {
+  .banner video {
     width: 100%;
     height: auto;
   }
 }
 
 @media (max-aspect-ratio: 16/9) {
-  video {
+  .banner video {
     width: auto;
     height: 100%;
   }
