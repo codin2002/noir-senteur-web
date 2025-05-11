@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { cn } from "@/lib/utils";
+import { Loader } from 'lucide-react';
 
 interface ResponsiveImageProps {
   src: string;
@@ -12,6 +13,8 @@ interface ResponsiveImageProps {
   hover?: boolean;
   onLoad?: () => void;
   onError?: () => void;
+  fallbackSrc?: string;
+  showLoadingIndicator?: boolean;
 }
 
 const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
@@ -23,20 +26,44 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   hover = false,
   onLoad,
   onError,
+  fallbackSrc = '/placeholder.svg',
+  showLoadingIndicator = true,
 }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  
+  // Function to handle image load
+  const handleLoad = () => {
+    setIsLoading(false);
+    if (onLoad) onLoad();
+  };
+  
+  // Function to handle image error
+  const handleError = () => {
+    setIsLoading(false);
+    setHasError(true);
+    if (onError) onError();
+  };
+  
   return (
-    <AspectRatio ratio={aspectRatio} className="overflow-hidden">
+    <AspectRatio ratio={aspectRatio} className={cn("relative overflow-hidden", className)}>
+      {isLoading && showLoadingIndicator && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100/20 dark:bg-gray-800/20 z-10">
+          <Loader className="w-6 h-6 text-gold animate-spin" />
+        </div>
+      )}
+      
       <img 
-        src={src} 
+        src={hasError ? fallbackSrc : src} 
         alt={alt} 
         className={cn(
-          `w-full h-full object-${objectFit}`,
+          `w-full h-full object-${objectFit} transition-opacity duration-300`,
           hover && "transition-transform duration-500 hover:scale-105",
-          className
+          isLoading ? "opacity-0" : "opacity-100"
         )}
         loading="lazy"
-        onLoad={onLoad}
-        onError={onError}
+        onLoad={handleLoad}
+        onError={handleError}
       />
     </AspectRatio>
   );

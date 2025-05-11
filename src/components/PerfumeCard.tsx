@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
@@ -55,11 +56,14 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="w-full md:w-1/2 overflow-hidden">
-        <div className="relative h-[400px] overflow-hidden">
+        <div className="relative h-[400px] md:h-[500px] overflow-hidden">
           <ProductImage 
             src={getPerfumeImage()} 
             alt={name}
             fullWidth={true}
+            hover={true}
+            aspectRatio={3/4}
+            objectFit="contain"
           />
         </div>
       </div>
@@ -69,7 +73,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           <h3 className="text-sm uppercase tracking-widest text-gold">{notes}</h3>
           <h2 className="text-3xl md:text-4xl font-serif">{name}</h2>
         </div>
-        <p className="text-muted-foreground leading-relaxed max-w-md">
+        <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
           {description}
         </p>
         <p className="text-xl font-light text-gold mt-4">
