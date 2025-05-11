@@ -27,7 +27,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
     <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
       <div className="h-[240px] relative overflow-hidden">
         <img 
-          src={item.perfume.image} 
+          src="/lovable-uploads/7f9b1f70-6972-49da-83b7-90ffd656d640.png"
           alt={item.perfume.name} 
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
         />
