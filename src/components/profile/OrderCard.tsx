@@ -44,7 +44,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
           </div>
         </div>
         <div className="mt-2">
-          <p className="text-gold text-lg">Total: ${total}</p>
+          <p className="text-gold text-lg">Total: AED {total}</p>
         </div>
       </div>
       

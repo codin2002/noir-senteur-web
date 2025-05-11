@@ -129,7 +129,13 @@ const Cart = () => {
                   {cartItems.map((item) => (
                     <CartItem 
                       key={item.id} 
-                      item={item} 
+                      item={{
+                        ...item,
+                        perfume: {
+                          ...item.perfume,
+                          price: item.perfume.price.replace('$', 'AED ')
+                        }
+                      }} 
                       onItemUpdate={handleUpdateItem}
                       onItemRemove={handleRemoveItem}
                     />
@@ -141,7 +147,8 @@ const Cart = () => {
               <div className="lg:w-1/3">
                 <CartSummary 
                   cartItems={cartItems} 
-                  onCheckout={checkout} 
+                  onCheckout={checkout}
+                  currencySymbol="AED "
                 />
               </div>
             </div>

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -274,7 +273,9 @@ const PerfumeDetail = () => {
               <div>
                 <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
                 <h1 className="text-4xl md:text-5xl font-serif mt-2">{perfume.name}</h1>
-                <p className="text-2xl font-light text-gold mt-4">{perfume.price}</p>
+                <p className="text-2xl font-light text-gold mt-4">
+                  {perfume.price.replace('$', 'AED ')}
+                </p>
               </div>
               
               <div className="h-px bg-gold/30 w-full"></div>

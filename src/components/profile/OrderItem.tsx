@@ -24,8 +24,8 @@ const OrderItem: React.FC<OrderItemProps> = ({ id, perfume, price, quantity }) =
         <p className="text-sm text-muted-foreground">{perfume.notes}</p>
       </div>
       <div className="text-right">
-        <p>${price} × {quantity}</p>
-        <p className="text-gold">${(price * quantity).toFixed(2)}</p>
+        <p>AED {price} × {quantity}</p>
+        <p className="text-gold">AED {(price * quantity).toFixed(2)}</p>
       </div>
     </div>
   );

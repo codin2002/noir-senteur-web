@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
 interface PerfumeCardProps {
-  id: string; // Added id prop
+  id: string; 
   name: string;
   notes: string;
   description: string;
@@ -15,7 +15,7 @@ interface PerfumeCardProps {
 }
 
 const PerfumeCard: React.FC<PerfumeCardProps> = ({
-  id, // New id prop
+  id,
   name,
   notes,
   description,
@@ -56,7 +56,9 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
         <p className="text-muted-foreground leading-relaxed max-w-md">
           {description}
         </p>
-        <p className="text-xl font-light text-gold mt-4">{price}</p>
+        <p className="text-xl font-light text-gold mt-4">
+          {price.replace('$', 'AED ')}
+        </p>
         <button 
           className="btn-outline mt-6" 
           onClick={handleExplore}

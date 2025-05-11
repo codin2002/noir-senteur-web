@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CartItemType } from './CartItem';
@@ -6,38 +5,43 @@ import { CartItemType } from './CartItem';
 interface CartSummaryProps {
   cartItems: CartItemType[];
   onCheckout: () => void;
+  currencySymbol?: string;
 }
 
-const CartSummary: React.FC<CartSummaryProps> = ({ cartItems, onCheckout }) => {
-  const calculateTotal = () => {
+const CartSummary: React.FC<CartSummaryProps> = ({ cartItems, onCheckout, currencySymbol = '$' }) => {
+  const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => 
       sum + (item.perfume.price_value * item.quantity), 0
     );
   };
 
+  const subtotal = calculateSubtotal();
+  const shippingCost = subtotal > 0 ? 20 : 0; // Example shipping cost
+  const total = subtotal + shippingCost;
+
   return (
-    <div className="bg-darker border border-gold/20 rounded-lg p-6 h-fit">
-      <h2 className="text-xl font-serif mb-6">Order Summary</h2>
+    <div className="bg-darker border border-gold/20 rounded-lg p-6 space-y-4">
+      <h2 className="text-xl font-serif">Order Summary</h2>
       
-      <div className="space-y-3">
-        {cartItems.map((item) => (
-          <div key={item.id} className="flex justify-between text-sm">
-            <span>{item.perfume.name} × {item.quantity}</span>
-            <span>${item.perfume.price_value * item.quantity}</span>
-          </div>
-        ))}
-        
-        <div className="border-t border-gold/20 pt-3 mt-3">
-          <div className="flex justify-between font-medium">
-            <span>Total</span>
-            <span className="text-gold">${calculateTotal()}</span>
-          </div>
-        </div>
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span>Subtotal</span>
+        <span>{currencySymbol}{subtotal.toFixed(2)}</span>
+      </div>
+      
+      <div className="flex justify-between text-sm text-muted-foreground">
+        <span>Shipping</span>
+        <span>{currencySymbol}{shippingCost.toFixed(2)}</span>
+      </div>
+      
+      <div className="border-t border-gold/20 pt-4 flex justify-between font-medium">
+        <span>Total</span>
+        <span>{currencySymbol}{total.toFixed(2)}</span>
       </div>
       
       <Button 
-        className="w-full bg-gold text-darker hover:bg-gold/80 mt-6"
+        className="w-full bg-gold text-darker hover:bg-gold/80"
         onClick={onCheckout}
+        disabled={cartItems.length === 0}
       >
         Checkout
       </Button>
