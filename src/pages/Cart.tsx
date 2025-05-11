@@ -70,6 +70,11 @@ const Cart = () => {
   };
 
   const checkout = async () => {
+    if (cartItems.length === 0) {
+      toast.error('Your cart is empty');
+      return;
+    }
+    
     try {
       // Create order using a stored procedure
       const { data, error } = await supabase.rpc('create_order_with_items', {
@@ -119,39 +124,39 @@ const Cart = () => {
             <div className="flex justify-center items-center py-12">
               <div className="w-10 h-10 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin"></div>
             </div>
-          ) : !user || cartItems.length === 0 ? (
-            <CartEmpty isAuthenticated={!!user} />
+          ) : !user ? (
+            <CartEmpty isAuthenticated={false} />
           ) : (
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Cart items */}
               <div className="flex-grow">
-                <div className="space-y-4">
-                  {cartItems.map((item) => (
-                    <CartItem 
-                      key={item.id} 
-                      item={{
-                        ...item,
-                        perfume: {
-                          ...item.perfume,
-                          price: item.perfume.price.replace('$', 'AED ')
-                        }
-                      }} 
-                      onItemUpdate={handleUpdateItem}
-                      onItemRemove={handleRemoveItem}
-                      refreshCartCount={refreshCartCount}
-                    />
-                  ))}
-                </div>
+                {cartItems.length > 0 ? (
+                  <div className="space-y-4">
+                    {cartItems.map((item) => (
+                      <CartItem 
+                        key={item.id} 
+                        item={item} 
+                        onItemUpdate={handleUpdateItem}
+                        onItemRemove={handleRemoveItem}
+                        refreshCartCount={refreshCartCount}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <CartEmpty isAuthenticated={true} />
+                )}
               </div>
               
-              {/* Order summary */}
-              <div className="lg:w-1/3">
-                <CartSummary 
-                  cartItems={cartItems} 
-                  onCheckout={checkout}
-                  currencySymbol="AED "
-                />
-              </div>
+              {/* Order summary - Always show for authenticated users */}
+              {user && (
+                <div className="lg:w-1/3">
+                  <CartSummary 
+                    cartItems={cartItems} 
+                    onCheckout={checkout}
+                    currencySymbol="AED "
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>

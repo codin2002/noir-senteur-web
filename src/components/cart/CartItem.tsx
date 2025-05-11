@@ -30,6 +30,7 @@ const CartItem: React.FC<CartItemProps> = ({
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const { user } = useAuth();
 
   const updateQuantity = async (newQuantity: number) => {
@@ -39,15 +40,10 @@ const CartItem: React.FC<CartItemProps> = ({
     try {
       setIsUpdating(true);
       
-      const { error } = await supabase
-        .from('cart')
-        .update({ quantity: newQuantity })
-        .eq('id', item.id)
-        .eq('user_id', user.id);
-        
-      if (error) throw error;
+      // Update local state immediately for better UX
+      setLocalQuantity(newQuantity);
       
-      // Update the local state with the new quantity
+      // Update the local state with the new quantity before database update
       onItemUpdate({
         ...item,
         quantity: newQuantity
@@ -56,8 +52,23 @@ const CartItem: React.FC<CartItemProps> = ({
       // Refresh the cart count in navbar
       refreshCartCount();
       
+      // Update the database in the background
+      const { error } = await supabase
+        .from('cart')
+        .update({ quantity: newQuantity })
+        .eq('id', item.id)
+        .eq('user_id', user.id);
+        
+      if (error) throw error;
+      
     } catch (error: any) {
       console.error('Error updating cart item:', error);
+      // Revert local state if there's an error
+      setLocalQuantity(item.quantity);
+      onItemUpdate({
+        ...item,
+        quantity: item.quantity
+      });
       toast.error('Failed to update quantity', {
         description: error.message
       });
@@ -72,6 +83,9 @@ const CartItem: React.FC<CartItemProps> = ({
     try {
       setIsRemoving(true);
       
+      // Optimistically remove from UI first
+      onItemRemove(item.id);
+      
       const { error } = await supabase
         .from('cart')
         .delete()
@@ -80,7 +94,6 @@ const CartItem: React.FC<CartItemProps> = ({
         
       if (error) throw error;
       
-      onItemRemove(item.id);
       toast.success('Item removed from cart');
       
       // Refresh the cart count in navbar
@@ -119,18 +132,18 @@ const CartItem: React.FC<CartItemProps> = ({
       {/* Quantity controls */}
       <div className="flex items-center gap-2">
         <button 
-          onClick={() => updateQuantity(item.quantity - 1)}
-          disabled={isUpdating || item.quantity <= 1}
+          onClick={() => updateQuantity(localQuantity - 1)}
+          disabled={isUpdating || localQuantity <= 1}
           className="p-1 rounded-full hover:bg-gold/20 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Minus className="h-4 w-4" />
         </button>
         
-        <span className="w-6 text-center">{item.quantity}</span>
+        <span className="w-6 text-center">{localQuantity}</span>
         
         <button 
-          onClick={() => updateQuantity(item.quantity + 1)}
-          disabled={isUpdating || item.quantity >= 10}
+          onClick={() => updateQuantity(localQuantity + 1)}
+          disabled={isUpdating || localQuantity >= 10}
           className="p-1 rounded-full hover:bg-gold/20 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Plus className="h-4 w-4" />
