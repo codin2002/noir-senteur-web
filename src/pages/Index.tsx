@@ -18,9 +18,15 @@ const Index = () => {
     <div className="min-h-screen bg-cartier-red text-white overflow-x-hidden">
       <Navbar />
       <Hero />
-      <Collection />
-      <About />
-      <Footer />
+      <div id="collection">
+        <Collection />
+      </div>
+      <div id="about">
+        <About />
+      </div>
+      <div id="contact">
+        <Footer />
+      </div>
     </div>
   );
 };

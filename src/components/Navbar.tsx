@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
@@ -51,6 +50,14 @@ const Navbar = () => {
       .toUpperCase()
       .substring(0, 2);
   };
+  
+  const scrollToSection = (id: string) => {
+    setIsMobileMenuOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <nav
@@ -61,20 +68,29 @@ const Navbar = () => {
     >
       <div className="flex items-center justify-between">
         <Link to="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
-          SENTEUR<span className="gold-text">.</span>
+          <span className="gold-text">٣١٣</span>
         </Link>
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-8 items-center">
-          <Link to="/#collection" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+          <button 
+            onClick={() => scrollToSection('collection')} 
+            className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
+          >
             Collection
-          </Link>
-          <Link to="/#about" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+          </button>
+          <button 
+            onClick={() => scrollToSection('about')} 
+            className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
+          >
             About
-          </Link>
-          <Link to="/#contact" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+          </button>
+          <button 
+            onClick={() => scrollToSection('contact')} 
+            className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
+          >
             Contact
-          </Link>
+          </button>
           
           {/* Wishlist and Cart Icons */}
           <div className="flex items-center space-x-4">
@@ -189,27 +205,24 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-darker bg-opacity-95 backdrop-blur-sm py-4">
           <div className="flex flex-col space-y-4 px-6">
-            <Link 
-              to="/#collection" 
+            <button
+              onClick={() => scrollToSection('collection')}
               className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
-              onClick={() => setIsMobileMenuOpen(false)}
             >
               Collection
-            </Link>
-            <Link 
-              to="/#about" 
+            </button>
+            <button
+              onClick={() => scrollToSection('about')}
               className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
-              onClick={() => setIsMobileMenuOpen(false)}
             >
               About
-            </Link>
-            <Link 
-              to="/#contact" 
+            </button>
+            <button
+              onClick={() => scrollToSection('contact')}
               className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
-              onClick={() => setIsMobileMenuOpen(false)}
             >
               Contact
-            </Link>
+            </button>
             
             {user ? (
               <>
