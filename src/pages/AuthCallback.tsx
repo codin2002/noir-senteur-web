@@ -19,9 +19,9 @@ const AuthCallback = () => {
         
         if (sessionError) {
           console.error('Session error:', sessionError);
-          setError(sessionError.message);
+          setError("Authentication failed. Please try again.");
           sonnerToast.error("Authentication error", {
-            description: sessionError.message
+            description: "Authentication failed. Please try again."
           });
           navigate('/auth');
           return;
@@ -37,9 +37,9 @@ const AuthCallback = () => {
           return;
         }
 
-        console.log('Authentication successful, session:', data.session.user.email);
+        console.log('Authentication successful');
         sonnerToast.success("Successfully signed in", {
-          description: `Welcome back, ${data.session.user.email}`
+          description: `Welcome back!`
         });
         
         // Check if there was a previous location the user was trying to access
@@ -53,9 +53,9 @@ const AuthCallback = () => {
         navigate(redirectTo);
       } catch (err: any) {
         console.error('Unexpected error during authentication:', err);
-        setError(err.message || 'An unexpected error occurred');
+        setError('An unexpected error occurred');
         sonnerToast.error("Authentication error", {
-          description: err.message || 'An unexpected error occurred'
+          description: 'An unexpected error occurred'
         });
         navigate('/auth');
       }

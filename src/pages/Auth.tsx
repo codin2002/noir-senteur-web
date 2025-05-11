@@ -11,7 +11,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 
 // Define validation schemas
 const loginSchema = z.object({
@@ -183,13 +182,14 @@ const Auth = () => {
                 </form>
               </Form>
               
-              <div className="mt-4 text-center">
-                <div className="flex items-center my-4">
-                  <Separator className="flex-grow bg-gold/20" />
-                  <span className="px-4 text-sm text-muted-foreground">or</span>
-                  <Separator className="flex-grow bg-gold/20" />
-                </div>
-                
+              <div className="mt-6 text-center relative">
+                <div className="absolute top-1/2 left-0 w-full h-px bg-gold/20 -translate-y-1/2"></div>
+                <span className="relative bg-darker px-4 text-sm text-muted-foreground z-10">
+                  or
+                </span>
+              </div>
+              
+              <div className="mt-6">
                 <Button 
                   type="button" 
                   variant="outline" 
@@ -267,13 +267,14 @@ const Auth = () => {
                 </form>
               </Form>
               
-              <div className="mt-4 text-center">
-                <div className="flex items-center my-4">
-                  <Separator className="flex-grow bg-gold/20" />
-                  <span className="px-4 text-sm text-muted-foreground">or</span>
-                  <Separator className="flex-grow bg-gold/20" />
-                </div>
-                
+              <div className="mt-6 text-center relative">
+                <div className="absolute top-1/2 left-0 w-full h-px bg-gold/20 -translate-y-1/2"></div>
+                <span className="relative bg-darker px-4 text-sm text-muted-foreground z-10">
+                  or
+                </span>
+              </div>
+              
+              <div className="mt-6">
                 <Button 
                   type="button" 
                   variant="outline" 
