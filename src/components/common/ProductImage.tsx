@@ -9,7 +9,7 @@ interface ProductImageProps {
   className?: string;
   fullWidth?: boolean;
   fallbackImage?: string;
-  aspectRatio?: number;
+  aspectRatio?: number | "auto";
   objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
   showPlaceholderOnError?: boolean;
   hover?: boolean;
@@ -56,7 +56,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
 
   // Calculate optimal container classes based on image type
   const containerClasses = cn(
-    "relative overflow-hidden rounded-lg",
+    "relative overflow-hidden rounded-lg flex items-center justify-center",
     isWebpOrAvif && "bg-darker", // Better background for modern formats
     fullWidth ? "w-full h-full" : "",
     className

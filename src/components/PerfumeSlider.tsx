@@ -71,11 +71,14 @@ const PerfumeSlider = () => {
               {perfumes.map((perfume) => (
                 <CarouselItem key={perfume.id} className="md:basis-1/2 lg:basis-1/3">
                   <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
-                    <div className="h-64 w-full overflow-hidden mb-4">
+                    <div className="h-64 w-full overflow-hidden mb-4 flex items-center justify-center">
                       <ProductImage 
                         src={getPerfumeImage(perfume)}
                         alt={perfume.name}
                         fullWidth={true}
+                        aspectRatio="auto"
+                        objectFit="contain"
+                        className="max-h-full"
                       />
                     </div>
                     <div className="flex-1 flex flex-col">

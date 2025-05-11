@@ -41,14 +41,15 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="w-full md:w-1/2 overflow-hidden">
-        <div className="relative h-[400px] md:h-[500px] overflow-hidden">
+        <div className="relative h-[400px] md:h-[500px] overflow-hidden flex items-center justify-center">
           <ProductImage 
             src={getPerfumeImage({name, image})} 
             alt={name}
             fullWidth={true}
             hover={true}
-            aspectRatio={3/4}
+            aspectRatio="auto"
             objectFit="contain"
+            className="max-h-full"
           />
         </div>
       </div>
