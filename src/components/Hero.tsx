@@ -5,10 +5,16 @@ const Hero = () => {
   return (
     <div className="relative h-screen w-full overflow-hidden flex items-center justify-center">
       <div className="absolute inset-0 bg-darker">
-        <div 
-          className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1624359736213-e8cec3a37945?q=80&w=1000')] 
-          bg-cover bg-center opacity-60"
-        ></div>
+        {/* Video background */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Video.mov" type="video/quicktime" />
+        </video>
         <div className="absolute inset-0 bg-gradient"></div>
       </div>
 

@@ -108,3 +108,15 @@
 .img-responsive {
   @apply w-full h-auto object-cover;
 }
+
+/* Video styling for hero section */
+video.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Ensure iOS Safari plays the video */
+video[playsinline] {
+  -webkit-playsinline: 1;
+}
