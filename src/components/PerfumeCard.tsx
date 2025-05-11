@@ -41,7 +41,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       <div className="w-full md:w-1/2 overflow-hidden">
         <div className="relative h-[400px] overflow-hidden">
           <img 
-            src="/lovable-uploads/7f9b1f70-6972-49da-83b7-90ffd656d640.png" 
+            src={image} 
             alt={name} 
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           />
