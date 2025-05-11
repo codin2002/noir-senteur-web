@@ -4,7 +4,6 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-// Since TooltipPrimitive.Provider doesn't accept a ref, we don't need to use forwardRef
 const TooltipProvider = ({ ...props }: TooltipPrimitive.TooltipProviderProps) => (
   <TooltipPrimitive.Provider {...props} />
 )
