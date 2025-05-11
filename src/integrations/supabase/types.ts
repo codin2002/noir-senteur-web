@@ -267,6 +267,35 @@ export type Database = {
         }
         Relationships: []
       }
+      wishlist: {
+        Row: {
+          created_at: string
+          id: string
+          perfume_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          perfume_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          perfume_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wishlist_perfume_id_fkey"
+            columns: ["perfume_id"]
+            isOneToOne: false
+            referencedRelation: "perfumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -287,6 +316,16 @@ export type Database = {
           user_id: string
           perfume_id: string
           quantity: number
+          created_at: string
+          perfume: Json
+        }[]
+      }
+      get_wishlist_with_perfumes: {
+        Args: { user_uuid: string }
+        Returns: {
+          id: string
+          user_id: string
+          perfume_id: string
           created_at: string
           perfume: Json
         }[]

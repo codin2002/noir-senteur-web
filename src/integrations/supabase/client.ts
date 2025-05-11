@@ -11,7 +11,7 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
-// Type for wishlist table that is not yet in the generated types
+// Type for wishlist table that is now in the database
 export type WishlistItem = {
   id: string;
   user_id: string;
