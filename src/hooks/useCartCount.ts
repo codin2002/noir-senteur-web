@@ -38,7 +38,7 @@ export const useCartCount = (userId?: string) => {
       
       if (data && Array.isArray(data)) {
         // Type-safe cast for the data returned from DB
-        const cartItems = data as CartItemFromDB[];
+        const cartItems = data as unknown as CartItemFromDB[];
         
         // Calculate the total quantity of items in the cart
         const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
