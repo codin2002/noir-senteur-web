@@ -39,7 +39,7 @@ const AuthCallback = () => {
 
         console.log('Authentication successful');
         sonnerToast.success("Successfully signed in", {
-          description: `Welcome back!`
+          description: `Welcome to senteurfragrances.com!`
         });
         
         // Check if there was a previous location the user was trying to access
