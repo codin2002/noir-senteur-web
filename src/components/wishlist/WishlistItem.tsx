@@ -3,6 +3,7 @@ import React from 'react';
 import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Perfume } from '@/types/perfume';
+import ResponsiveImage from '@/components/common/ResponsiveImage';
 
 export interface WishlistItemType {
   id: string;
@@ -31,10 +32,11 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
   return (
     <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
       <div className="h-[240px] relative overflow-hidden">
-        <img 
+        <ResponsiveImage 
           src={perfumeImage}
-          alt={item.perfume.name} 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+          alt={item.perfume.name}
+          aspectRatio={16/10}
+          hover={true}
         />
       </div>
       <div className="p-4">

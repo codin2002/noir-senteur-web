@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Perfume } from '@/types/perfume';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './common/LoadingSpinner';
+import ResponsiveImage from './common/ResponsiveImage';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 const PerfumeSlider = () => {
@@ -76,11 +77,12 @@ const PerfumeSlider = () => {
               {perfumes.map((perfume) => (
                 <CarouselItem key={perfume.id} className="md:basis-1/2 lg:basis-1/3">
                   <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
-                    <div className="relative h-64 w-full overflow-hidden mb-4">
-                      <img 
-                        src={getPerfumeImage(perfume)} 
-                        alt={perfume.name} 
-                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                    <div className="h-64 w-full overflow-hidden mb-4">
+                      <ResponsiveImage 
+                        src={getPerfumeImage(perfume)}
+                        alt={perfume.name}
+                        aspectRatio={3/4}
+                        hover={true}
                       />
                     </div>
                     <div className="flex-1 flex flex-col">

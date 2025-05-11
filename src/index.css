@@ -64,6 +64,10 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
   }
+
+  img {
+    @apply max-w-full h-auto;
+  }
 }
 
 .gold-text {
@@ -94,4 +98,13 @@
 
 .btn-outline {
   @apply border border-gold text-gold hover:bg-gold hover:text-cartier-red transition-colors px-6 py-3 inline-block uppercase tracking-widest text-xs font-sans;
+}
+
+/* Responsive image container classes */
+.img-container {
+  @apply relative overflow-hidden w-full;
+}
+
+.img-responsive {
+  @apply w-full h-auto object-cover;
 }
