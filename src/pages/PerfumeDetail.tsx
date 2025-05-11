@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, WishlistItem } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
@@ -106,11 +107,12 @@ const PerfumeDetail = () => {
       if (!user || !id) return;
       
       try {
+        // Use type assertion for the wishlist table
         const { data, error } = await supabase
-          .from('wishlist')
+          .from('wishlist' as any)
           .select('*')
           .eq('user_id', user.id)
-          .eq('perfume_id', id);
+          .eq('perfume_id', id) as { data: WishlistItem[] | null, error: any };
           
         if (error) {
           throw error;
@@ -203,20 +205,20 @@ const PerfumeDetail = () => {
       // Check if already in wishlist
       if (isInWishlist) {
         const { data, error } = await supabase
-          .from('wishlist')
+          .from('wishlist' as any)
           .select('id')
           .eq('user_id', user.id)
           .eq('perfume_id', id)
-          .single();
+          .single() as { data: WishlistItem | null, error: any };
           
         if (error) throw error;
         
         if (data) {
           // Remove from wishlist
           const { error: deleteError } = await supabase
-            .from('wishlist')
+            .from('wishlist' as any)
             .delete()
-            .eq('id', data.id);
+            .eq('id', data.id) as { error: any };
             
           if (deleteError) throw deleteError;
           
@@ -226,11 +228,11 @@ const PerfumeDetail = () => {
       } else {
         // Add to wishlist
         const { error } = await supabase
-          .from('wishlist')
+          .from('wishlist' as any)
           .insert({
             user_id: user.id,
             perfume_id: id
-          });
+          }) as { error: any };
           
         if (error) throw error;
         
