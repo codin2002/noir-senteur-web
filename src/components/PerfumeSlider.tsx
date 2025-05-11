@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Perfume } from '@/types/perfume';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './common/LoadingSpinner';
-import ResponsiveImage from './common/ResponsiveImage';
+import ProductImage from './common/ProductImage';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 const PerfumeSlider = () => {
@@ -78,11 +77,10 @@ const PerfumeSlider = () => {
                 <CarouselItem key={perfume.id} className="md:basis-1/2 lg:basis-1/3">
                   <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
                     <div className="h-64 w-full overflow-hidden mb-4">
-                      <ResponsiveImage 
+                      <ProductImage 
                         src={getPerfumeImage(perfume)}
                         alt={perfume.name}
-                        aspectRatio={3/4}
-                        hover={true}
+                        fullWidth={true}
                       />
                     </div>
                     <div className="flex-1 flex flex-col">

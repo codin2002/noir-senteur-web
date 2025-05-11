@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import ResponsiveImage from './common/ResponsiveImage';
+import ProductImage from './common/ProductImage';
 
 interface PerfumeCardProps {
   id: string; 
@@ -46,11 +45,10 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
     >
       <div className="w-full md:w-1/2 overflow-hidden">
         <div className="relative h-[400px] overflow-hidden">
-          <ResponsiveImage 
+          <ProductImage 
             src={perfumeImage} 
             alt={name}
-            aspectRatio={3/4}
-            hover={true}
+            fullWidth={true}
           />
         </div>
       </div>
