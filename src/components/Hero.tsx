@@ -7,13 +7,14 @@ const Hero = () => {
       <div className="absolute inset-0 bg-darker">
         {/* Video background */}
         <video
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover hero-video"
           autoPlay
           loop
           muted
           playsInline
         >
           <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Video.mov" type="video/quicktime" />
+          Your browser does not support video playback.
         </video>
         <div className="absolute inset-0 bg-gradient"></div>
       </div>
