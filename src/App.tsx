@@ -14,7 +14,6 @@ import Wishlist from "./pages/Wishlist";
 import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
 import PerfumeDetail from "./pages/PerfumeDetail";
-import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -32,11 +31,6 @@ const App = () => (
             <Route path="/perfume/:id" element={<PerfumeDetail />} />
             
             {/* Protected routes */}
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            } />
             <Route path="/wishlist" element={
               <ProtectedRoute>
                 <Wishlist />
