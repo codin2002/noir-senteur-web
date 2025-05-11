@@ -6,7 +6,7 @@ const Footer = () => {
   return (
     <footer id="contact" className="bg-dark pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pb-12 border-b border-gray-800">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-12 border-b border-gray-800">
           <div>
             <h2 className="text-2xl font-serif mb-6">SENTEUR<span className="gold-text">.</span></h2>
             <p className="text-muted-foreground mb-6">
@@ -29,16 +29,6 @@ const Footer = () => {
                 </svg>
               </a>
             </div>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-serif mb-6">Visit Us</h3>
-            <address className="not-italic text-muted-foreground">
-              <p>25 Rue Saint-Honoré</p>
-              <p>75001 Paris, France</p>
-              <p className="mt-4">Mon - Sat: 10am - 7pm</p>
-              <p>Sunday: By appointment</p>
-            </address>
           </div>
           
           <div>

@@ -68,7 +68,7 @@ const Navbar = () => {
     >
       <div className="flex items-center justify-between">
         <Link to="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
-          <span className="gold-text">٣١٣</span>
+          SENTEUR<span className="gold-text">.</span>
         </Link>
 
         {/* Desktop Menu */}
