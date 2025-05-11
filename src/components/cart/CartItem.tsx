@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { Perfume } from '@/types/perfume';
+import ProductImage from '../common/ProductImage';
 
 export interface CartItemType {
   id: string;
@@ -32,6 +32,22 @@ const CartItem: React.FC<CartItemProps> = ({
   const [isRemoving, setIsRemoving] = useState(false);
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const { user } = useAuth();
+
+  // Get the appropriate image source
+  const getPerfumeImage = () => {
+    // For the "Signature First" perfume, use the custom image with Arabic "313"
+    if (item.perfume.name === "Signature First") {
+      return "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png";
+    }
+    
+    // For "Luxury Collection" perfume, use the uploaded image
+    if (item.perfume.name === "Luxury Collection") {
+      return "/lovable-uploads/8409f135-32ac-4937-ae90-9d2ad51131b5.png";
+    }
+    
+    // Otherwise use the image from the database
+    return item.perfume.image;
+  };
 
   const updateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
@@ -113,10 +129,11 @@ const CartItem: React.FC<CartItemProps> = ({
     <div className="flex flex-col sm:flex-row gap-4 p-4 bg-darker rounded-lg border border-gold/20">
       {/* Product image */}
       <div className="w-full sm:w-24 h-24 rounded-md overflow-hidden">
-        <img 
-          src={item.perfume.image} 
+        <ProductImage 
+          src={getPerfumeImage()} 
           alt={item.perfume.name} 
-          className="w-full h-full object-cover"
+          className="w-full h-full"
+          objectFit="contain"
         />
       </div>
       
