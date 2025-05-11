@@ -115,12 +115,21 @@ export const useProfile = () => {
         
       if (error) throw error;
       
-      setProfile(data);
+      // Ensure data is properly typed as Profile
+      const profileData: Profile = {
+        id: data.id,
+        full_name: data.full_name,
+        avatar_url: data.avatar_url,
+        phone: data.phone,
+        address: data.address
+      };
+      
+      setProfile(profileData);
       setFormData(prev => ({
         ...prev,
-        full_name: data?.full_name || '',
-        phone: data?.phone || '',
-        address: data?.address || ''
+        full_name: profileData.full_name || '',
+        phone: profileData.phone || '',
+        address: profileData.address || ''
       }));
     } catch (error: any) {
       console.error('Error fetching profile:', error);
