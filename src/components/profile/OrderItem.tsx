@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';

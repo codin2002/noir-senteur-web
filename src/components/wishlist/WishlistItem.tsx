@@ -48,7 +48,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
         <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
           {item.perfume.description}
         </p>
-        <p className="text-lg font-light text-gold mb-4">{item.perfume.price}</p>
+        <p className="text-lg font-light text-gold mb-4">AED 100</p>
         
         <div className="flex space-x-2">
           <Button 

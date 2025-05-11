@@ -93,7 +93,7 @@ const PerfumeSlider = () => {
                       <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
                       <h3 className="text-xl font-serif mb-2">{getDisplayName(perfume)}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
-                      <p className="text-gold font-light mb-4 mt-auto">{perfume.price}</p>
+                      <p className="text-gold font-light mb-4 mt-auto">AED 100</p>
                       <button 
                         onClick={() => handleExplore(perfume.id)} 
                         className="btn-outline text-center text-xs py-2"

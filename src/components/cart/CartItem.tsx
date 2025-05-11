@@ -146,7 +146,7 @@ const CartItem: React.FC<CartItemProps> = ({
         <h3 className="font-serif text-lg">{displayName}</h3>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
         <p className="text-gold mt-1">
-          {item.perfume.price.replace('$', 'AED ')}
+          AED 100
         </p>
       </div>
       

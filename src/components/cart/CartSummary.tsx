@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CartItemType } from './CartItem';
@@ -8,10 +9,10 @@ interface CartSummaryProps {
   currencySymbol?: string;
 }
 
-const CartSummary: React.FC<CartSummaryProps> = ({ cartItems, onCheckout, currencySymbol = '$' }) => {
+const CartSummary: React.FC<CartSummaryProps> = ({ cartItems, onCheckout, currencySymbol = 'AED ' }) => {
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => 
-      sum + (item.perfume.price_value * item.quantity), 0
+      sum + (100 * item.quantity), 0
     );
   };
 

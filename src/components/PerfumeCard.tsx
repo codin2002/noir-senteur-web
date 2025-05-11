@@ -80,7 +80,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           {description}
         </p>
         <p className="text-xl font-light text-gold mt-4">
-          {price.replace('$', 'AED ')}
+          AED 100
         </p>
         <button 
           className="btn-outline mt-6" 
