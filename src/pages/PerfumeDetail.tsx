@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import PerfumeClassification from '@/components/perfume/PerfumeClassification';
+import PerfumeRatings from '@/components/perfume/PerfumeRatings';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface Perfume {
   id: string;
@@ -18,11 +21,46 @@ interface Perfume {
   price_value: number;
 }
 
+interface PerfumeClassificationData {
+  id: string;
+  perfume_id: string;
+  type_floral: number;
+  type_fresh: number;
+  type_oriental: number;
+  type_woody: number;
+  occasion_casual: number;
+  occasion_formal: number;
+  occasion_evening: number;
+  occasion_special: number;
+  season_spring: number;
+  season_summer: number;
+  season_fall: number;
+  season_winter: number;
+  audience_feminine: number;
+  audience_masculine: number;
+  audience_unisex: number;
+}
+
+interface PerfumeRatingData {
+  id: string;
+  perfume_id: string;
+  scent_rating: number;
+  durability_rating: number;
+  sillage_rating: number;
+  bottle_rating: number;
+  total_votes: number;
+}
+
 const PerfumeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [perfume, setPerfume] = useState<Perfume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [showExplore, setShowExplore] = useState(false);
+  const [classificationData, setClassificationData] = useState<PerfumeClassificationData | null>(null);
+  const [ratingsData, setRatingsData] = useState<PerfumeRatingData | null>(null);
+  const [isLoadingClassification, setIsLoadingClassification] = useState(false);
+  const [isLoadingRatings, setIsLoadingRatings] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -59,6 +97,70 @@ const PerfumeDetail = () => {
       fetchPerfume();
     }
   }, [id]);
+
+  const fetchClassificationData = async () => {
+    if (!id) return;
+    
+    try {
+      setIsLoadingClassification(true);
+      
+      const { data, error } = await supabase
+        .from('perfume_classifications')
+        .select('*')
+        .eq('perfume_id', id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching classification data:', error);
+        return;
+      }
+      
+      if (data) {
+        setClassificationData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching classification data:', error);
+    } finally {
+      setIsLoadingClassification(false);
+    }
+  };
+
+  const fetchRatingsData = async () => {
+    if (!id) return;
+    
+    try {
+      setIsLoadingRatings(true);
+      
+      const { data, error } = await supabase
+        .from('perfume_ratings')
+        .select('*')
+        .eq('perfume_id', id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching ratings data:', error);
+        return;
+      }
+      
+      if (data) {
+        setRatingsData(data);
+      }
+    } catch (error) {
+      console.error('Error fetching ratings data:', error);
+    } finally {
+      setIsLoadingRatings(false);
+    }
+  };
+
+  const toggleExplore = () => {
+    if (!showExplore) {
+      // First-time opening, fetch data
+      fetchClassificationData();
+      fetchRatingsData();
+    }
+    
+    setShowExplore(!showExplore);
+  };
 
   const addToCart = async () => {
     if (!user) {
@@ -123,7 +225,7 @@ const PerfumeDetail = () => {
       <div className="min-h-screen bg-dark text-white">
         <Navbar />
         <div className="pt-24 pb-12 flex justify-center items-center min-h-[50vh]">
-          <div className="w-10 h-10 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin"></div>
+          <LoadingSpinner size="md" />
         </div>
         <Footer />
       </div>
@@ -193,7 +295,7 @@ const PerfumeDetail = () => {
                 </p>
               </div>
               
-              <div className="pt-6">
+              <div className="pt-6 space-y-4">
                 <Button 
                   className="w-full bg-gold text-darker hover:bg-gold/80"
                   onClick={addToCart}
@@ -201,9 +303,37 @@ const PerfumeDetail = () => {
                 >
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </Button>
+                
+                <Button 
+                  variant="outline"
+                  className="w-full border-gold/50 text-gold hover:bg-gold/10"
+                  onClick={toggleExplore}
+                >
+                  {showExplore ? 'Hide Details' : 'Explore'}
+                </Button>
               </div>
             </div>
           </div>
+          
+          {/* Classification & Ratings */}
+          {showExplore && (
+            <div className="mt-16 border-t border-gold/30 pt-12">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                <div className="lg:border-r lg:border-gold/20 lg:pr-8">
+                  <PerfumeClassification 
+                    classificationData={classificationData}
+                    isLoading={isLoadingClassification}
+                  />
+                </div>
+                <div className="lg:pl-8">
+                  <PerfumeRatings 
+                    ratingsData={ratingsData}
+                    isLoading={isLoadingRatings}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <Footer />

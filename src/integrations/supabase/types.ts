@@ -92,6 +92,124 @@ export type Database = {
         }
         Relationships: []
       }
+      perfume_classifications: {
+        Row: {
+          audience_feminine: number
+          audience_masculine: number
+          audience_unisex: number
+          created_at: string
+          id: string
+          occasion_casual: number
+          occasion_evening: number
+          occasion_formal: number
+          occasion_special: number
+          perfume_id: string
+          season_fall: number
+          season_spring: number
+          season_summer: number
+          season_winter: number
+          type_floral: number
+          type_fresh: number
+          type_oriental: number
+          type_woody: number
+          updated_at: string
+        }
+        Insert: {
+          audience_feminine?: number
+          audience_masculine?: number
+          audience_unisex?: number
+          created_at?: string
+          id?: string
+          occasion_casual?: number
+          occasion_evening?: number
+          occasion_formal?: number
+          occasion_special?: number
+          perfume_id: string
+          season_fall?: number
+          season_spring?: number
+          season_summer?: number
+          season_winter?: number
+          type_floral?: number
+          type_fresh?: number
+          type_oriental?: number
+          type_woody?: number
+          updated_at?: string
+        }
+        Update: {
+          audience_feminine?: number
+          audience_masculine?: number
+          audience_unisex?: number
+          created_at?: string
+          id?: string
+          occasion_casual?: number
+          occasion_evening?: number
+          occasion_formal?: number
+          occasion_special?: number
+          perfume_id?: string
+          season_fall?: number
+          season_spring?: number
+          season_summer?: number
+          season_winter?: number
+          type_floral?: number
+          type_fresh?: number
+          type_oriental?: number
+          type_woody?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfume_classifications_perfume_id_fkey"
+            columns: ["perfume_id"]
+            isOneToOne: true
+            referencedRelation: "perfumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      perfume_ratings: {
+        Row: {
+          bottle_rating: number
+          created_at: string
+          durability_rating: number
+          id: string
+          perfume_id: string
+          scent_rating: number
+          sillage_rating: number
+          total_votes: number
+          updated_at: string
+        }
+        Insert: {
+          bottle_rating?: number
+          created_at?: string
+          durability_rating?: number
+          id?: string
+          perfume_id: string
+          scent_rating?: number
+          sillage_rating?: number
+          total_votes?: number
+          updated_at?: string
+        }
+        Update: {
+          bottle_rating?: number
+          created_at?: string
+          durability_rating?: number
+          id?: string
+          perfume_id?: string
+          scent_rating?: number
+          sillage_rating?: number
+          total_votes?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "perfume_ratings_perfume_id_fkey"
+            columns: ["perfume_id"]
+            isOneToOne: true
+            referencedRelation: "perfumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       perfumes: {
         Row: {
           created_at: string
