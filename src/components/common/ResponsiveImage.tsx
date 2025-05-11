@@ -17,7 +17,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   alt,
   aspectRatio = 1,
   className,
-  objectFit = "cover",
+  objectFit = "contain", // Changed default from "cover" to "contain"
   hover = false,
 }) => {
   return (

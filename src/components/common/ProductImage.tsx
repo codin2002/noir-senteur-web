@@ -19,6 +19,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
         src={src} 
         alt={alt} 
         aspectRatio={3/4}
+        objectFit="contain"
       />
     </div>
   );
