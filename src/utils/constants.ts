@@ -10,3 +10,53 @@ export const PRICING = {
   CURRENCY_SYMBOL: 'AED ',
   SHIPPING_COST: 20,
 };
+
+// Perfume information constants
+export const PERFUMES = {
+  SIGNATURE_FIRST: {
+    ID: "signature-first",
+    NAME: "Signature First", 
+    DISPLAY_NAME: "٣١٣", // Arabic "313"
+    NOTES: "Amber, Oud, Vanilla",
+    DESCRIPTION: "Our signature perfume with complex notes of amber and oud, finished with a touch of vanilla for a sophisticated, long-lasting aroma.",
+    SHORT_DESCRIPTION: "A sophisticated blend of amber and oud with vanilla undertones.",
+    IMAGE: "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png"
+  },
+  LUXURY_COLLECTION: {
+    ID: "luxury-collection",
+    NAME: "Luxury Collection",
+    DISPLAY_NAME: "Luxury Collection",
+    NOTES: "Rose, Jasmine, Sandalwood",
+    DESCRIPTION: "An exquisite combination of rose and jasmine, with a rich sandalwood base that offers an elegant and refined sensory experience.",
+    SHORT_DESCRIPTION: "Elegant floral notes with a rich sandalwood base.",
+    IMAGE: "/lovable-uploads/8409f135-32ac-4937-ae90-9d2ad51131b5.png"
+  }
+};
+
+/**
+ * Helper function to get perfume display image based on name
+ * @param perfume - Perfume object from database
+ * @returns Correct image URL for the perfume
+ */
+export const getPerfumeImage = (perfume: { name: string, image: string }) => {
+  if (perfume.name === PERFUMES.SIGNATURE_FIRST.NAME) {
+    return PERFUMES.SIGNATURE_FIRST.IMAGE;
+  }
+  if (perfume.name === PERFUMES.LUXURY_COLLECTION.NAME) {
+    return PERFUMES.LUXURY_COLLECTION.IMAGE;
+  }
+  return perfume.image;
+};
+
+/**
+ * Helper function to get perfume display name
+ * @param perfume - Perfume object from database
+ * @returns Correct display name for the perfume
+ */
+export const getPerfumeDisplayName = (perfume: { name: string }) => {
+  if (perfume.name === PERFUMES.SIGNATURE_FIRST.NAME) {
+    return PERFUMES.SIGNATURE_FIRST.DISPLAY_NAME;
+  }
+  return perfume.name;
+};
+

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Perfume } from '@/types/perfume';
@@ -5,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './common/LoadingSpinner';
 import ProductImage from './common/ProductImage';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { PRICING } from '@/utils/constants';
+import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
 
 const PerfumeSlider = () => {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
@@ -45,18 +46,6 @@ const PerfumeSlider = () => {
     navigate(`/perfume/${id}`);
   };
 
-  // Function to get the correct image URL
-  const getPerfumeImage = (perfume: Perfume) => {
-    return perfume.name === "Signature First" 
-      ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
-      : perfume.image;
-  };
-
-  // Display Arabic "313" for Signature First perfume
-  const getDisplayName = (perfume: Perfume) => {
-    return perfume.name === "Signature First" ? "٣١٣" : perfume.name;
-  };
-
   return (
     <section className="section bg-cartier-red py-24">
       <div className="max-w-7xl mx-auto">
@@ -91,7 +80,7 @@ const PerfumeSlider = () => {
                     </div>
                     <div className="flex-1 flex flex-col">
                       <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
-                      <h3 className="text-xl font-serif mb-2">{getDisplayName(perfume)}</h3>
+                      <h3 className="text-xl font-serif mb-2">{getPerfumeDisplayName(perfume)}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
                       <p className="text-gold font-light mb-4 mt-auto">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</p>
                       <button 

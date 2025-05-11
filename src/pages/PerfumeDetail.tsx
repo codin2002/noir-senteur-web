@@ -10,7 +10,7 @@ import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Heart } from 'lucide-react';
-import { PRICING } from '@/utils/constants';
+import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
 
 interface Perfume {
   id: string;
@@ -338,19 +338,6 @@ const PerfumeDetail = () => {
     );
   }
 
-  // Get the correct image URL based on the perfume name
-  const getPerfumeImage = () => {
-    if (perfume?.name === "Signature First") {
-      return "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png";
-    }
-    return perfume?.image;
-  };
-
-  // Display Arabic "313" for Signature First perfume
-  const getDisplayName = () => {
-    return perfume?.name === "Signature First" ? "٣١٣" : perfume?.name;
-  };
-
   return (
     <div className="min-h-screen bg-dark text-white">
       <Navbar />
@@ -361,7 +348,7 @@ const PerfumeDetail = () => {
             <div className="w-full lg:w-1/2">
               <div className="relative h-[500px] lg:h-[700px] overflow-hidden rounded-lg">
                 <img 
-                  src={getPerfumeImage()} 
+                  src={getPerfumeImage(perfume)} 
                   alt={perfume.name} 
                   className="w-full h-full object-cover"
                 />
@@ -372,7 +359,7 @@ const PerfumeDetail = () => {
             <div className="w-full lg:w-1/2 space-y-6 lg:pt-12">
               <div>
                 <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
-                <h1 className="text-4xl md:text-5xl font-serif mt-2">{getDisplayName()}</h1>
+                <h1 className="text-4xl md:text-5xl font-serif mt-2">{getPerfumeDisplayName(perfume)}</h1>
                 <p className="text-2xl font-light text-gold mt-4">
                   {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
                 </p>

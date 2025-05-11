@@ -2,7 +2,7 @@
 import React from 'react';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';
-import { PRICING } from '@/utils/constants';
+import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
 
 interface OrderItemProps {
   id: string;
@@ -12,37 +12,18 @@ interface OrderItemProps {
 }
 
 const OrderItem: React.FC<OrderItemProps> = ({ id, perfume, price, quantity }) => {
-  // Get the appropriate image source
-  const getPerfumeImage = () => {
-    // For the "Signature First" perfume, use the custom image with Arabic "313"
-    if (perfume.name === "Signature First") {
-      return "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png";
-    }
-    
-    // For "Luxury Collection" perfume, use the uploaded image
-    if (perfume.name === "Luxury Collection") {
-      return "/lovable-uploads/8409f135-32ac-4937-ae90-9d2ad51131b5.png";
-    }
-    
-    // Otherwise use the image from the database
-    return perfume.image;
-  };
-
-  // Display Arabic "313" for Signature First perfume
-  const displayName = perfume.name === "Signature First" ? "٣١٣" : perfume.name;
-
   return (
     <div key={id} className="flex items-center gap-4">
       <div className="w-16 h-16 rounded overflow-hidden">
         <ProductImage 
-          src={getPerfumeImage()} 
+          src={getPerfumeImage(perfume)} 
           alt={perfume.name}
           className="w-full h-full"
           objectFit="contain"
         />
       </div>
       <div className="flex-grow">
-        <h4 className="font-serif">{displayName}</h4>
+        <h4 className="font-serif">{getPerfumeDisplayName(perfume)}</h4>
         <p className="text-sm text-muted-foreground">{perfume.notes}</p>
       </div>
       <div className="text-right">
