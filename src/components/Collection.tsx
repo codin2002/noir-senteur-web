@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import PerfumeCard from './PerfumeCard';
 import { supabase } from '@/integrations/supabase/client';
@@ -47,8 +46,7 @@ const Collection = () => {
     <section id="collection" className="section bg-cartier-red">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-sm uppercase tracking-widest text-gold mb-3">Our Collection</h2>
-          <h3 className="text-4xl md:text-5xl font-serif mb-4">Signature Fragrances</h3>
+          <h2 className="text-4xl md:text-5xl font-serif mb-4 text-white">Our Collection</h2>
           <div className="w-24 h-0.5 bg-gold mx-auto"></div>
         </div>
 
