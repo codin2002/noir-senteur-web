@@ -10,6 +10,8 @@ interface Profile {
   id: string;
   full_name: string | null;
   avatar_url: string | null;
+  phone: string | null;
+  address: string | null;
 }
 
 interface OrderItem {
@@ -36,7 +38,8 @@ export const useProfile = () => {
   const [formData, setFormData] = useState({
     full_name: '',
     email: '',
-    avatar_url: ''
+    phone: '',
+    address: ''
   });
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -116,7 +119,8 @@ export const useProfile = () => {
       setFormData(prev => ({
         ...prev,
         full_name: data?.full_name || '',
-        avatar_url: data?.avatar_url || ''
+        phone: data?.phone || '',
+        address: data?.address || ''
       }));
     } catch (error: any) {
       console.error('Error fetching profile:', error);
@@ -132,7 +136,8 @@ export const useProfile = () => {
         .from('profiles')
         .update({
           full_name: formData.full_name,
-          avatar_url: formData.avatar_url
+          phone: formData.phone,
+          address: formData.address
         })
         .eq('id', user?.id);
         

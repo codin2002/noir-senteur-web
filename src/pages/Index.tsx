@@ -12,6 +12,17 @@ const Index = () => {
     document.title = "Senteur Fragrances";
     // Create storage bucket if it doesn't exist
     createStorageBucket();
+    
+    // Check if there's a hash in the URL to scroll to that section
+    if (window.location.hash) {
+      const id = window.location.hash.substring(1);
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 500); // Small delay to ensure elements are rendered
+    }
   }, []);
 
   return (

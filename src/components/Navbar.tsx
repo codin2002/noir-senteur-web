@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -21,6 +21,7 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { count: cartCount } = useCartCount(user?.id);
 
   useEffect(() => {
@@ -53,9 +54,16 @@ const Navbar = () => {
   
   const scrollToSection = (id: string) => {
     setIsMobileMenuOpen(false);
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
+    
+    // If we're on the home page, scroll to the section
+    if (location.pathname === '/') {
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      // If we're not on the home page, navigate to home and add the fragment
+      navigate(`/#${id}`);
     }
   };
 
@@ -130,7 +138,7 @@ const Navbar = () => {
                     <History className="mr-2 h-4 w-4" />
                     <span>Purchase History</span>
                   </DropdownMenuItem>
-                  {/* Add admin link */}
+                  {/* Admin link */}
                   <DropdownMenuItem 
                     className="focus:bg-gold/10 focus:text-white cursor-pointer"
                     onClick={() => navigate('/admin')}
@@ -234,7 +242,7 @@ const Navbar = () => {
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Link>
-                {/* Add admin link to mobile menu */}
+                {/* Admin link for mobile menu */}
                 <Link
                   to="/admin"
                   className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider flex items-center"

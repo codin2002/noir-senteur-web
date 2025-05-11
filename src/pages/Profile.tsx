@@ -10,6 +10,7 @@ import PurchaseHistory from '@/components/profile/PurchaseHistory';
 import AccountForm from '@/components/profile/AccountForm';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import NotSignedIn from '@/components/common/NotSignedIn';
+import { useLocation } from 'react-router-dom';
 
 const Profile = () => {
   const { 
@@ -22,10 +23,23 @@ const Profile = () => {
     handleSignOut,
     handleChange
   } = useProfile();
+  const location = useLocation();
 
   useEffect(() => {
     document.title = "My Profile | Senteur Fragrances";
-  }, []);
+    
+    // Get the tab from URL if available
+    const searchParams = new URLSearchParams(location.search);
+    const tabParam = searchParams.get('tab');
+    
+    // If there's a tab parameter and the element exists, scroll to it
+    if (tabParam) {
+      const element = document.getElementById(tabParam);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [location]);
 
   if (!user) {
     return (
@@ -50,14 +64,14 @@ const Profile = () => {
             <LoadingSpinner />
           ) : (
             <ProfileTabs>
-              <TabsContent value="history" className="mt-0">
+              <TabsContent value="history" className="mt-0" id="history">
                 <PurchaseHistory 
                   orders={orders} 
                   formatDate={formatDate} 
                 />
               </TabsContent>
               
-              <TabsContent value="account">
+              <TabsContent value="account" id="account">
                 <AccountForm
                   formData={formData}
                   handleChange={handleChange}

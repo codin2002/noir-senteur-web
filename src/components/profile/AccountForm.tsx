@@ -8,7 +8,8 @@ interface AccountFormProps {
   formData: {
     full_name: string;
     email: string;
-    avatar_url: string;
+    phone: string;
+    address: string;
   };
   handleChange: (field: string) => (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSignOut: () => Promise<void>;
@@ -26,6 +27,16 @@ const AccountForm: React.FC<AccountFormProps> = ({
       <div className="max-w-xl mx-auto">
         <div className="space-y-6">
           <div className="space-y-2">
+            <Label htmlFor="full_name">Full Name</Label>
+            <Input 
+              id="full_name"
+              value={formData.full_name}
+              onChange={handleChange('full_name')}
+              className="bg-darker border-gold/30"
+            />
+          </div>
+          
+          <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input 
               id="email"
@@ -37,23 +48,24 @@ const AccountForm: React.FC<AccountFormProps> = ({
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="full_name">Full Name</Label>
+            <Label htmlFor="phone">Phone Number</Label>
             <Input 
-              id="full_name"
-              value={formData.full_name}
-              onChange={handleChange('full_name')}
+              id="phone"
+              value={formData.phone}
+              onChange={handleChange('phone')}
               className="bg-darker border-gold/30"
+              placeholder="+971 50 XXX XXXX"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="avatar_url">Profile Picture URL</Label>
+            <Label htmlFor="address">Address</Label>
             <Input 
-              id="avatar_url"
-              value={formData.avatar_url}
-              onChange={handleChange('avatar_url')}
+              id="address"
+              value={formData.address}
+              onChange={handleChange('address')}
               className="bg-darker border-gold/30"
-              placeholder="https://example.com/avatar.jpg"
+              placeholder="Your delivery address"
             />
           </div>
           
