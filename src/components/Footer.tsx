@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Instagram, Tiktok, MessageCircle } from 'lucide-react';
+import { Instagram, MessageCircle } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -20,7 +20,13 @@ const Footer = () => {
                 <Instagram size={20} />
               </a>
               <a href="https://www.tiktok.com/@senteurfragrances?_t=ZS-8wGnFChmyoB&_r=1" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-gold transition-colors">
-                <Tiktok size={20} />
+                {/* Since there's no direct TikTok icon in lucide-react, we'll use a custom SVG */}
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 12a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path>
+                  <path d="M16 8v8"></path>
+                  <path d="M12 16v-8"></path>
+                  <path d="M20 12V8a4 4 0 0 0-4-4h-1"></path>
+                </svg>
               </a>
             </div>
           </div>
