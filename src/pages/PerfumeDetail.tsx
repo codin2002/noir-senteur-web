@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -345,19 +344,8 @@ const PerfumeDetail = () => {
       <div className="pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Left - Image */}
-            <div className="w-full lg:w-1/2">
-              <div className="relative h-[500px] lg:h-[700px] overflow-hidden rounded-lg">
-                <img 
-                  src={perfume.image} 
-                  alt={perfume.name} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
-            
             {/* Right - Details */}
-            <div className="w-full lg:w-1/2 space-y-6 lg:pt-12">
+            <div className="w-full space-y-6 lg:pt-12">
               <div>
                 <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
                 <h1 className="text-4xl md:text-5xl font-serif mt-2">{perfume.name}</h1>
