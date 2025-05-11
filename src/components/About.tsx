@@ -31,8 +31,8 @@ const About = () => {
           <div className="relative">
             <div className="aspect-[4/5] w-full overflow-hidden">
               <img 
-                src="https://images.unsplash.com/photo-1615341076629-4297a5a96493?q=80&w=1000" 
-                alt="Perfume artisan" 
+                src="/lovable-uploads/1d63d516-ca5a-4462-a2ab-26d9b30d289a.png" 
+                alt="Luxury perfume bottle" 
                 className="w-full h-full object-cover"
               />
             </div>

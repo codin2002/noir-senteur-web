@@ -3,7 +3,6 @@ import React, { useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Hero from '@/components/Hero';
 import Collection from '@/components/Collection';
-import PerfumeSlider from '@/components/PerfumeSlider';
 import About from '@/components/About';
 import Footer from '@/components/Footer';
 import { createStorageBucket } from '@/lib/supabase';
@@ -20,7 +19,6 @@ const Index = () => {
       <Navbar />
       <Hero />
       <Collection />
-      <PerfumeSlider />
       <About />
       <Footer />
     </div>
