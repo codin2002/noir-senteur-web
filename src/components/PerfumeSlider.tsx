@@ -49,7 +49,7 @@ const PerfumeSlider = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-sm uppercase tracking-widest text-gold mb-3">Explore More</h2>
-          <h3 className="text-4xl md:text-5xl font-serif mb-4">Our Complete Collection</h3>
+          <h3 className="text-4xl md:text-5xl font-serif mb-4">Our Collection</h3>
           <div className="w-24 h-0.5 bg-gold mx-auto"></div>
         </div>
 
