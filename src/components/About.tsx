@@ -5,7 +5,7 @@ const About = () => {
   return (
     <section id="about" className="section bg-darker">
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+        <div className="grid md:grid-cols-1 gap-12 items-center">
           <div className="animate-fade-up">
             <h2 className="text-sm uppercase tracking-widest text-gold mb-3">About Us</h2>
             <h3 className="text-4xl md:text-5xl font-serif mb-6">Our Philosophy</h3>
@@ -26,17 +26,6 @@ const About = () => {
                 more than just a scent—it's an extension of your identity.
               </p>
             </div>
-          </div>
-          
-          <div className="relative">
-            <div className="aspect-[4/5] w-full overflow-hidden">
-              <img 
-                src="/lovable-uploads/1d63d516-ca5a-4462-a2ab-26d9b30d289a.png" 
-                alt="Luxury perfume bottle" 
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="absolute bottom-0 left-0 w-1/2 h-1/2 border border-gold -mb-6 -ml-6 z-[-1]"></div>
           </div>
         </div>
         
