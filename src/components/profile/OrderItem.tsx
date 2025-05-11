@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';
+import { PRICING } from '@/utils/constants';
 
 interface OrderItemProps {
   id: string;
@@ -44,8 +46,8 @@ const OrderItem: React.FC<OrderItemProps> = ({ id, perfume, price, quantity }) =
         <p className="text-sm text-muted-foreground">{perfume.notes}</p>
       </div>
       <div className="text-right">
-        <p>AED {price} × {quantity}</p>
-        <p className="text-gold">AED {(price * quantity).toFixed(2)}</p>
+        <p>{PRICING.CURRENCY_SYMBOL}{price} × {quantity}</p>
+        <p className="text-gold">{PRICING.CURRENCY_SYMBOL}{(price * quantity).toFixed(2)}</p>
       </div>
     </div>
   );

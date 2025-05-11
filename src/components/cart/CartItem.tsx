@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,6 +5,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';
+import { PRICING } from '@/utils/constants';
 
 export interface CartItemType {
   id: string;
@@ -146,7 +146,7 @@ const CartItem: React.FC<CartItemProps> = ({
         <h3 className="font-serif text-lg">{displayName}</h3>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
         <p className="text-gold mt-1">
-          AED 100
+          {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
       </div>
       

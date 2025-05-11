@@ -3,6 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './common/ProductImage';
+import { PRICING } from '@/utils/constants';
 
 interface PerfumeCardProps {
   id: string; 
@@ -80,7 +81,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           {description}
         </p>
         <p className="text-xl font-light text-gold mt-4">
-          AED 100
+          {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
         <button 
           className="btn-outline mt-6" 

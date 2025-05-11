@@ -4,6 +4,7 @@ import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Perfume } from '@/types/perfume';
 import ResponsiveImage from '@/components/common/ResponsiveImage';
+import { PRICING } from '@/utils/constants';
 
 export interface WishlistItemType {
   id: string;
@@ -48,7 +49,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
         <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
           {item.perfume.description}
         </p>
-        <p className="text-lg font-light text-gold mb-4">AED 100</p>
+        <p className="text-lg font-light text-gold mb-4">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</p>
         
         <div className="flex space-x-2">
           <Button 

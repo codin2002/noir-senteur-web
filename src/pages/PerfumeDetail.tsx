@@ -10,6 +10,7 @@ import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Heart } from 'lucide-react';
+import { PRICING } from '@/utils/constants';
 
 interface Perfume {
   id: string;
@@ -373,7 +374,7 @@ const PerfumeDetail = () => {
                 <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
                 <h1 className="text-4xl md:text-5xl font-serif mt-2">{getDisplayName()}</h1>
                 <p className="text-2xl font-light text-gold mt-4">
-                  {perfume.price.replace('$', 'AED ')}
+                  {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
                 </p>
               </div>
               
