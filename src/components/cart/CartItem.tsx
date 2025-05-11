@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,9 +19,15 @@ interface CartItemProps {
   item: CartItemType;
   onItemUpdate: (item: CartItemType) => void;
   onItemRemove: (id: string) => void;
+  refreshCartCount: () => void;
 }
 
-const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove }) => {
+const CartItem: React.FC<CartItemProps> = ({ 
+  item, 
+  onItemUpdate, 
+  onItemRemove,
+  refreshCartCount
+}) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
   const { user } = useAuth();
@@ -45,6 +52,9 @@ const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove })
         ...item,
         quantity: newQuantity
       });
+      
+      // Refresh the cart count in navbar
+      refreshCartCount();
       
     } catch (error: any) {
       console.error('Error updating cart item:', error);
@@ -72,6 +82,9 @@ const CartItem: React.FC<CartItemProps> = ({ item, onItemUpdate, onItemRemove })
       
       onItemRemove(item.id);
       toast.success('Item removed from cart');
+      
+      // Refresh the cart count in navbar
+      refreshCartCount();
       
     } catch (error: any) {
       console.error('Error removing cart item:', error);

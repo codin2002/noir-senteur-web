@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
@@ -65,15 +66,15 @@ const Navbar = () => {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-8 items-center">
-          <a href="#collection" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+          <Link to="/#collection" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
             Collection
-          </a>
-          <a href="#about" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+          </Link>
+          <Link to="/#about" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
             About
-          </a>
-          <a href="#contact" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+          </Link>
+          <Link to="/#contact" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
             Contact
-          </a>
+          </Link>
           
           {/* Wishlist and Cart Icons */}
           <div className="flex items-center space-x-4">
@@ -188,27 +189,27 @@ const Navbar = () => {
       {isMobileMenuOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-darker bg-opacity-95 backdrop-blur-sm py-4">
           <div className="flex flex-col space-y-4 px-6">
-            <a 
-              href="#collection" 
+            <Link 
+              to="/#collection" 
               className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Collection
-            </a>
-            <a 
-              href="#about" 
+            </Link>
+            <Link 
+              to="/#about" 
               className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               About
-            </a>
-            <a 
-              href="#contact" 
+            </Link>
+            <Link 
+              to="/#contact" 
               className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Contact
-            </a>
+            </Link>
             
             {user ? (
               <>

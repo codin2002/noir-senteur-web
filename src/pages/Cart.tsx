@@ -1,4 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
@@ -61,12 +63,10 @@ const Cart = () => {
     setCartItems(cartItems.map(item => 
       item.id === updatedItem.id ? updatedItem : item
     ));
-    refreshCartCount(); // Refresh the cart count in navbar
   };
 
   const handleRemoveItem = (id: string) => {
     setCartItems(cartItems.filter(item => item.id !== id));
-    refreshCartCount(); // Refresh the cart count in navbar
   };
 
   const checkout = async () => {
@@ -138,6 +138,7 @@ const Cart = () => {
                       }} 
                       onItemUpdate={handleUpdateItem}
                       onItemRemove={handleRemoveItem}
+                      refreshCartCount={refreshCartCount}
                     />
                   ))}
                 </div>

@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { Heart } from 'lucide-react';
 
 interface Perfume {
   id: string;
@@ -55,6 +56,8 @@ const PerfumeDetail = () => {
   const [perfume, setPerfume] = useState<Perfume | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [addingToWishlist, setAddingToWishlist] = useState(false);
+  const [isInWishlist, setIsInWishlist] = useState(false);
   const [showExplore, setShowExplore] = useState(false);
   const [classificationData, setClassificationData] = useState<PerfumeClassificationData | null>(null);
   const [ratingsData, setRatingsData] = useState<PerfumeRatingData | null>(null);
@@ -96,6 +99,31 @@ const PerfumeDetail = () => {
       fetchPerfume();
     }
   }, [id]);
+
+  // Check if item is in wishlist
+  useEffect(() => {
+    const checkWishlist = async () => {
+      if (!user || !id) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('wishlist')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('perfume_id', id);
+          
+        if (error) {
+          throw error;
+        }
+        
+        setIsInWishlist(data && data.length > 0);
+      } catch (error) {
+        console.error('Error checking wishlist:', error);
+      }
+    };
+    
+    checkWishlist();
+  }, [user, id]);
 
   const fetchClassificationData = async () => {
     if (!id) return;
@@ -159,6 +187,64 @@ const PerfumeDetail = () => {
     }
     
     setShowExplore(!showExplore);
+  };
+
+  const addToWishlist = async () => {
+    if (!user) {
+      // Store the redirect path for after login
+      localStorage.setItem('auth_redirect_path', `/perfume/${id}`);
+      navigate('/auth');
+      return;
+    }
+    
+    try {
+      setAddingToWishlist(true);
+      
+      // Check if already in wishlist
+      if (isInWishlist) {
+        const { data, error } = await supabase
+          .from('wishlist')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('perfume_id', id)
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          // Remove from wishlist
+          const { error: deleteError } = await supabase
+            .from('wishlist')
+            .delete()
+            .eq('id', data.id);
+            
+          if (deleteError) throw deleteError;
+          
+          setIsInWishlist(false);
+          toast.success('Removed from wishlist');
+        }
+      } else {
+        // Add to wishlist
+        const { error } = await supabase
+          .from('wishlist')
+          .insert({
+            user_id: user.id,
+            perfume_id: id
+          });
+          
+        if (error) throw error;
+        
+        setIsInWishlist(true);
+        toast.success('Added to wishlist');
+      }
+    } catch (error: any) {
+      console.error('Error updating wishlist:', error);
+      toast.error('Failed to update wishlist', {
+        description: error.message
+      });
+    } finally {
+      setAddingToWishlist(false);
+    }
   };
 
   const addToCart = async () => {
@@ -305,13 +391,25 @@ const PerfumeDetail = () => {
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </Button>
                 
-                <Button 
-                  variant="outline"
-                  className="w-full border-gold/50 text-gold hover:bg-gold/10"
-                  onClick={toggleExplore}
-                >
-                  {showExplore ? 'Hide Details' : 'Explore'}
-                </Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <Button 
+                    variant="outline"
+                    className={`border-gold/50 ${isInWishlist ? 'bg-gold/10 text-gold' : 'text-gold hover:bg-gold/10'}`}
+                    onClick={addToWishlist}
+                    disabled={addingToWishlist}
+                  >
+                    <Heart className={`h-5 w-5 mr-2 ${isInWishlist ? 'fill-gold stroke-gold' : ''}`} />
+                    {isInWishlist ? 'Wishlisted' : 'Add to Wishlist'}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline"
+                    className="border-gold/50 text-gold hover:bg-gold/10"
+                    onClick={toggleExplore}
+                  >
+                    {showExplore ? 'Hide Details' : 'Explore'}
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
