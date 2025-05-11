@@ -4,10 +4,10 @@ import React from 'react';
 const Hero = () => {
   return (
     <div className="relative h-screen w-full overflow-hidden flex items-center justify-center">
-      <div className="absolute inset-0 bg-darker">
-        {/* Video background */}
+      <div className="absolute inset-0">
+        {/* Video background with improved classes */}
         <video
-          className="absolute inset-0 w-full h-full object-cover hero-video"
+          className="w-full h-full object-cover"
           autoPlay
           loop
           muted
