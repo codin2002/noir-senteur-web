@@ -346,11 +346,11 @@ const PerfumeDetail = () => {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             {/* Left - Image */}
             <div className="w-full lg:w-1/2">
-              <div className="relative h-[500px] lg:h-[700px] overflow-hidden rounded-lg">
+              <div className="flex items-center justify-center h-[500px] lg:h-[700px] p-4">
                 <img 
                   src={getPerfumeImage(perfume)} 
-                  alt={perfume.name} 
-                  className="w-full h-full object-cover"
+                  alt={perfume?.name || 'Perfume'} 
+                  className="max-w-full max-h-full object-contain"
                 />
               </div>
             </div>

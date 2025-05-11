@@ -4,7 +4,7 @@ import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Perfume } from '@/types/perfume';
 import ResponsiveImage from '@/components/common/ResponsiveImage';
-import { PRICING } from '@/utils/constants';
+import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
 
 export interface WishlistItemType {
   id: string;
@@ -25,27 +25,21 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
   onAddToCart, 
   onRemoveFromWishlist 
 }) => {
-  // Check if this is the first signature perfume to use the custom image
-  const perfumeImage = item.perfume.name === "Signature First" 
-    ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
-    : item.perfume.image;
-
-  // Display Arabic "313" for Signature First perfume
-  const displayName = item.perfume.name === "Signature First" ? "٣١٣" : item.perfume.name;
-
   return (
     <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
-      <div className="h-[240px] relative overflow-hidden">
+      <div className="h-[240px] flex items-center justify-center p-4">
         <ResponsiveImage 
-          src={perfumeImage}
+          src={getPerfumeImage(item.perfume)}
           alt={item.perfume.name}
-          aspectRatio={16/10}
+          aspectRatio="auto"
           hover={true}
+          objectFit="contain"
+          className="max-h-full"
         />
       </div>
       <div className="p-4">
         <h3 className="text-sm uppercase tracking-widest text-gold">{item.perfume.notes}</h3>
-        <h2 className="text-xl font-serif mb-2">{displayName}</h2>
+        <h2 className="text-xl font-serif mb-2">{getPerfumeDisplayName(item.perfume)}</h2>
         <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
           {item.perfume.description}
         </p>

@@ -71,7 +71,7 @@ const PerfumeSlider = () => {
               {perfumes.map((perfume) => (
                 <CarouselItem key={perfume.id} className="md:basis-1/2 lg:basis-1/3">
                   <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
-                    <div className="h-64 w-full overflow-hidden mb-4 flex items-center justify-center">
+                    <div className="h-64 w-full flex items-center justify-center p-2"> 
                       <ProductImage 
                         src={getPerfumeImage(perfume)}
                         alt={perfume.name}
@@ -81,7 +81,7 @@ const PerfumeSlider = () => {
                         className="max-h-full"
                       />
                     </div>
-                    <div className="flex-1 flex flex-col">
+                    <div className="flex-1 flex flex-col p-2">
                       <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
                       <h3 className="text-xl font-serif mb-2">{getPerfumeDisplayName(perfume)}</h3>
                       <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>

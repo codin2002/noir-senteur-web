@@ -21,7 +21,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
   className,
   fullWidth = false,
   fallbackImage = '/placeholder.svg',
-  aspectRatio = 3/4,
+  aspectRatio = "auto", // Changed default to "auto" to prevent cropping
   objectFit = "contain",
   showPlaceholderOnError = true,
   hover = false
@@ -56,8 +56,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
 
   // Calculate optimal container classes based on image type
   const containerClasses = cn(
-    "relative overflow-hidden rounded-lg flex items-center justify-center",
-    isWebpOrAvif && "bg-darker", // Better background for modern formats
+    "relative flex items-center justify-center",
     fullWidth ? "w-full h-full" : "",
     className
   );

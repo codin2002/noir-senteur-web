@@ -45,10 +45,10 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
     if (onError) onError();
   };
   
-  // If aspectRatio is "auto", render without AspectRatio wrapper
+  // If aspectRatio is "auto", render without AspectRatio wrapper to prevent cropping
   if (aspectRatio === "auto") {
     return (
-      <div className={cn("relative", className)}>
+      <div className={cn("relative w-full h-full", className)}>
         {isLoading && showLoadingIndicator && (
           <div className="absolute inset-0 flex items-center justify-center bg-gray-100/20 dark:bg-gray-800/20 z-10">
             <Loader className="w-6 h-6 text-gold animate-spin" />
@@ -59,7 +59,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
           src={hasError ? fallbackSrc : src} 
           alt={alt} 
           className={cn(
-            `w-auto h-auto max-w-full max-h-full object-${objectFit} transition-opacity duration-300`,
+            `w-auto h-auto max-w-full max-h-full m-auto object-${objectFit} transition-opacity duration-300`,
             hover && "transition-transform duration-500 hover:scale-105",
             isLoading ? "opacity-0" : "opacity-100"
           )}
