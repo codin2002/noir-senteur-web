@@ -13,7 +13,7 @@ const About = () => {
             
             <div className="space-y-4 text-muted-foreground">
               <p>
-                Since our founding in 2015, Senteur Fragrances has been dedicated to the art of perfumery, 
+                Since our founding in 2025, Senteur Fragrances has been dedicated to the art of perfumery, 
                 crafting distinctive scents that capture moments, memories, and emotions.
               </p>
               <p>
