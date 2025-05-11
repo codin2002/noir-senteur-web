@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,12 +13,15 @@ import {
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 import { Heart, ShoppingCart, History, User } from 'lucide-react';
+import { useCartCount } from '@/hooks/useCartCount';
+import CartBadge from '@/components/ui/cart-badge';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { count: cartCount } = useCartCount(user?.id);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,6 +83,7 @@ const Navbar = () => {
             
             <Link to="/cart" className="text-white hover:text-gold transition-colors relative">
               <ShoppingCart className="h-5 w-5" />
+              <CartBadge count={cartCount} />
             </Link>
           </div>
           
@@ -159,8 +162,9 @@ const Navbar = () => {
             <Heart className="h-5 w-5" />
           </Link>
           
-          <Link to="/cart" className="text-white hover:text-gold transition-colors">
+          <Link to="/cart" className="text-white hover:text-gold transition-colors relative">
             <ShoppingCart className="h-5 w-5" />
+            <CartBadge count={cartCount} className="-top-1 -right-1" />
           </Link>
           
           <button 

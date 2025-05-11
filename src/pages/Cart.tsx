@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -8,11 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
 import CartItem, { CartItemType } from '@/components/cart/CartItem';
 import CartSummary from '@/components/cart/CartSummary';
 import CartEmpty from '@/components/cart/CartEmpty';
+import { useCartCount } from '@/hooks/useCartCount';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
+  const { refresh: refreshCartCount } = useCartCount(user?.id);
 
   useEffect(() => {
     document.title = "Shopping Cart | Senteur Fragrances";
@@ -60,10 +61,12 @@ const Cart = () => {
     setCartItems(cartItems.map(item => 
       item.id === updatedItem.id ? updatedItem : item
     ));
+    refreshCartCount(); // Refresh the cart count in navbar
   };
 
   const handleRemoveItem = (id: string) => {
     setCartItems(cartItems.filter(item => item.id !== id));
+    refreshCartCount(); // Refresh the cart count in navbar
   };
 
   const checkout = async () => {
@@ -84,6 +87,7 @@ const Cart = () => {
       }
       
       setCartItems([]);
+      refreshCartCount(); // Refresh the cart count in navbar
       toast.success('Order placed successfully!', {
         description: 'Your perfumes will be delivered soon.'
       });
