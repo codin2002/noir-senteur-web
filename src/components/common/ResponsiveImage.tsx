@@ -10,6 +10,8 @@ interface ResponsiveImageProps {
   className?: string;
   objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
   hover?: boolean;
+  onLoad?: () => void;
+  onError?: () => void;
 }
 
 const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
@@ -17,8 +19,10 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   alt,
   aspectRatio = 1,
   className,
-  objectFit = "contain", // Changed default from "cover" to "contain"
+  objectFit = "contain",
   hover = false,
+  onLoad,
+  onError,
 }) => {
   return (
     <AspectRatio ratio={aspectRatio} className="overflow-hidden">
@@ -31,6 +35,8 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
           className
         )}
         loading="lazy"
+        onLoad={onLoad}
+        onError={onError}
       />
     </AspectRatio>
   );

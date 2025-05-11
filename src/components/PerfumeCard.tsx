@@ -30,10 +30,21 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
     navigate(`/perfume/${id}`);
   };
 
-  // Use the custom uploaded image for the first perfume (Signature First)
-  const perfumeImage = name === "Signature First" 
-    ? "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png" 
-    : image;
+  // Get the appropriate image source
+  const getPerfumeImage = () => {
+    // For the "Signature First" perfume, use the local image
+    if (name === "Signature First") {
+      return "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png";
+    }
+    
+    // For "Luxury Collection" perfume, use the newly uploaded image
+    if (name === "Luxury Collection") {
+      return "/lovable-uploads/8409f135-32ac-4937-ae90-9d2ad51131b5.png";
+    }
+    
+    // Otherwise use the image from the database
+    return image;
+  };
 
   return (
     <div 
@@ -46,7 +57,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       <div className="w-full md:w-1/2 overflow-hidden">
         <div className="relative h-[400px] overflow-hidden">
           <ProductImage 
-            src={perfumeImage} 
+            src={getPerfumeImage()} 
             alt={name}
             fullWidth={true}
           />
