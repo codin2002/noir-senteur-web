@@ -5,7 +5,7 @@ import { Button } from './ui/button';
 const Hero = () => {
   return (
     <div className="banner">
-      <video autoPlay loop muted playsInline>
+      <video autoPlay loop muted playsInline className="hero-video">
         <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Video.mov" type="video/quicktime" />
         Your browser does not support video playback.
       </video>
