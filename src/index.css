@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -83,38 +84,6 @@
   text-orientation: mixed;
 }
 
-/* Banner styling for video hero */
-.banner {
-  @apply relative w-full h-screen overflow-hidden;
-}
-
-/* Video overlay with gradient */
-.video-overlay {
-  @apply absolute inset-0 bg-gradient pointer-events-none z-10;
-}
-
-/* Content styling */
-.content {
-  @apply absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20 animate-fade-in;
-}
-
-/* Scroll indicator */
-.scroll-indicator {
-  @apply absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20;
-}
-
-.bg-gradient {
-  background: linear-gradient(to bottom, rgba(128, 27, 43, 0.3), rgba(128, 27, 43, 0.95));
-}
-
-.section {
-  @apply py-20 px-6 md:px-12 lg:px-24;
-}
-
-.hover-scale {
-  @apply transition-transform duration-300 hover:scale-105;
-}
-
 .btn-outline {
   @apply border border-gold text-gold hover:bg-gold hover:text-cartier-red transition-colors px-6 py-3 inline-block uppercase tracking-widest text-xs font-sans;
 }
@@ -128,39 +97,20 @@
   @apply w-full h-auto object-cover;
 }
 
-/* Video styling */
-.banner video {
-  @apply absolute top-0 left-0 min-w-full min-h-full w-auto h-auto object-cover;
-  z-index: 5;
+.section {
+  @apply py-20 px-6 md:px-12 lg:px-24;
 }
 
-/* Hero video specific styling */
-.hero-video {
-  width: 100% !important;
-  height: 100% !important;
-  object-fit: cover !important;
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 5 !important;
+.hover-scale {
+  @apply transition-transform duration-300 hover:scale-105;
+}
+
+/* Background gradient for overlays */
+.bg-gradient {
+  background: linear-gradient(to bottom, rgba(128, 27, 43, 0.3), rgba(128, 27, 43, 0.95));
 }
 
 /* Ensure iOS Safari plays the video */
 video[playsinline] {
   -webkit-playsinline: 1;
-}
-
-/* Media query for video responsiveness */
-@media (min-aspect-ratio: 16/9) {
-  .banner video {
-    width: 100%;
-    height: auto;
-  }
-}
-
-@media (max-aspect-ratio: 16/9) {
-  .banner video {
-    width: auto;
-    height: 100%;
-  }
 }
