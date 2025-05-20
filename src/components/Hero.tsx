@@ -4,9 +4,9 @@ import React, { useEffect, useRef, useState } from 'react';
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [videoError, setVideoError] = useState(false);
   
   useEffect(() => {
-    // Function to attempt playing the video
     const attemptPlay = async () => {
       if (videoRef.current) {
         try {
@@ -15,6 +15,7 @@ const Hero = () => {
           setIsVideoLoaded(true);
         } catch (error) {
           console.error("Auto-play failed:", error);
+          setVideoError(true);
           
           // Add a click event listener to play the video on user interaction
           const handleClick = () => {
@@ -24,7 +25,10 @@ const Hero = () => {
                   console.log("Video playing after user interaction");
                   setIsVideoLoaded(true);
                 })
-                .catch(e => console.error("Still could not play video after click:", e));
+                .catch(e => {
+                  console.error("Still could not play video after click:", e);
+                  setVideoError(true);
+                });
               document.removeEventListener('click', handleClick);
             }
           };
@@ -35,72 +39,51 @@ const Hero = () => {
     };
 
     // Wait a moment for the video element to be properly initialized
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       attemptPlay();
       
       // Debug video element
       if (videoRef.current) {
-        console.log("Video element properties:", {
-          readyState: videoRef.current.readyState,
-          networkState: videoRef.current.networkState,
-          error: videoRef.current.error,
-          paused: videoRef.current.paused,
-          currentSrc: videoRef.current.currentSrc,
-          videoWidth: videoRef.current.videoWidth,
-          videoHeight: videoRef.current.videoHeight
-        });
+        console.log("Video element ready state:", videoRef.current.readyState);
       }
     }, 1000);
 
     return () => {
-      // Cleanup any event listeners
+      clearTimeout(timer);
       document.removeEventListener('click', () => {});
     };
   }, []);
 
-  // Log when sources change
-  const handleSourceError = (e: React.SyntheticEvent<HTMLSourceElement>) => {
-    console.error("Source failed to load:", e.currentTarget.src);
-  };
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Fallback background in case video doesn't load */}
-      <div className="absolute inset-0 bg-cartier-red opacity-30"></div>
+      {/* Fallback background for when video doesn't load */}
+      <div className="absolute inset-0 bg-gradient-to-b from-cartier-red/40 to-cartier-red/70"></div>
       
-      {/* Video Element with multiple sources for better browser compatibility */}
-      {/* Use direct URLs to the video files */}
-      <video 
-        ref={videoRef}
-        className="absolute top-0 left-0 w-full h-full object-cover"
-        autoPlay 
-        loop 
-        muted 
-        playsInline
-        poster="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/poster.jpg"
-        onLoadedData={() => setIsVideoLoaded(true)}
-      >
-        {/* Try the MOV file first since it's confirmed to exist */}
-        <source 
-          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.mov" 
-          type="video/quicktime"
-          onError={handleSourceError} 
-        />
-        <source 
-          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.mp4" 
-          type="video/mp4"
-          onError={handleSourceError} 
-        />
-        <source 
-          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.webm" 
-          type="video/webm"
-          onError={handleSourceError} 
-        />
-        Your browser does not support video playback.
-      </video>
+      {/* Video background with inline style to ensure it works */}
+      {!videoError && (
+        <video 
+          ref={videoRef}
+          className="absolute top-0 left-0 min-w-full min-h-full object-cover z-0"
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+          poster="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1887&auto=format&fit=crop"
+          onLoadedData={() => setIsVideoLoaded(true)}
+          onError={() => setVideoError(true)}
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        >
+          <source 
+            src="https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" 
+            type="video/mp4"
+            onError={(e) => console.error("MP4 source failed:", e)}
+          />
+          Your browser does not support video playback.
+        </video>
+      )}
       
       {/* Dark overlay for text visibility */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/40 to-black/70 z-10"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80 z-10"></div>
       
       {/* Content positioned above the video */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20">
