@@ -5,14 +5,25 @@ const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [videoStarted, setVideoStarted] = useState(false);
   
   useEffect(() => {
+    // Preload the video before attempting to play
+    const preloadVideo = () => {
+      if (videoRef.current) {
+        videoRef.current.load();
+        console.log("Video preloading started");
+      }
+    };
+    
     const attemptPlay = async () => {
       if (videoRef.current) {
         try {
+          // Only set video started after play() succeeds
           await videoRef.current.play();
           console.log("Video playback started successfully");
           setIsVideoLoaded(true);
+          setVideoStarted(true);
         } catch (error) {
           console.error("Auto-play failed:", error);
           setVideoError(true);
@@ -24,6 +35,7 @@ const Hero = () => {
                 .then(() => {
                   console.log("Video playing after user interaction");
                   setIsVideoLoaded(true);
+                  setVideoStarted(true);
                 })
                 .catch(e => {
                   console.error("Still could not play video after click:", e);
@@ -37,6 +49,9 @@ const Hero = () => {
         }
       }
     };
+
+    // Start preloading immediately
+    preloadVideo();
 
     // Wait a moment for the video element to be properly initialized
     const timer = setTimeout(() => {
@@ -56,31 +71,32 @@ const Hero = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Fallback background for when video doesn't load */}
-      <div className="absolute inset-0 bg-gradient-to-b from-cartier-red/40 to-cartier-red/70"></div>
-      
-      {/* Video background with inline style to ensure it works */}
-      {!videoError && (
-        <video 
-          ref={videoRef}
-          className="absolute top-0 left-0 min-w-full min-h-full object-cover z-0"
-          autoPlay 
-          loop 
-          muted 
-          playsInline
-          poster="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1887&auto=format&fit=crop"
-          onLoadedData={() => setIsVideoLoaded(true)}
-          onError={() => setVideoError(true)}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        >
-          <source 
-            src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Video.mp4" 
-            type="video/mp4"
-            onError={(e) => console.error("MP4 source failed:", e)}
-          />
-          Your browser does not support video playback.
-        </video>
+      {/* Only show the background when video hasn't started or there's an error */}
+      {(!videoStarted || videoError) && (
+        <div className="absolute inset-0 bg-gradient-to-b from-cartier-red/40 to-cartier-red/70 z-0"></div>
       )}
+      
+      {/* Video background with opacity 0 until loaded */}
+      <video 
+        ref={videoRef}
+        className={`absolute top-0 left-0 min-w-full min-h-full object-cover transition-opacity duration-700 ${videoStarted ? 'opacity-100' : 'opacity-0'}`}
+        autoPlay 
+        loop 
+        muted 
+        playsInline
+        poster="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1887&auto=format&fit=crop"
+        onLoadedData={() => setIsVideoLoaded(true)}
+        onError={() => setVideoError(true)}
+        preload="auto"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      >
+        <source 
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Video.mp4" 
+          type="video/mp4"
+          onError={(e) => console.error("MP4 source failed:", e)}
+        />
+        Your browser does not support video playback.
+      </video>
       
       {/* Dark overlay for text visibility */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80 z-10"></div>
