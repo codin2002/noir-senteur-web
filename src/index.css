@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -69,10 +68,24 @@
     @apply max-w-full h-auto;
   }
   
-  /* Ensure videos behave properly */
+  /* Enhanced video handling */
   video {
     @apply object-cover;
     -webkit-object-fit: cover;
+  }
+  
+  /* Force video to fill its container */
+  video.fullscreen-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Ensure iOS Safari plays the video */
+  video[playsinline] {
+    -webkit-playsinline: 1;
   }
 }
 
@@ -114,9 +127,4 @@
 /* Background gradient for overlays */
 .bg-gradient {
   background: linear-gradient(to bottom, rgba(128, 27, 43, 0.3), rgba(128, 27, 43, 0.95));
-}
-
-/* Ensure iOS Safari plays the video */
-video[playsinline] {
-  -webkit-playsinline: 1;
 }

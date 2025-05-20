@@ -1,52 +1,101 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   
   useEffect(() => {
-    // Ensure video plays when component mounts
-    if (videoRef.current) {
-      const playPromise = videoRef.current.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.error("Video playback failed:", error);
+    // Function to attempt playing the video
+    const attemptPlay = async () => {
+      if (videoRef.current) {
+        try {
+          await videoRef.current.play();
+          console.log("Video playback started successfully");
+          setIsVideoLoaded(true);
+        } catch (error) {
+          console.error("Auto-play failed:", error);
           
           // Add a click event listener to play the video on user interaction
           const handleClick = () => {
             if (videoRef.current) {
-              videoRef.current.play().catch(e => console.error("Still could not play video:", e));
+              videoRef.current.play()
+                .then(() => {
+                  console.log("Video playing after user interaction");
+                  setIsVideoLoaded(true);
+                })
+                .catch(e => console.error("Still could not play video after click:", e));
               document.removeEventListener('click', handleClick);
             }
           };
           
           document.addEventListener('click', handleClick);
+        }
+      }
+    };
+
+    // Wait a moment for the video element to be properly initialized
+    setTimeout(() => {
+      attemptPlay();
+      
+      // Debug video element
+      if (videoRef.current) {
+        console.log("Video element properties:", {
+          readyState: videoRef.current.readyState,
+          networkState: videoRef.current.networkState,
+          error: videoRef.current.error,
+          paused: videoRef.current.paused,
+          currentSrc: videoRef.current.currentSrc,
+          videoWidth: videoRef.current.videoWidth,
+          videoHeight: videoRef.current.videoHeight
         });
       }
-    }
-    
-    // Debug video element
-    console.log("Video element:", videoRef.current);
-    console.log("Video sources:", videoRef.current?.querySelectorAll('source'));
+    }, 1000);
+
+    return () => {
+      // Cleanup any event listeners
+      document.removeEventListener('click', () => {});
+    };
   }, []);
+
+  // Log when sources change
+  const handleSourceError = (e: React.SyntheticEvent<HTMLSourceElement>) => {
+    console.error("Source failed to load:", e.currentTarget.src);
+  };
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Fallback background in case video doesn't load */}
+      <div className="absolute inset-0 bg-cartier-red opacity-30"></div>
+      
       {/* Video Element with multiple sources for better browser compatibility */}
+      {/* Use direct URLs to the video files */}
       <video 
         ref={videoRef}
-        className="absolute top-0 left-0 min-w-full min-h-full w-auto h-auto object-cover"
+        className="absolute top-0 left-0 w-full h-full object-cover"
         autoPlay 
         loop 
         muted 
         playsInline
         poster="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/poster.jpg"
+        onLoadedData={() => setIsVideoLoaded(true)}
       >
-        {/* Fix URL typos by removing double slashes */}
-        <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.mp4" type="video/mp4" />
-        <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.webm" type="video/webm" />
-        <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.mov" type="video/quicktime" />
+        {/* Try the MOV file first since it's confirmed to exist */}
+        <source 
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.mov" 
+          type="video/quicktime"
+          onError={handleSourceError} 
+        />
+        <source 
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.mp4" 
+          type="video/mp4"
+          onError={handleSourceError} 
+        />
+        <source 
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero/Video.webm" 
+          type="video/webm"
+          onError={handleSourceError} 
+        />
         Your browser does not support video playback.
       </video>
       
