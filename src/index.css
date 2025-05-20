@@ -68,6 +68,12 @@
   img {
     @apply max-w-full h-auto;
   }
+  
+  /* Ensure videos behave properly */
+  video {
+    @apply object-cover;
+    -webkit-object-fit: cover;
+  }
 }
 
 .gold-text {
