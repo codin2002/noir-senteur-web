@@ -91,7 +91,7 @@ const Hero = () => {
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}
       >
         <source 
-          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Video.mp4" 
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//first.mp4" 
           type="video/mp4"
           onError={(e) => console.error("MP4 source failed:", e)}
         />
