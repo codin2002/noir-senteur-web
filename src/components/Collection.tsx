@@ -43,7 +43,7 @@ const Collection = () => {
   const featuredPerfumes = perfumes.slice(0, 3);
 
   return (
-    <section id="collection" className="section bg-cartier-red">
+    <section id="collection" className="section" style={{ backgroundColor: 'rgb(108, 0, 12)' }}>
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-5xl font-serif mb-4 text-white">Our Collection</h2>
