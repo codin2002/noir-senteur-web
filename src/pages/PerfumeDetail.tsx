@@ -476,6 +476,114 @@ const PerfumeDetail = () => {
       <Footer />
     </div>
   );
+
+  async function addToWishlist() {
+    if (!user) {
+      localStorage.setItem('auth_redirect_path', `/perfume/${id}`);
+      navigate('/auth');
+      return;
+    }
+    
+    try {
+      setAddingToWishlist(true);
+      
+      if (isInWishlist) {
+        const { data, error } = await supabase
+          .from('wishlist')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('perfume_id', id)
+          .single();
+          
+        if (error) throw error;
+        
+        if (data) {
+          const { error: deleteError } = await supabase
+            .from('wishlist')
+            .delete()
+            .eq('id', data.id);
+            
+          if (deleteError) throw deleteError;
+          
+          setIsInWishlist(false);
+          toast.success('Removed from wishlist');
+        }
+      } else {
+        const { error } = await supabase
+          .from('wishlist')
+          .insert({
+            user_id: user.id,
+            perfume_id: id
+          });
+          
+        if (error) throw error;
+        
+        setIsInWishlist(true);
+        toast.success('Added to wishlist');
+      }
+    } catch (error: any) {
+      console.error('Error updating wishlist:', error);
+      toast.error('Failed to update wishlist', {
+        description: error.message
+      });
+    } finally {
+      setAddingToWishlist(false);
+    }
+  }
+
+  async function addToCart() {
+    if (!user) {
+      localStorage.setItem('auth_redirect_path', `/perfume/${id}`);
+      navigate('/auth');
+      return;
+    }
+    
+    try {
+      setAddingToCart(true);
+      
+      const { data: existingCartItems, error: checkError } = await supabase
+        .from('cart')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('perfume_id', id);
+        
+      if (checkError) throw checkError;
+      
+      if (existingCartItems && existingCartItems.length > 0) {
+        const { error: updateError } = await supabase
+          .from('cart')
+          .update({ quantity: existingCartItems[0].quantity + 1 })
+          .eq('id', existingCartItems[0].id);
+          
+        if (updateError) throw updateError;
+        
+        toast.success('Cart updated', {
+          description: 'Item quantity increased in your cart'
+        });
+      } else {
+        const { error: insertError } = await supabase
+          .from('cart')
+          .insert({
+            user_id: user.id,
+            perfume_id: id,
+            quantity: 1
+          });
+          
+        if (insertError) throw insertError;
+        
+        toast.success('Added to cart', {
+          description: 'Item added to your cart successfully'
+        });
+      }
+    } catch (error: any) {
+      console.error('Error adding to cart:', error);
+      toast.error('Failed to add to cart', {
+        description: error.message
+      });
+    } finally {
+      setAddingToCart(false);
+    }
+  }
 };
 
 export default PerfumeDetail;
