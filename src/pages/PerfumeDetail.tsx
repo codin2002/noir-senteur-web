@@ -146,11 +146,14 @@ const PerfumeDetail = () => {
         .from('perfume_classifications')
         .select('*')
         .eq('perfume_id', id)
-        .maybeSingle();
+        .single();
         
       if (error) {
         console.error('Error fetching classification data:', error);
-        toast.error('Failed to load classification data');
+        if (error.code !== 'PGRST116') { // Don't show error for "not found"
+          toast.error('Failed to load classification data');
+        }
+        setClassificationData(null);
         return;
       }
       
@@ -158,7 +161,7 @@ const PerfumeDetail = () => {
       setClassificationData(data);
     } catch (error) {
       console.error('Error fetching classification data:', error);
-      toast.error('Failed to load classification data');
+      setClassificationData(null);
     } finally {
       setIsLoadingClassification(false);
     }
@@ -175,11 +178,14 @@ const PerfumeDetail = () => {
         .from('perfume_ratings')
         .select('*')
         .eq('perfume_id', id)
-        .maybeSingle();
+        .single();
         
       if (error) {
         console.error('Error fetching ratings data:', error);
-        toast.error('Failed to load ratings data');
+        if (error.code !== 'PGRST116') { // Don't show error for "not found"
+          toast.error('Failed to load ratings data');
+        }
+        setRatingsData(null);
         return;
       }
       
@@ -187,7 +193,7 @@ const PerfumeDetail = () => {
       setRatingsData(data);
     } catch (error) {
       console.error('Error fetching ratings data:', error);
-      toast.error('Failed to load ratings data');
+      setRatingsData(null);
     } finally {
       setIsLoadingRatings(false);
     }
@@ -208,13 +214,15 @@ const PerfumeDetail = () => {
     }
   };
 
-  const toggleExplore = () => {
-    if (!showExplore) {
-      // First-time opening, fetch data
+  // Fetch data when component mounts or ID changes
+  useEffect(() => {
+    if (id) {
       fetchClassificationData();
       fetchRatingsData();
     }
-    
+  }, [id]);
+
+  const toggleExplore = () => {
     setShowExplore(!showExplore);
   };
 
@@ -447,39 +455,37 @@ const PerfumeDetail = () => {
             </div>
           </div>
           
-          {/* Classification & Ratings */}
-          {showExplore && (
-            <div className="mt-16 border-t border-gold/30 pt-12">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-serif">Perfume Analytics</h2>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={refreshData}
-                  disabled={refreshing}
-                  className="border-gold/50 text-gold hover:bg-gold/10"
-                >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                  {refreshing ? 'Refreshing...' : 'Refresh Data'}
-                </Button>
+          {/* Classification & Ratings - Always show when data is available */}
+          <div className="mt-16 border-t border-gold/30 pt-12">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-serif">Perfume Analytics</h2>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                disabled={refreshing}
+                className="border-gold/50 text-gold hover:bg-gold/10"
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                {refreshing ? 'Refreshing...' : 'Refresh Data'}
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+              <div className="lg:border-r lg:border-gold/20 lg:pr-8">
+                <PerfumeClassification 
+                  classificationData={classificationData}
+                  isLoading={isLoadingClassification}
+                />
               </div>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                <div className="lg:border-r lg:border-gold/20 lg:pr-8">
-                  <PerfumeClassification 
-                    classificationData={classificationData}
-                    isLoading={isLoadingClassification}
-                  />
-                </div>
-                <div className="lg:pl-8">
-                  <PerfumeRatings 
-                    ratingsData={ratingsData}
-                    isLoading={isLoadingRatings}
-                  />
-                </div>
+              <div className="lg:pl-8">
+                <PerfumeRatings 
+                  ratingsData={ratingsData}
+                  isLoading={isLoadingRatings}
+                />
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
       <Footer />
