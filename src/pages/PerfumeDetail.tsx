@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -10,6 +11,7 @@ import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
 import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import DebugInfo from '@/components/DebugInfo';
 import { Heart, RefreshCw } from 'lucide-react';
 import { PRICING, getPerfumeImages, getPerfumeDisplayName } from '@/utils/constants';
 
@@ -73,6 +75,7 @@ const PerfumeDetail = () => {
     const fetchPerfume = async () => {
       try {
         setIsLoading(true);
+        console.log('Fetching perfume with ID:', id);
         
         const { data, error } = await supabase
           .from('perfumes')
@@ -85,8 +88,9 @@ const PerfumeDetail = () => {
         }
         
         if (data) {
+          console.log('Perfume data fetched:', data);
           setPerfume(data);
-          document.title = `${data.name} | Senteur Fragrances`;
+          document.title = `${getPerfumeDisplayName(data)} | Senteur Fragrances`;
         }
       } catch (error: any) {
         console.error('Error fetching perfume:', error);
@@ -361,6 +365,7 @@ const PerfumeDetail = () => {
 
   return (
     <div className="min-h-screen bg-dark text-white">
+      <DebugInfo />
       <Navbar />
       <div className="pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto">
@@ -369,7 +374,7 @@ const PerfumeDetail = () => {
             <div className="w-full lg:w-1/2">
               <PerfumeImageSlider 
                 images={getPerfumeImages(perfume)}
-                alt={perfume?.name || 'Perfume'}
+                alt={getPerfumeDisplayName(perfume)}
               />
             </div>
             
