@@ -8,9 +8,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
+import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { Heart } from 'lucide-react';
-import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeImages, getPerfumeDisplayName } from '@/utils/constants';
 
 interface Perfume {
   id: string;
@@ -344,15 +345,12 @@ const PerfumeDetail = () => {
       <div className="pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Left - Image */}
+            {/* Left - Image Slider */}
             <div className="w-full lg:w-1/2">
-              <div className="flex items-center justify-center h-[500px] lg:h-[700px] p-4">
-                <img 
-                  src={getPerfumeImage(perfume)} 
-                  alt={perfume?.name || 'Perfume'} 
-                  className="max-w-full max-h-full object-contain"
-                />
-              </div>
+              <PerfumeImageSlider 
+                images={getPerfumeImages(perfume)}
+                alt={perfume?.name || 'Perfume'}
+              />
             </div>
             
             {/* Right - Details */}
