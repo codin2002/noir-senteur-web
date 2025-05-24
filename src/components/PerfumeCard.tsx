@@ -3,7 +3,8 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './common/ProductImage';
-import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
+import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 interface PerfumeCardProps {
   id: string; 
@@ -27,6 +28,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   invert = false
 }) => {
   const navigate = useNavigate();
+  const { primaryImage } = usePerfumeImages(id);
 
   const handleExplore = () => {
     navigate(`/perfume/${id}`);
@@ -43,13 +45,13 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       <div className="w-full md:w-1/2 overflow-hidden">
         <div className="relative h-[400px] md:h-[500px] flex items-center justify-center">
           <ProductImage 
-            src={getPerfumeImage({name, image})} 
+            src={primaryImage || image} 
             alt={name}
             fullWidth={true}
             hover={true}
             aspectRatio="auto"
             objectFit="contain"
-            className="max-h-full p-4" // Added padding to ensure image has space around it
+            className="max-h-full p-4"
           />
         </div>
       </div>

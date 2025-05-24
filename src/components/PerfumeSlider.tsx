@@ -6,7 +6,44 @@ import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './common/LoadingSpinner';
 import ProductImage from './common/ProductImage';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
+import { usePerfumeImages } from '@/hooks/usePerfumeImages';
+
+interface PerfumeSliderItemProps {
+  perfume: Perfume;
+  onExplore: (id: string) => void;
+}
+
+const PerfumeSliderItem: React.FC<PerfumeSliderItemProps> = ({ perfume, onExplore }) => {
+  const { primaryImage } = usePerfumeImages(perfume.id);
+
+  return (
+    <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
+      <div className="h-64 w-full flex items-center justify-center p-2"> 
+        <ProductImage 
+          src={primaryImage || perfume.image}
+          alt={perfume.name}
+          fullWidth={true}
+          aspectRatio="auto"
+          objectFit="contain"
+          className="max-h-full"
+        />
+      </div>
+      <div className="flex-1 flex flex-col p-2">
+        <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
+        <h3 className="text-xl font-serif mb-2">{getPerfumeDisplayName(perfume)}</h3>
+        <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
+        <p className="text-gold font-light mb-4 mt-auto">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</p>
+        <button 
+          onClick={() => onExplore(perfume.id)} 
+          className="btn-outline text-center text-xs py-2"
+        >
+          EXPLORE
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const PerfumeSlider = () => {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
@@ -70,30 +107,7 @@ const PerfumeSlider = () => {
             <CarouselContent>
               {perfumes.map((perfume) => (
                 <CarouselItem key={perfume.id} className="md:basis-1/2 lg:basis-1/3">
-                  <div className="bg-black/20 p-4 rounded-lg h-full flex flex-col">
-                    <div className="h-64 w-full flex items-center justify-center p-2"> 
-                      <ProductImage 
-                        src={getPerfumeImage(perfume)}
-                        alt={perfume.name}
-                        fullWidth={true}
-                        aspectRatio="auto"
-                        objectFit="contain"
-                        className="max-h-full"
-                      />
-                    </div>
-                    <div className="flex-1 flex flex-col p-2">
-                      <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
-                      <h3 className="text-xl font-serif mb-2">{getPerfumeDisplayName(perfume)}</h3>
-                      <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
-                      <p className="text-gold font-light mb-4 mt-auto">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</p>
-                      <button 
-                        onClick={() => handleExplore(perfume.id)} 
-                        className="btn-outline text-center text-xs py-2"
-                      >
-                        EXPLORE
-                      </button>
-                    </div>
-                  </div>
+                  <PerfumeSliderItem perfume={perfume} onExplore={handleExplore} />
                 </CarouselItem>
               ))}
             </CarouselContent>

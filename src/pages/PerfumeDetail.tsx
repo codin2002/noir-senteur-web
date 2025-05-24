@@ -12,7 +12,8 @@ import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import DebugInfo from '@/components/DebugInfo';
 import { Heart, RefreshCw } from 'lucide-react';
-import { PRICING, getPerfumeImages, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
+import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 interface Perfume {
   id: string;
@@ -69,6 +70,9 @@ const PerfumeDetail = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Use the new hook to fetch images
+  const { imageUrls, primaryImage, isLoading: imagesLoading } = usePerfumeImages(id || '');
 
   useEffect(() => {
     const fetchPerfume = async () => {
@@ -371,10 +375,16 @@ const PerfumeDetail = () => {
           <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             {/* Left - Image Slider */}
             <div className="w-full lg:w-1/2">
-              <PerfumeImageSlider 
-                images={getPerfumeImages(perfume)}
-                alt={getPerfumeDisplayName(perfume)}
-              />
+              {imagesLoading ? (
+                <div className="flex items-center justify-center h-[500px] lg:h-[700px]">
+                  <LoadingSpinner size="md" />
+                </div>
+              ) : (
+                <PerfumeImageSlider 
+                  images={imageUrls.length > 0 ? imageUrls : [perfume.image]}
+                  alt={getPerfumeDisplayName(perfume)}
+                />
+              )}
             </div>
             
             {/* Right - Details */}

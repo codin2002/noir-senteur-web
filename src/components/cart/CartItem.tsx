@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +5,8 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';
-import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
+import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 export interface CartItemType {
   id: string;
@@ -34,6 +34,7 @@ const CartItem: React.FC<CartItemProps> = ({
   const [isRemoving, setIsRemoving] = useState(false);
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const { user } = useAuth();
+  const { primaryImage } = usePerfumeImages(item.perfume.id);
 
   const updateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
@@ -116,7 +117,7 @@ const CartItem: React.FC<CartItemProps> = ({
       {/* Product image */}
       <div className="w-full sm:w-24 h-24 rounded-md overflow-hidden">
         <ProductImage 
-          src={getPerfumeImage(item.perfume)} 
+          src={primaryImage || item.perfume.image} 
           alt={item.perfume.name} 
           className="w-full h-full"
           objectFit="contain"
