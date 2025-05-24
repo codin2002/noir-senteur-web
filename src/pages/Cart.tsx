@@ -9,11 +9,14 @@ import { supabase } from '@/integrations/supabase/client';
 import CartItem, { CartItemType } from '@/components/cart/CartItem';
 import CartSummary from '@/components/cart/CartSummary';
 import CartEmpty from '@/components/cart/CartEmpty';
+import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+  const [userProfile, setUserProfile] = useState<{ address: string }>({ address: '' });
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
 
@@ -22,6 +25,7 @@ const Cart = () => {
     
     if (user) {
       fetchCart();
+      fetchUserProfile();
     } else {
       setIsLoading(false);
     }
@@ -59,6 +63,22 @@ const Cart = () => {
     }
   };
 
+  const fetchUserProfile = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('address')
+        .eq('id', user?.id)
+        .single();
+      
+      if (error) throw error;
+      
+      setUserProfile({ address: data?.address || '' });
+    } catch (error: any) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
   const handleUpdateItem = (updatedItem: CartItemType) => {
     setCartItems(cartItems.map(item => 
       item.id === updatedItem.id ? updatedItem : item
@@ -69,12 +89,19 @@ const Cart = () => {
     setCartItems(cartItems.filter(item => item.id !== id));
   };
 
-  const checkout = async () => {
+  const handleCheckoutClick = () => {
     if (cartItems.length === 0) {
       toast.error('Your cart is empty');
       return;
     }
-    
+    setIsCheckoutModalOpen(true);
+  };
+
+  const handleConfirmCheckout = async (
+    addressType: 'home' | 'pickup', 
+    deliveryAddress: string, 
+    pickupPointId?: string
+  ) => {
     try {
       // Create order using a stored procedure
       const { data, error } = await supabase.rpc('create_order_with_items', {
@@ -94,7 +121,9 @@ const Cart = () => {
       setCartItems([]);
       refreshCartCount(); // Refresh the cart count in navbar
       toast.success('Order placed successfully!', {
-        description: 'Your perfumes will be delivered soon.'
+        description: addressType === 'home' 
+          ? 'Your perfumes will be delivered to your address.' 
+          : 'Your perfumes are ready for pickup.'
       });
     } catch (error: any) {
       console.error('Error checking out:', error);
@@ -152,7 +181,7 @@ const Cart = () => {
                 <div className="lg:w-1/3">
                   <CartSummary 
                     cartItems={cartItems} 
-                    onCheckout={checkout}
+                    onCheckout={handleCheckoutClick}
                     currencySymbol="AED "
                   />
                 </div>
@@ -162,6 +191,16 @@ const Cart = () => {
         </div>
       </div>
       <Footer />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        cartItems={cartItems}
+        userAddress={userProfile.address}
+        onConfirmCheckout={handleConfirmCheckout}
+        currencySymbol="AED "
+      />
     </div>
   );
 };
