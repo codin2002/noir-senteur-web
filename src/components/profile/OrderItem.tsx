@@ -2,7 +2,8 @@
 import React from 'react';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';
-import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
+import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 interface OrderItemProps {
   id: string;
@@ -12,11 +13,13 @@ interface OrderItemProps {
 }
 
 const OrderItem: React.FC<OrderItemProps> = ({ id, perfume, price, quantity }) => {
+  const { primaryImage } = usePerfumeImages(perfume.id);
+
   return (
     <div key={id} className="flex items-center gap-4">
       <div className="w-16 h-16 rounded overflow-hidden">
         <ProductImage 
-          src={getPerfumeImage(perfume)} 
+          src={primaryImage || perfume.image} 
           alt={perfume.name}
           className="w-full h-full"
           objectFit="contain"

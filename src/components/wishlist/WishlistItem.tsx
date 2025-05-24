@@ -4,7 +4,8 @@ import { Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Perfume } from '@/types/perfume';
 import ResponsiveImage from '@/components/common/ResponsiveImage';
-import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
+import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
+import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 export interface WishlistItemType {
   id: string;
@@ -25,11 +26,13 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
   onAddToCart, 
   onRemoveFromWishlist 
 }) => {
+  const { primaryImage } = usePerfumeImages(item.perfume.id);
+
   return (
     <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
       <div className="h-[240px] flex items-center justify-center p-4">
         <ResponsiveImage 
-          src={getPerfumeImage(item.perfume)}
+          src={primaryImage || item.perfume.image}
           alt={item.perfume.name}
           aspectRatio="auto"
           hover={true}
