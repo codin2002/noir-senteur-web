@@ -10,7 +10,7 @@ import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
 import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import { Heart } from 'lucide-react';
+import { Heart, RefreshCw } from 'lucide-react';
 import { PRICING, getPerfumeImages, getPerfumeDisplayName } from '@/utils/constants';
 
 interface Perfume {
@@ -65,6 +65,7 @@ const PerfumeDetail = () => {
   const [ratingsData, setRatingsData] = useState<PerfumeRatingData | null>(null);
   const [isLoadingClassification, setIsLoadingClassification] = useState(false);
   const [isLoadingRatings, setIsLoadingRatings] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -182,6 +183,21 @@ const PerfumeDetail = () => {
       toast.error('Failed to load ratings data');
     } finally {
       setIsLoadingRatings(false);
+    }
+  };
+
+  const refreshData = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([
+        fetchClassificationData(),
+        fetchRatingsData()
+      ]);
+      toast.success('Data refreshed successfully');
+    } catch (error) {
+      toast.error('Failed to refresh data');
+    } finally {
+      setRefreshing(false);
     }
   };
 
@@ -420,6 +436,20 @@ const PerfumeDetail = () => {
           {/* Classification & Ratings */}
           {showExplore && (
             <div className="mt-16 border-t border-gold/30 pt-12">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-serif">Perfume Analytics</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refreshData}
+                  disabled={refreshing}
+                  className="border-gold/50 text-gold hover:bg-gold/10"
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  {refreshing ? 'Refreshing...' : 'Refresh Data'}
+                </Button>
+              </div>
+              
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
                 <div className="lg:border-r lg:border-gold/20 lg:pr-8">
                   <PerfumeClassification 
