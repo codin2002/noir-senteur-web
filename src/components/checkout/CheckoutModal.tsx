@@ -40,7 +40,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   const subtotal = calculateSubtotal();
-  const shippingCost = selectedAddressType === 'home' ? 25 : 0; // Free pickup
+  const shippingCost = selectedAddressType === 'home' ? 20 : 0; // 20 AED for home delivery, free for pickup
   const total = subtotal + shippingCost;
 
   const handleConfirmCheckout = () => {
@@ -76,8 +76,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <span>{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping</span>
-                <span>{currencySymbol}{shippingCost.toFixed(2)}</span>
+                <span>Shipping ({selectedAddressType === 'home' ? 'Home Delivery' : 'Pickup Point'})</span>
+                <span className={shippingCost === 0 ? 'text-green-400' : ''}>
+                  {shippingCost === 0 ? 'FREE' : `${currencySymbol}${shippingCost.toFixed(2)}`}
+                </span>
               </div>
               <Separator className="bg-gold/20" />
               <div className="flex justify-between font-semibold">

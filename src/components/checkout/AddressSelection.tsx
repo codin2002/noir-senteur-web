@@ -67,7 +67,7 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
 
   return (
     <div className="space-y-4">
-      <Label className="text-base font-semibold">Delivery Address</Label>
+      <Label className="text-base font-semibold">Delivery Options</Label>
       
       <RadioGroup value={deliveryMethod} onValueChange={handleDeliveryMethodChange}>
         <div className="space-y-4">
@@ -75,9 +75,14 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="home" id="home_delivery" className="mt-1" />
             <div className="flex-1">
-              <Label htmlFor="home_delivery" className="cursor-pointer font-medium">
-                Home Delivery
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="home_delivery" className="cursor-pointer font-medium">
+                  Home Delivery
+                </Label>
+                <span className="text-sm text-orange-400 font-medium">
+                  (+AED 20.00)
+                </span>
+              </div>
               {userAddress && (
                 <div className="mt-2 p-3 bg-darker border border-gold/20 rounded-md">
                   <p className="text-sm text-muted-foreground whitespace-pre-line">
@@ -97,9 +102,14 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
           <div className="flex items-start space-x-3">
             <RadioGroupItem value="pickup" id="pickup_delivery" className="mt-1" />
             <div className="flex-1">
-              <Label htmlFor="pickup_delivery" className="cursor-pointer font-medium">
-                Pickup Point
-              </Label>
+              <div className="flex items-center gap-2">
+                <Label htmlFor="pickup_delivery" className="cursor-pointer font-medium">
+                  Pickup Point
+                </Label>
+                <span className="text-sm text-green-400 font-medium">
+                  (FREE)
+                </span>
+              </div>
               {deliveryMethod === 'pickup' && (
                 <div className="mt-2 space-y-2">
                   <Select value={selectedPickupPoint} onValueChange={setSelectedPickupPoint}>
