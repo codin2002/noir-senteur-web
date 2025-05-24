@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
 
 interface PerfumeImage {
@@ -25,12 +25,32 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
   className 
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [api, setApi] = useState<CarouselApi>();
 
   // Extract image URLs from the PerfumeImage objects
   const imageUrls = images.map(img => img.image_url);
   
   // If no images, use fallback
   const displayImages = imageUrls.length > 0 ? imageUrls : (fallbackImage ? [fallbackImage] : []);
+
+  // Sync currentIndex with carousel API
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    api.on("select", () => {
+      setCurrentIndex(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  // Handle thumbnail click
+  const handleThumbnailClick = useCallback((index: number) => {
+    if (api) {
+      api.scrollTo(index);
+    }
+    setCurrentIndex(index);
+  }, [api]);
 
   if (displayImages.length === 0) {
     return (
@@ -54,7 +74,7 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
 
   return (
     <div className={cn("relative", className)}>
-      <Carousel className="w-full">
+      <Carousel className="w-full" setApi={setApi}>
         <CarouselContent>
           {displayImages.map((imageUrl, index) => (
             <CarouselItem key={index}>
@@ -82,9 +102,9 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
           {displayImages.map((imageUrl, index) => (
             <button
               key={index}
-              onClick={() => setCurrentIndex(index)}
+              onClick={() => handleThumbnailClick(index)}
               className={cn(
-                "w-16 h-16 border-2 rounded-md overflow-hidden",
+                "w-16 h-16 border-2 rounded-md overflow-hidden transition-all duration-200 hover:border-gold/80",
                 currentIndex === index ? "border-gold" : "border-gold/30"
               )}
             >
