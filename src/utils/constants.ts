@@ -15,7 +15,7 @@ export const PRICING = {
 export const PERFUMES = {
   THREE_ONE_THREE: {
     ID: "313",
-    NAME: "313", 
+    NAME: "٣١٣", // Changed to match database Arabic name
     DISPLAY_NAME: "٣١٣", // Arabic "313"
     NOTES: "Amber, Oud, Vanilla",
     DESCRIPTION: "Our signature perfume with complex notes of amber and oud, finished with a touch of vanilla for a sophisticated, long-lasting aroma.",
