@@ -13,9 +13,9 @@ export const PRICING = {
 
 // Perfume information constants
 export const PERFUMES = {
-  SIGNATURE_FIRST: {
-    ID: "signature-first",
-    NAME: "Signature First", 
+  THREE_ONE_THREE: {
+    ID: "313",
+    NAME: "313", 
     DISPLAY_NAME: "٣١٣", // Arabic "313"
     NOTES: "Amber, Oud, Vanilla",
     DESCRIPTION: "Our signature perfume with complex notes of amber and oud, finished with a touch of vanilla for a sophisticated, long-lasting aroma.",
@@ -44,8 +44,8 @@ export const PERFUMES = {
  * @returns Correct image URL for the perfume
  */
 export const getPerfumeImage = (perfume: { name: string, image: string }) => {
-  if (perfume.name === PERFUMES.SIGNATURE_FIRST.NAME) {
-    return PERFUMES.SIGNATURE_FIRST.IMAGE;
+  if (perfume.name === PERFUMES.THREE_ONE_THREE.NAME) {
+    return PERFUMES.THREE_ONE_THREE.IMAGE;
   }
   if (perfume.name === PERFUMES.LUXURY_COLLECTION.NAME) {
     return PERFUMES.LUXURY_COLLECTION.IMAGE;
@@ -59,8 +59,8 @@ export const getPerfumeImage = (perfume: { name: string, image: string }) => {
  * @returns Array of image URLs for the perfume
  */
 export const getPerfumeImages = (perfume: { name: string, image: string }) => {
-  if (perfume.name === PERFUMES.SIGNATURE_FIRST.NAME) {
-    return PERFUMES.SIGNATURE_FIRST.IMAGES;
+  if (perfume.name === PERFUMES.THREE_ONE_THREE.NAME) {
+    return PERFUMES.THREE_ONE_THREE.IMAGES;
   }
   if (perfume.name === PERFUMES.LUXURY_COLLECTION.NAME) {
     return PERFUMES.LUXURY_COLLECTION.IMAGES;
@@ -74,8 +74,8 @@ export const getPerfumeImages = (perfume: { name: string, image: string }) => {
  * @returns Correct display name for the perfume
  */
 export const getPerfumeDisplayName = (perfume: { name: string }) => {
-  if (perfume.name === PERFUMES.SIGNATURE_FIRST.NAME) {
-    return PERFUMES.SIGNATURE_FIRST.DISPLAY_NAME;
+  if (perfume.name === PERFUMES.THREE_ONE_THREE.NAME) {
+    return PERFUMES.THREE_ONE_THREE.DISPLAY_NAME;
   }
   return perfume.name;
 };
