@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Trash2, Plus, Minus } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,7 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { Perfume } from '@/types/perfume';
 import ProductImage from '../common/ProductImage';
-import { PRICING } from '@/utils/constants';
+import { PRICING, getPerfumeImage, getPerfumeDisplayName } from '@/utils/constants';
 
 export interface CartItemType {
   id: string;
@@ -33,25 +34,6 @@ const CartItem: React.FC<CartItemProps> = ({
   const [isRemoving, setIsRemoving] = useState(false);
   const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const { user } = useAuth();
-
-  // Get the appropriate image source
-  const getPerfumeImage = () => {
-    // For the "Signature First" perfume, use the custom image with Arabic "313"
-    if (item.perfume.name === "Signature First") {
-      return "/lovable-uploads/a9ced43b-497b-4733-9093-613c3f990036.png";
-    }
-    
-    // For "Luxury Collection" perfume, use the uploaded image
-    if (item.perfume.name === "Luxury Collection") {
-      return "/lovable-uploads/8409f135-32ac-4937-ae90-9d2ad51131b5.png";
-    }
-    
-    // Otherwise use the image from the database
-    return item.perfume.image;
-  };
-
-  // Display Arabic "313" for Signature First perfume
-  const displayName = item.perfume.name === "Signature First" ? "٣١٣" : item.perfume.name;
 
   const updateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1 || newQuantity > 10) return;
@@ -134,7 +116,7 @@ const CartItem: React.FC<CartItemProps> = ({
       {/* Product image */}
       <div className="w-full sm:w-24 h-24 rounded-md overflow-hidden">
         <ProductImage 
-          src={getPerfumeImage()} 
+          src={getPerfumeImage(item.perfume)} 
           alt={item.perfume.name} 
           className="w-full h-full"
           objectFit="contain"
@@ -143,7 +125,7 @@ const CartItem: React.FC<CartItemProps> = ({
       
       {/* Product details */}
       <div className="flex-grow">
-        <h3 className="font-serif text-lg">{displayName}</h3>
+        <h3 className="font-serif text-lg">{getPerfumeDisplayName(item.perfume)}</h3>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
         <p className="text-gold mt-1">
           {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
