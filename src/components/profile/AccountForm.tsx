@@ -88,7 +88,7 @@ const AccountForm: React.FC<AccountFormProps> = ({
           </div>
           
           <div className="space-y-4">
-            <Label className="text-base font-semibold">Address (UAE Format)</Label>
+            <Label className="text-base font-semibold">Address</Label>
             
             <div className="space-y-3">
               <div className="space-y-2">
