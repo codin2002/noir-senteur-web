@@ -132,23 +132,25 @@ const PerfumeDetail = () => {
     
     try {
       setIsLoadingClassification(true);
+      console.log('Fetching classification data for perfume ID:', id);
       
       const { data, error } = await supabase
         .from('perfume_classifications')
         .select('*')
         .eq('perfume_id', id)
-        .single();
+        .maybeSingle();
         
       if (error) {
         console.error('Error fetching classification data:', error);
+        toast.error('Failed to load classification data');
         return;
       }
       
-      if (data) {
-        setClassificationData(data);
-      }
+      console.log('Classification data fetched:', data);
+      setClassificationData(data);
     } catch (error) {
       console.error('Error fetching classification data:', error);
+      toast.error('Failed to load classification data');
     } finally {
       setIsLoadingClassification(false);
     }
@@ -159,23 +161,25 @@ const PerfumeDetail = () => {
     
     try {
       setIsLoadingRatings(true);
+      console.log('Fetching ratings data for perfume ID:', id);
       
       const { data, error } = await supabase
         .from('perfume_ratings')
         .select('*')
         .eq('perfume_id', id)
-        .single();
+        .maybeSingle();
         
       if (error) {
         console.error('Error fetching ratings data:', error);
+        toast.error('Failed to load ratings data');
         return;
       }
       
-      if (data) {
-        setRatingsData(data);
-      }
+      console.log('Ratings data fetched:', data);
+      setRatingsData(data);
     } catch (error) {
       console.error('Error fetching ratings data:', error);
+      toast.error('Failed to load ratings data');
     } finally {
       setIsLoadingRatings(false);
     }
