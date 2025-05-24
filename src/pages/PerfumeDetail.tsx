@@ -146,13 +146,11 @@ const PerfumeDetail = () => {
         .from('perfume_classifications')
         .select('*')
         .eq('perfume_id', id)
-        .single();
+        .maybeSingle();
         
       if (error) {
         console.error('Error fetching classification data:', error);
-        if (error.code !== 'PGRST116') { // Don't show error for "not found"
-          toast.error('Failed to load classification data');
-        }
+        toast.error('Failed to load classification data');
         setClassificationData(null);
         return;
       }
@@ -178,13 +176,11 @@ const PerfumeDetail = () => {
         .from('perfume_ratings')
         .select('*')
         .eq('perfume_id', id)
-        .single();
+        .maybeSingle();
         
       if (error) {
         console.error('Error fetching ratings data:', error);
-        if (error.code !== 'PGRST116') { // Don't show error for "not found"
-          toast.error('Failed to load ratings data');
-        }
+        toast.error('Failed to load ratings data');
         setRatingsData(null);
         return;
       }
