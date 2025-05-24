@@ -62,7 +62,6 @@ const PerfumeDetail = () => {
   const [addingToCart, setAddingToCart] = useState(false);
   const [addingToWishlist, setAddingToWishlist] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
-  const [showExplore, setShowExplore] = useState(false);
   const [classificationData, setClassificationData] = useState<PerfumeClassificationData | null>(null);
   const [ratingsData, setRatingsData] = useState<PerfumeRatingData | null>(null);
   const [isLoadingClassification, setIsLoadingClassification] = useState(false);
@@ -145,8 +144,7 @@ const PerfumeDetail = () => {
       const { data, error } = await supabase
         .from('perfume_classifications')
         .select('*')
-        .eq('perfume_id', id)
-        .maybeSingle();
+        .eq('perfume_id', id);
         
       if (error) {
         console.error('Error fetching classification data:', error);
@@ -156,7 +154,8 @@ const PerfumeDetail = () => {
       }
       
       console.log('Classification data fetched:', data);
-      setClassificationData(data);
+      // Take the first result if any exist
+      setClassificationData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
       console.error('Error fetching classification data:', error);
       setClassificationData(null);
@@ -175,8 +174,7 @@ const PerfumeDetail = () => {
       const { data, error } = await supabase
         .from('perfume_ratings')
         .select('*')
-        .eq('perfume_id', id)
-        .maybeSingle();
+        .eq('perfume_id', id);
         
       if (error) {
         console.error('Error fetching ratings data:', error);
@@ -186,7 +184,8 @@ const PerfumeDetail = () => {
       }
       
       console.log('Ratings data fetched:', data);
-      setRatingsData(data);
+      // Take the first result if any exist
+      setRatingsData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
       console.error('Error fetching ratings data:', error);
       setRatingsData(null);
@@ -217,10 +216,6 @@ const PerfumeDetail = () => {
       fetchRatingsData();
     }
   }, [id]);
-
-  const toggleExplore = () => {
-    setShowExplore(!showExplore);
-  };
 
   const addToWishlist = async () => {
     if (!user) {
@@ -428,7 +423,7 @@ const PerfumeDetail = () => {
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </Button>
                 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <Button 
                     variant="outline"
                     className={`border-gold/50 ${isInWishlist ? 'bg-gold/10 text-gold' : 'text-gold hover:bg-gold/10'}`}
@@ -438,20 +433,12 @@ const PerfumeDetail = () => {
                     <Heart className={`h-5 w-5 mr-2 ${isInWishlist ? 'fill-gold stroke-gold' : ''}`} />
                     {isInWishlist ? 'Wishlisted' : 'Add to Wishlist'}
                   </Button>
-                  
-                  <Button 
-                    variant="outline"
-                    className="border-gold/50 text-gold hover:bg-gold/10"
-                    onClick={toggleExplore}
-                  >
-                    {showExplore ? 'Hide Details' : 'Explore'}
-                  </Button>
                 </div>
               </div>
             </div>
           </div>
           
-          {/* Classification & Ratings - Always show when data is available */}
+          {/* Classification & Ratings - Always show section */}
           <div className="mt-16 border-t border-gold/30 pt-12">
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-serif">Perfume Analytics</h2>
