@@ -1,28 +1,25 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Heart, ShoppingCart, ArrowLeft, RefreshCw } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
+import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeRatings from '@/components/perfume/PerfumeRatings';
-import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
-import DebugInfo from '@/components/DebugInfo';
-import { Heart, RefreshCw } from 'lucide-react';
-import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
-import { usePerfumeImages } from '@/hooks/usePerfumeImages';
+import { useCartCount } from '@/hooks/useCartCount';
 
-interface Perfume {
+interface PerfumeImage {
   id: string;
-  name: string;
-  notes: string;
-  description: string;
-  image: string;
-  price: string;
-  price_value: number;
+  image_url: string;
+  alt_text: string | null;
+  is_primary: boolean;
+  display_order: number;
 }
 
 interface PerfumeClassificationData {
@@ -32,6 +29,9 @@ interface PerfumeClassificationData {
   type_fresh: number;
   type_oriental: number;
   type_woody: number;
+  audience_masculine: number;
+  audience_feminine: number;
+  audience_unisex: number;
   occasion_casual: number;
   occasion_formal: number;
   occasion_evening: number;
@@ -40,9 +40,6 @@ interface PerfumeClassificationData {
   season_summer: number;
   season_fall: number;
   season_winter: number;
-  audience_feminine: number;
-  audience_masculine: number;
-  audience_unisex: number;
 }
 
 interface PerfumeRatingData {
@@ -55,10 +52,23 @@ interface PerfumeRatingData {
   total_votes: number;
 }
 
+interface Perfume {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  price_value: number;
+  image: string;
+  notes: string;
+}
+
 const PerfumeDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [perfume, setPerfume] = useState<Perfume | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [perfumeImages, setPerfumeImages] = useState<PerfumeImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addingToWishlist, setAddingToWishlist] = useState(false);
   const [isInWishlist, setIsInWishlist] = useState(false);
@@ -66,81 +76,66 @@ const PerfumeDetail = () => {
   const [ratingsData, setRatingsData] = useState<PerfumeRatingData | null>(null);
   const [isLoadingClassification, setIsLoadingClassification] = useState(false);
   const [isLoadingRatings, setIsLoadingRatings] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const { user } = useAuth();
-  const navigate = useNavigate();
-
-  // Use the new hook to fetch images
-  const { imageUrls, primaryImage, isLoading: imagesLoading } = usePerfumeImages(id || '');
+  const { refresh: refreshCartCount } = useCartCount(user?.id);
 
   useEffect(() => {
-    const fetchPerfume = async () => {
-      try {
-        setIsLoading(true);
-        console.log('Fetching perfume with ID:', id);
-        
-        const { data, error } = await supabase
-          .from('perfumes')
-          .select('*')
-          .eq('id', id)
-          .single();
-          
-        if (error) {
-          throw error;
-        }
-        
-        if (data) {
-          console.log('Perfume data fetched:', data);
-          setPerfume(data);
-          document.title = `${getPerfumeDisplayName(data)} | Senteur Fragrances`;
-        }
-      } catch (error: any) {
-        console.error('Error fetching perfume:', error);
-        toast.error('Failed to load perfume details', {
-          description: error.message
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (id) {
       fetchPerfume();
-    }
-  }, [id]);
-
-  // Check if item is in wishlist
-  useEffect(() => {
-    const checkWishlist = async () => {
-      if (!user || !id) return;
-      
-      try {
-        const { data, error } = await supabase
-          .from('wishlist')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('perfume_id', id);
-          
-        if (error) {
-          throw error;
-        }
-        
-        setIsInWishlist(data && data.length > 0);
-      } catch (error) {
-        console.error('Error checking wishlist:', error);
+      fetchPerfumeImages();
+      if (user) {
+        checkWishlistStatus();
       }
-    };
-    
-    checkWishlist();
-  }, [user, id]);
+    }
+  }, [id, user]);
+
+  useEffect(() => {
+    document.title = perfume ? `${perfume.name} | Senteur Fragrances` : "Perfume Details | Senteur Fragrances";
+  }, [perfume]);
+
+  const fetchPerfume = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('perfumes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      setPerfume(data);
+    } catch (error: any) {
+      toast.error('Failed to load perfume details', {
+        description: error.message
+      });
+      navigate('/');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchPerfumeImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('perfume_images')
+        .select('*')
+        .eq('perfume_id', id)
+        .order('display_order', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching perfume images:', error);
+        return;
+      }
+
+      setPerfumeImages(data || []);
+    } catch (error) {
+      console.error('Error fetching perfume images:', error);
+    }
+  };
 
   const fetchClassificationData = async () => {
     if (!id) return;
     
+    setIsLoadingClassification(true);
     try {
-      setIsLoadingClassification(true);
-      console.log('Fetching classification data for perfume ID:', id);
-      
       const { data, error } = await supabase
         .from('perfume_classifications')
         .select('*')
@@ -148,12 +143,12 @@ const PerfumeDetail = () => {
         
       if (error) {
         console.error('Error fetching classification data:', error);
-        toast.error('Failed to load classification data');
-        setClassificationData(null);
+        toast.error('Failed to load classification data', {
+          description: error.message
+        });
         return;
       }
       
-      console.log('Classification data fetched:', data);
       // Take the first result if any exist
       setClassificationData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
@@ -167,10 +162,8 @@ const PerfumeDetail = () => {
   const fetchRatingsData = async () => {
     if (!id) return;
     
+    setIsLoadingRatings(true);
     try {
-      setIsLoadingRatings(true);
-      console.log('Fetching ratings data for perfume ID:', id);
-      
       const { data, error } = await supabase
         .from('perfume_ratings')
         .select('*')
@@ -178,12 +171,12 @@ const PerfumeDetail = () => {
         
       if (error) {
         console.error('Error fetching ratings data:', error);
-        toast.error('Failed to load ratings data');
-        setRatingsData(null);
+        toast.error('Failed to load ratings data', {
+          description: error.message
+        });
         return;
       }
       
-      console.log('Ratings data fetched:', data);
       // Take the first result if any exist
       setRatingsData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
@@ -194,22 +187,7 @@ const PerfumeDetail = () => {
     }
   };
 
-  const refreshData = async () => {
-    setRefreshing(true);
-    try {
-      await Promise.all([
-        fetchClassificationData(),
-        fetchRatingsData()
-      ]);
-      toast.success('Data refreshed successfully');
-    } catch (error) {
-      toast.error('Failed to refresh data');
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  // Fetch data when component mounts or ID changes
+  // Fetch classification and ratings data when component mounts
   useEffect(() => {
     if (id) {
       fetchClassificationData();
@@ -219,54 +197,36 @@ const PerfumeDetail = () => {
 
   const addToWishlist = async () => {
     if (!user) {
-      // Store the redirect path for after login
-      localStorage.setItem('auth_redirect_path', `/perfume/${id}`);
-      navigate('/auth');
+      toast.error('Please sign in to add items to your wishlist');
       return;
     }
-    
+
+    if (!id) return;
+
+    setAddingToWishlist(true);
     try {
-      setAddingToWishlist(true);
-      
-      // Check if already in wishlist
       if (isInWishlist) {
-        const { data, error } = await supabase
+        // Remove from wishlist
+        const { error } = await supabase
           .from('wishlist')
-          .select('id')
+          .delete()
           .eq('user_id', user.id)
-          .eq('perfume_id', id)
-          .single();
-          
+          .eq('perfume_id', id);
+
         if (error) throw error;
-        
-        if (data) {
-          // Remove from wishlist
-          const { error: deleteError } = await supabase
-            .from('wishlist')
-            .delete()
-            .eq('id', data.id);
-            
-          if (deleteError) throw deleteError;
-          
-          setIsInWishlist(false);
-          toast.success('Removed from wishlist');
-        }
+        setIsInWishlist(false);
+        toast.success('Removed from wishlist');
       } else {
         // Add to wishlist
         const { error } = await supabase
           .from('wishlist')
-          .insert({
-            user_id: user.id,
-            perfume_id: id
-          });
-          
+          .insert([{ user_id: user.id, perfume_id: id }]);
+
         if (error) throw error;
-        
         setIsInWishlist(true);
         toast.success('Added to wishlist');
       }
     } catch (error: any) {
-      console.error('Error updating wishlist:', error);
       toast.error('Failed to update wishlist', {
         description: error.message
       });
@@ -275,56 +235,71 @@ const PerfumeDetail = () => {
     }
   };
 
+  const checkWishlistStatus = async () => {
+    if (!user || !id) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('wishlist')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('perfume_id', id)
+        .single();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking wishlist status:', error);
+        return;
+      }
+
+      setIsInWishlist(!!data);
+    } catch (error) {
+      console.error('Error checking wishlist status:', error);
+    }
+  };
+
   const addToCart = async () => {
     if (!user) {
-      // Store the redirect path for after login
-      localStorage.setItem('auth_redirect_path', `/perfume/${id}`);
-      navigate('/auth');
+      toast.error('Please sign in to add items to your cart');
       return;
     }
-    
+
+    if (!id) return;
+
+    setAddingToCart(true);
     try {
-      setAddingToCart(true);
-      
-      // Check if the item is already in the cart
-      const { data: existingCartItems, error: checkError } = await supabase
+      // Check if item already exists in cart
+      const { data: existingItem, error: checkError } = await supabase
         .from('cart')
-        .select('*')
+        .select('id, quantity')
         .eq('user_id', user.id)
-        .eq('perfume_id', id);
-        
-      if (checkError) throw checkError;
-      
-      if (existingCartItems && existingCartItems.length > 0) {
-        // Update quantity if already in cart
+        .eq('perfume_id', id)
+        .single();
+
+      if (checkError && checkError.code !== 'PGRST116') {
+        throw checkError;
+      }
+
+      if (existingItem) {
+        // Update quantity
         const { error: updateError } = await supabase
           .from('cart')
-          .update({ quantity: existingCartItems[0].quantity + 1 })
-          .eq('id', existingCartItems[0].id);
-          
+          .update({ quantity: existingItem.quantity + 1 })
+          .eq('id', existingItem.id);
+
         if (updateError) throw updateError;
-        
-        toast.success('Cart updated', {
-          description: 'Item quantity increased in your cart'
-        });
+        toast.success('Updated cart quantity');
       } else {
-        // Add new item to cart
+        // Add new item
         const { error: insertError } = await supabase
           .from('cart')
-          .insert({
-            user_id: user.id,
-            perfume_id: id,
-            quantity: 1
-          });
-          
+          .insert([{ user_id: user.id, perfume_id: id, quantity: 1 }]);
+
         if (insertError) throw insertError;
-        
-        toast.success('Added to cart', {
-          description: 'Item added to your cart successfully'
-        });
+        toast.success('Added to cart');
       }
+      
+      refreshCartCount(); // Refresh the cart count in navbar
     } catch (error: any) {
-      console.error('Error adding to cart:', error);
       toast.error('Failed to add to cart', {
         description: error.message
       });
@@ -333,12 +308,17 @@ const PerfumeDetail = () => {
     }
   };
 
-  if (isLoading) {
+  const refreshAnalytics = () => {
+    fetchClassificationData();
+    fetchRatingsData();
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-dark text-white">
+      <div className="min-h-screen bg-dark text-white flex flex-col">
         <Navbar />
-        <div className="pt-24 pb-12 flex justify-center items-center min-h-[50vh]">
-          <LoadingSpinner size="md" />
+        <div className="flex-1 pt-24 pb-12 px-6 flex items-center justify-center">
+          <LoadingSpinner />
         </div>
         <Footer />
       </div>
@@ -347,18 +327,16 @@ const PerfumeDetail = () => {
 
   if (!perfume) {
     return (
-      <div className="min-h-screen bg-dark text-white">
+      <div className="min-h-screen bg-dark text-white flex flex-col">
         <Navbar />
-        <div className="pt-24 pb-12 px-6 flex flex-col justify-center items-center min-h-[50vh]">
-          <h2 className="text-3xl font-serif mb-4">Perfume Not Found</h2>
-          <p className="text-muted-foreground mb-6">The perfume you're looking for doesn't exist or has been removed.</p>
-          <Button 
-            variant="outline"
-            className="border-gold text-gold hover:bg-gold hover:text-darker"
-            onClick={() => navigate('/')}
-          >
-            Back to Collection
-          </Button>
+        <div className="flex-1 pt-24 pb-12 px-6 flex items-center justify-center">
+          <div className="text-center">
+            <h1 className="text-2xl font-serif mb-4">Perfume Not Found</h1>
+            <Button onClick={() => navigate('/')} className="bg-gold text-darker hover:bg-gold/80">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Go Back
+            </Button>
+          </div>
         </div>
         <Footer />
       </div>
@@ -366,60 +344,52 @@ const PerfumeDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-dark text-white">
-      <DebugInfo />
+    <div className="min-h-screen bg-dark text-white flex flex-col">
       <Navbar />
-      <div className="pt-24 pb-12 px-6">
+      <div className="flex-1 pt-24 pb-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* Left - Image Slider */}
-            <div className="w-full lg:w-1/2">
-              {imagesLoading ? (
-                <div className="flex items-center justify-center h-[500px] lg:h-[700px]">
-                  <LoadingSpinner size="md" />
-                </div>
-              ) : (
-                <PerfumeImageSlider 
-                  images={imageUrls.length > 0 ? imageUrls : [perfume.image]}
-                  alt={getPerfumeDisplayName(perfume)}
-                />
-              )}
+          {/* Back button */}
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate('/')} 
+            className="mb-6 text-gold hover:text-gold/80 hover:bg-gold/10"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Collection
+          </Button>
+
+          <div className="grid md:grid-cols-2 gap-12 mb-16">
+            {/* Image Gallery */}
+            <div className="space-y-6">
+              <PerfumeImageSlider 
+                images={perfumeImages} 
+                perfumeName={perfume.name}
+                fallbackImage={perfume.image}
+              />
             </div>
-            
-            {/* Right - Details */}
-            <div className="w-full lg:w-1/2 space-y-6 lg:pt-12">
+
+            {/* Product Details */}
+            <div className="space-y-6">
               <div>
-                <h3 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h3>
-                <h1 className="text-4xl md:text-5xl font-serif mt-2">{getPerfumeDisplayName(perfume)}</h1>
-                <p className="text-2xl font-light text-gold mt-4">
-                  {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
-                </p>
+                <h1 className="text-3xl md:text-4xl font-serif mb-4">{perfume.name}</h1>
+                <div className="text-2xl font-bold text-gold mb-6">{perfume.price}</div>
+                <p className="text-gray-300 leading-relaxed mb-6">{perfume.description}</p>
+                
+                {perfume.notes && (
+                  <div className="border-t border-gold/30 pt-6">
+                    <h3 className="font-semibold mb-3 text-gold">Notes</h3>
+                    <p className="text-gray-300">{perfume.notes}</p>
+                  </div>
+                )}
               </div>
-              
-              <div className="h-px bg-gold/30 w-full"></div>
-              
-              <div>
-                <h3 className="text-xl font-serif mb-3">Description</h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {perfume.description}
-                </p>
-              </div>
-              
-              <div className="h-px bg-gold/30 w-full"></div>
-              
-              <div>
-                <h3 className="text-xl font-serif mb-3">Notes</h3>
-                <p className="text-muted-foreground">
-                  {perfume.notes}
-                </p>
-              </div>
-              
-              <div className="pt-6 space-y-4">
+
+              <div className="space-y-4">
                 <Button 
-                  className="w-full bg-gold text-darker hover:bg-gold/80"
                   onClick={addToCart}
                   disabled={addingToCart}
+                  className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6"
                 >
+                  <ShoppingCart className="h-5 w-5 mr-2" />
                   {addingToCart ? 'Adding...' : 'Add to Cart'}
                 </Button>
                 
@@ -445,28 +415,24 @@ const PerfumeDetail = () => {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={refreshData}
-                disabled={refreshing}
+                onClick={refreshAnalytics}
                 className="border-gold/50 text-gold hover:bg-gold/10"
+                disabled={isLoadingClassification || isLoadingRatings}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh Data'}
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingClassification || isLoadingRatings ? 'animate-spin' : ''}`} />
+                Refresh Data
               </Button>
             </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-              <div className="lg:border-r lg:border-gold/20 lg:pr-8">
-                <PerfumeClassification 
-                  classificationData={classificationData}
-                  isLoading={isLoadingClassification}
-                />
-              </div>
-              <div className="lg:pl-8">
-                <PerfumeRatings 
-                  ratingsData={ratingsData}
-                  isLoading={isLoadingRatings}
-                />
-              </div>
+            <div className="grid lg:grid-cols-2 gap-12">
+              <PerfumeClassification 
+                data={classificationData} 
+                isLoading={isLoadingClassification}
+              />
+              <PerfumeRatings 
+                data={ratingsData} 
+                isLoading={isLoadingRatings}
+              />
             </div>
           </div>
         </div>
