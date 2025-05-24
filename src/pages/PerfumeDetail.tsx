@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -426,11 +425,11 @@ const PerfumeDetail = () => {
             
             <div className="grid lg:grid-cols-2 gap-12">
               <PerfumeClassification 
-                data={classificationData} 
+                classificationData={classificationData} 
                 isLoading={isLoadingClassification}
               />
               <PerfumeRatings 
-                data={ratingsData} 
+                ratingsData={ratingsData} 
                 isLoading={isLoadingRatings}
               />
             </div>
