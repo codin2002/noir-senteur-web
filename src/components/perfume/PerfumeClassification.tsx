@@ -44,6 +44,12 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   const [activeTab, setActiveTab] = useState("type");
   const isMobile = useIsMobile();
   
+  // Debug logging
+  useEffect(() => {
+    console.log('PerfumeClassification component rendered with data:', classificationData);
+    console.log('Is loading:', isLoading);
+  }, [classificationData, isLoading]);
+  
   // For platforms that have issue with chart rendering, we'll use useEffect to handle initial render
   useEffect(() => {
     // This empty effect helps with chart rendering on some mobile platforms
@@ -53,16 +59,20 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   }, []);
 
   if (isLoading) {
+    console.log('PerfumeClassification: Showing loading spinner');
     return <LoadingSpinner />;
   }
 
   if (!classificationData) {
+    console.log('PerfumeClassification: No classification data available');
     return (
       <div className="text-center py-8">
         <p className="text-white/70">No classification data available for this perfume.</p>
       </div>
     );
   }
+
+  console.log('PerfumeClassification: Creating chart data from:', classificationData);
 
   const typeData = [
     { name: 'Floral', value: classificationData.type_floral, fullMark: 100 },
@@ -91,6 +101,8 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
     { name: 'Unisex', value: classificationData.audience_unisex, fullMark: 100 },
   ];
 
+  console.log('Chart data created:', { typeData, occasionData, seasonData, audienceData });
+
   const chartConfig = {
     classification: {
       label: "Classification",
@@ -101,6 +113,8 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   // Adjust chart size based on device
   const chartHeight = isMobile ? 250 : 350;
   const chartOuterRadius = isMobile ? 70 : 90;
+
+  console.log('PerfumeClassification: Rendering charts with height:', chartHeight, 'radius:', chartOuterRadius);
 
   return (
     <div className="mt-8">
@@ -135,6 +149,9 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
         </TabsList>
         
         <TabsContent value="type" className="border-none p-0">
+          <div className="bg-red-500/10 border border-red-500/20 p-4 mb-4 rounded">
+            <p className="text-sm text-red-400">Debug: Type chart rendering with data: {JSON.stringify(typeData)}</p>
+          </div>
           <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart outerRadius={chartOuterRadius} data={typeData}>
@@ -158,6 +175,9 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
         </TabsContent>
 
         <TabsContent value="occasion" className="border-none p-0">
+          <div className="bg-red-500/10 border border-red-500/20 p-4 mb-4 rounded">
+            <p className="text-sm text-red-400">Debug: Occasion chart rendering with data: {JSON.stringify(occasionData)}</p>
+          </div>
           <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart outerRadius={chartOuterRadius} data={occasionData}>
@@ -181,6 +201,9 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
         </TabsContent>
 
         <TabsContent value="season" className="border-none p-0">
+          <div className="bg-red-500/10 border border-red-500/20 p-4 mb-4 rounded">
+            <p className="text-sm text-red-400">Debug: Season chart rendering with data: {JSON.stringify(seasonData)}</p>
+          </div>
           <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart outerRadius={chartOuterRadius} data={seasonData}>
@@ -204,6 +227,9 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
         </TabsContent>
 
         <TabsContent value="audience" className="border-none p-0">
+          <div className="bg-red-500/10 border border-red-500/20 p-4 mb-4 rounded">
+            <p className="text-sm text-red-400">Debug: Audience chart rendering with data: {JSON.stringify(audienceData)}</p>
+          </div>
           <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
             <ResponsiveContainer width="100%" height="100%">
               <RadarChart outerRadius={chartOuterRadius} data={audienceData}>
