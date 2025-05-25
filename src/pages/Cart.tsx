@@ -113,13 +113,12 @@ const Cart = () => {
   };
 
   const handleConfirmCheckout = async (
-    addressType: 'home' | 'pickup', 
-    deliveryAddress: string, 
-    pickupPointId?: string
+    addressType: 'home', 
+    deliveryAddress: string
   ) => {
     // The payment processing is now handled in CheckoutModal
-    // This function is called after successful Stripe redirect
-    console.log('Checkout confirmed with:', { addressType, deliveryAddress, pickupPointId });
+    // This function is called after successful payment redirect
+    console.log('Checkout confirmed with:', { addressType, deliveryAddress });
   };
 
   const calculateTotal = () => {

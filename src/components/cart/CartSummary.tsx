@@ -2,7 +2,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CartItemType } from './CartItem';
-import { PRICING } from '@/utils/constants';
 
 interface CartSummaryProps {
   cartItems: CartItemType[];
@@ -13,16 +12,16 @@ interface CartSummaryProps {
 const CartSummary: React.FC<CartSummaryProps> = ({ 
   cartItems, 
   onCheckout, 
-  currencySymbol = PRICING.CURRENCY_SYMBOL 
+  currencySymbol = 'AED '
 }) => {
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => 
-      sum + (PRICING.PERFUME_PRICE * item.quantity), 0
+      sum + (item.perfume.price_value * item.quantity), 0
     );
   };
 
   const subtotal = calculateSubtotal();
-  const shippingCost = subtotal > 0 ? PRICING.SHIPPING_COST : 0;
+  const shippingCost = subtotal > 0 ? 4.99 : 0; // Fixed delivery charge
   const total = subtotal + shippingCost;
 
   return (
