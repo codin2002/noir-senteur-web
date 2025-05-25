@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { CartItemType } from '@/components/cart/CartItem';
 import AddressSelection from './AddressSelection';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -26,6 +28,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [selectedAddressType, setSelectedAddressType] = useState<'home' | 'pickup'>('home');
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress);
   const [pickupPointId, setPickupPointId] = useState<string>();
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const handleAddressChange = (addressType: 'home' | 'pickup', address: string, pointId?: string) => {
     setSelectedAddressType(addressType);
@@ -43,9 +46,44 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const shippingCost = selectedAddressType === 'home' ? 20 : 0; // 20 AED for home delivery, free for pickup
   const total = subtotal + shippingCost;
 
-  const handleConfirmCheckout = () => {
-    onConfirmCheckout(selectedAddressType, deliveryAddress, pickupPointId);
-    onClose();
+  const handleConfirmCheckout = async () => {
+    setIsProcessingPayment(true);
+    
+    try {
+      // Create Stripe payment session
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          cartItems,
+          deliveryMethod: selectedAddressType,
+          deliveryAddress,
+          pickupPointId
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        // Open Stripe checkout in a new tab
+        window.open(data.url, '_blank');
+        
+        // Call the original checkout handler for any cleanup
+        onConfirmCheckout(selectedAddressType, deliveryAddress, pickupPointId);
+        onClose();
+        
+        toast.success('Redirecting to payment...', {
+          description: 'Complete your payment in the new tab to finish your order.'
+        });
+      } else {
+        throw new Error('Failed to create payment session');
+      }
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      toast.error('Payment failed', {
+        description: error.message || 'Unable to process payment. Please try again.'
+      });
+    } finally {
+      setIsProcessingPayment(false);
+    }
   };
 
   const isAddressValid = selectedAddressType === 'home' ? !!userAddress : !!pickupPointId;
@@ -101,15 +139,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               variant="outline"
               className="flex-1 border-gold/30 hover:bg-gold/10"
               onClick={onClose}
+              disabled={isProcessingPayment}
             >
               Cancel
             </Button>
             <Button
               className="flex-1 bg-gold text-darker hover:bg-gold/80"
               onClick={handleConfirmCheckout}
-              disabled={!isAddressValid}
+              disabled={!isAddressValid || isProcessingPayment}
             >
-              Confirm Order
+              {isProcessingPayment ? 'Processing...' : 'Pay with Stripe'}
             </Button>
           </div>
         </div>

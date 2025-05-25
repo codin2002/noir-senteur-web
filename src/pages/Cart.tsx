@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
@@ -19,9 +18,25 @@ const Cart = () => {
   const [userProfile, setUserProfile] = useState<{ address: string }>({ address: '' });
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     document.title = "Shopping Cart | Senteur Fragrances";
+    
+    // Check for payment status in URL
+    const paymentStatus = searchParams.get('payment');
+    if (paymentStatus === 'success') {
+      toast.success('Payment completed successfully!', {
+        description: 'Your order has been confirmed.'
+      });
+      // Clear cart after successful payment
+      setCartItems([]);
+      refreshCartCount();
+    } else if (paymentStatus === 'cancelled') {
+      toast.error('Payment was cancelled', {
+        description: 'Your cart items are still saved.'
+      });
+    }
     
     if (user) {
       fetchCart();
@@ -29,7 +44,7 @@ const Cart = () => {
     } else {
       setIsLoading(false);
     }
-  }, [user]);
+  }, [user, searchParams]);
 
   const fetchCart = async () => {
     try {
@@ -102,35 +117,9 @@ const Cart = () => {
     deliveryAddress: string, 
     pickupPointId?: string
   ) => {
-    try {
-      // Create order using a stored procedure
-      const { data, error } = await supabase.rpc('create_order_with_items', {
-        user_uuid: user?.id,
-        cart_items: JSON.stringify(cartItems.map(item => ({
-          perfume_id: item.perfume_id,
-          quantity: item.quantity,
-          price: item.perfume.price_value
-        }))),
-        order_total: calculateTotal()
-      });
-        
-      if (error) {
-        throw error;
-      }
-      
-      setCartItems([]);
-      refreshCartCount(); // Refresh the cart count in navbar
-      toast.success('Order placed successfully!', {
-        description: addressType === 'home' 
-          ? 'Your perfumes will be delivered to your address.' 
-          : 'Your perfumes are ready for pickup.'
-      });
-    } catch (error: any) {
-      console.error('Error checking out:', error);
-      toast.error('Failed to complete checkout', {
-        description: error.message
-      });
-    }
+    // The payment processing is now handled in CheckoutModal
+    // This function is called after successful Stripe redirect
+    console.log('Checkout confirmed with:', { addressType, deliveryAddress, pickupPointId });
   };
 
   const calculateTotal = () => {
