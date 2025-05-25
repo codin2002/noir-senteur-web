@@ -43,50 +43,68 @@ serve(async (req) => {
       throw new Error("Ziina API key not configured");
     }
 
-    // Create Ziina payment request
+    // Create Ziina payment request with correct endpoint and format
     const ziinaPayload = {
-      amount: total,
+      amount: Math.round(total * 100), // Convert to fils (smallest currency unit)
       currency: "AED",
       description: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
       customer: {
         name: user.user_metadata?.full_name || "Customer",
         email: user.email,
       },
+      redirect: {
+        success_url: `${req.headers.get("origin") || "https://gzddmdwgzcnikqurtnsy.supabase.co"}/cart?payment=success`,
+        cancel_url: `${req.headers.get("origin") || "https://gzddmdwgzcnikqurtnsy.supabase.co"}/cart?payment=cancelled`
+      },
       metadata: {
         user_id: user.id,
         delivery_address: deliveryAddress,
-        order_items: cartItems.map((item: any) => ({
+        order_items: JSON.stringify(cartItems.map((item: any) => ({
           perfume_id: item.perfume_id,
           quantity: item.quantity,
           price: item.perfume.price_value
-        }))
+        })))
       }
     };
 
     console.log('Creating Ziina payment with payload:', ziinaPayload);
 
-    // Call Ziina API to create payment
-    const ziinaResponse = await fetch("https://api.ziina.com/v1/payments", {
+    // Call Ziina API using the correct endpoint
+    const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${ziinaApiKey}`,
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify(ziinaPayload),
     });
 
+    console.log('Ziina API response status:', ziinaResponse.status);
+
     if (!ziinaResponse.ok) {
-      const errorData = await ziinaResponse.text();
-      console.error('Ziina API error:', errorData);
-      throw new Error(`Ziina payment creation failed: ${ziinaResponse.status}`);
+      const errorText = await ziinaResponse.text();
+      console.error('Ziina API error response:', errorText);
+      
+      // Try to parse error as JSON
+      let errorMessage = `Ziina API error (${ziinaResponse.status})`;
+      try {
+        const errorData = JSON.parse(errorText);
+        errorMessage = errorData.message || errorData.error || errorMessage;
+      } catch {
+        errorMessage = errorText || errorMessage;
+      }
+      
+      throw new Error(errorMessage);
     }
 
     const ziinaData = await ziinaResponse.json();
     console.log('Ziina payment created successfully:', ziinaData);
 
+    // Return the payment URL and details
     return new Response(JSON.stringify({ 
       success: true,
-      payment_url: ziinaData.payment_url || ziinaData.checkout_url,
+      payment_url: ziinaData.checkout_url || ziinaData.payment_url || ziinaData.url,
       payment_id: ziinaData.id,
       total_amount: total.toString(),
     }), {
@@ -95,7 +113,10 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error('Error creating payment session:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message || "Payment creation failed",
+      details: error.toString()
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
