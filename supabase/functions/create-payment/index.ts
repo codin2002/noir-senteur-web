@@ -43,34 +43,22 @@ serve(async (req) => {
       throw new Error("Ziina API key not configured");
     }
 
-    // Create Ziina payment request with correct endpoint and format
+    // Create Ziina payment request with correct API v2 format
     const ziinaPayload = {
-      amount: Math.round(total * 100), // Convert to fils (smallest currency unit)
-      currency: "AED",
-      description: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
-      customer: {
-        name: user.user_metadata?.full_name || "Customer",
-        email: user.email,
-      },
-      redirect: {
-        success_url: `${req.headers.get("origin") || "https://gzddmdwgzcnikqurtnsy.supabase.co"}/cart?payment=success`,
-        cancel_url: `${req.headers.get("origin") || "https://gzddmdwgzcnikqurtnsy.supabase.co"}/cart?payment=cancelled`
-      },
-      metadata: {
-        user_id: user.id,
-        delivery_address: deliveryAddress,
-        order_items: JSON.stringify(cartItems.map((item: any) => ({
-          perfume_id: item.perfume_id,
-          quantity: item.quantity,
-          price: item.perfume.price_value
-        })))
-      }
+      amount: Math.round(total * 100), // Convert to fils
+      currency_code: "AED",
+      message: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
+      success_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/cart?payment=success`,
+      cancel_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/cart?payment=cancelled`,
+      test: true, // Set to true for testing
+      transaction_source: "directApi",
+      allow_tips: false,
     };
 
     console.log('Creating Ziina payment with payload:', ziinaPayload);
 
-    // Call Ziina API using the correct production endpoint
-    const ziinaResponse = await fetch("https://custom.ziina.com/v1/payment_intents", {
+    // Call Ziina API using the correct v2 endpoint
+    const ziinaResponse = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${ziinaApiKey}`,
@@ -85,17 +73,7 @@ serve(async (req) => {
     if (!ziinaResponse.ok) {
       const errorText = await ziinaResponse.text();
       console.error('Ziina API error response:', errorText);
-      
-      // Try to parse error as JSON
-      let errorMessage = `Ziina API error (${ziinaResponse.status})`;
-      try {
-        const errorData = JSON.parse(errorText);
-        errorMessage = errorData.message || errorData.error || errorMessage;
-      } catch {
-        errorMessage = errorText || errorMessage;
-      }
-      
-      throw new Error(errorMessage);
+      throw new Error(`Ziina API error (${ziinaResponse.status}): ${errorText}`);
     }
 
     const ziinaData = await ziinaResponse.json();
@@ -104,7 +82,7 @@ serve(async (req) => {
     // Return the payment URL and details
     return new Response(JSON.stringify({ 
       success: true,
-      payment_url: ziinaData.checkout_url || ziinaData.payment_url || ziinaData.url,
+      payment_url: ziinaData.redirect_url,
       payment_id: ziinaData.id,
       total_amount: total.toString(),
     }), {
