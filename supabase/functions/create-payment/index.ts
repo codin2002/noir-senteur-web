@@ -69,8 +69,8 @@ serve(async (req) => {
 
     console.log('Creating Ziina payment with payload:', ziinaPayload);
 
-    // Call Ziina API using the correct endpoint
-    const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
+    // Call Ziina API using the correct production endpoint
+    const ziinaResponse = await fetch("https://custom.ziina.com/v1/payment_intents", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${ziinaApiKey}`,
