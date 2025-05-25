@@ -43,23 +43,27 @@ serve(async (req) => {
       throw new Error("Ziina API key not configured");
     }
 
-    // Create Ziina payment request with correct v1 API format
+    // Create Ziina payment request with correct API v2 format
     const ziinaPayload = {
       amount: Math.round(total * 100), // Convert to fils
-      currency: "AED",
-      description: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
-      success_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/success`,
-      cancel_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/cancel`,
+      currency_code: "AED",
+      message: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
+      success_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/payment-success`,
+      cancel_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/cart?payment=cancelled`,
+      test: true, // Set to true for testing
+      transaction_source: "directApi",
+      allow_tips: false,
     };
 
     console.log('Creating Ziina payment with payload:', ziinaPayload);
 
-    // Call Ziina API using the correct v1 endpoint
-    const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
+    // Call Ziina API using the correct v2 endpoint
+    const ziinaResponse = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${ziinaApiKey}`,
         "Content-Type": "application/json",
+        "Accept": "application/json",
       },
       body: JSON.stringify(ziinaPayload),
     });
