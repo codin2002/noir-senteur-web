@@ -16,7 +16,7 @@ serve(async (req) => {
 
   try {
     // Get the request body
-    const { cartItems, deliveryMethod, deliveryAddress, pickupPointId } = await req.json();
+    const { cartItems, deliveryMethod, deliveryAddress, pickupPointId, embedded } = await req.json();
 
     // Create Supabase client using the anon key for user authentication
     const supabaseClient = createClient(
@@ -79,34 +79,68 @@ serve(async (req) => {
       });
     }
 
-    // Create a one-time payment session
-    const session = await stripe.checkout.sessions.create({
-      customer: customerId,
-      customer_email: customerId ? undefined : user.email,
-      line_items: lineItems,
-      mode: "payment",
-      success_url: `${req.headers.get("origin")}/cart?payment=success`,
-      cancel_url: `${req.headers.get("origin")}/cart?payment=cancelled`,
-      metadata: {
-        user_id: user.id,
-        delivery_method: deliveryMethod,
-        delivery_address: deliveryAddress,
-        pickup_point_id: pickupPointId || "",
-        cart_items: JSON.stringify(cartItems.map((item: any) => ({
-          perfume_id: item.perfume_id,
-          quantity: item.quantity,
-          price: item.perfume.price_value
-        }))),
-        total_amount: total.toString(),
-      },
-    });
+    if (embedded) {
+      // Create embedded checkout session
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : user.email,
+        line_items: lineItems,
+        mode: "payment",
+        ui_mode: "embedded",
+        return_url: `${req.headers.get("origin")}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+        metadata: {
+          user_id: user.id,
+          delivery_method: deliveryMethod,
+          delivery_address: deliveryAddress,
+          pickup_point_id: pickupPointId || "",
+          cart_items: JSON.stringify(cartItems.map((item: any) => ({
+            perfume_id: item.perfume_id,
+            quantity: item.quantity,
+            price: item.perfume.price_value
+          }))),
+          total_amount: total.toString(),
+        },
+      });
 
-    console.log('Payment session created:', session.id);
+      console.log('Embedded checkout session created:', session.id);
 
-    return new Response(JSON.stringify({ url: session.url }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
+      return new Response(JSON.stringify({ 
+        clientSecret: session.client_secret,
+        publishableKey: Deno.env.get("STRIPE_PUBLISHABLE_KEY") || "pk_test_..." // You'll need to add this
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    } else {
+      // Create a regular checkout session (original functionality)
+      const session = await stripe.checkout.sessions.create({
+        customer: customerId,
+        customer_email: customerId ? undefined : user.email,
+        line_items: lineItems,
+        mode: "payment",
+        success_url: `${req.headers.get("origin")}/cart?payment=success`,
+        cancel_url: `${req.headers.get("origin")}/cart?payment=cancelled`,
+        metadata: {
+          user_id: user.id,
+          delivery_method: deliveryMethod,
+          delivery_address: deliveryAddress,
+          pickup_point_id: pickupPointId || "",
+          cart_items: JSON.stringify(cartItems.map((item: any) => ({
+            perfume_id: item.perfume_id,
+            quantity: item.quantity,
+            price: item.perfume.price_value
+          }))),
+          total_amount: total.toString(),
+        },
+      });
+
+      console.log('Payment session created:', session.id);
+
+      return new Response(JSON.stringify({ url: session.url }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
   } catch (error) {
     console.error('Error creating payment session:', error);
     return new Response(JSON.stringify({ error: error.message }), {
