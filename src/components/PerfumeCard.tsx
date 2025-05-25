@@ -1,13 +1,11 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './common/ProductImage';
 import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
 import { usePerfumeImages } from '@/hooks/usePerfumeImages';
-
 interface PerfumeCardProps {
-  id: string; 
+  id: string;
   name: string;
   notes: string;
   description: string;
@@ -16,7 +14,6 @@ interface PerfumeCardProps {
   delay?: number;
   invert?: boolean;
 }
-
 const PerfumeCard: React.FC<PerfumeCardProps> = ({
   id,
   name,
@@ -28,38 +25,27 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   invert = false
 }) => {
   const navigate = useNavigate();
-  const { primaryImage } = usePerfumeImages(id);
-
+  const {
+    primaryImage
+  } = usePerfumeImages(id);
   const handleExplore = () => {
     navigate(`/perfume/${id}`);
   };
-
-  return (
-    <div 
-      className={cn(
-        "group flex flex-col md:flex-row gap-8 items-center",
-        invert && "md:flex-row-reverse"
-      )}
-      style={{ animationDelay: `${delay}ms` }}
-    >
+  return <div className={cn("group flex flex-col md:flex-row gap-8 items-center", invert && "md:flex-row-reverse")} style={{
+    animationDelay: `${delay}ms`
+  }}>
       <div className="w-full md:w-1/2 overflow-hidden">
         <div className="relative h-[400px] md:h-[500px] flex items-center justify-center">
-          <ProductImage 
-            src={primaryImage || image} 
-            alt={name}
-            fullWidth={true}
-            hover={true}
-            aspectRatio="auto"
-            objectFit="contain"
-            className="max-h-full p-4"
-          />
+          <ProductImage src={primaryImage || image} alt={name} fullWidth={true} hover={true} aspectRatio="auto" objectFit="contain" className="max-h-full p-4" />
         </div>
       </div>
       
       <div className="w-full md:w-1/2 space-y-4 text-left md:text-center">
         <div className="mb-2">
           <h3 className="text-sm uppercase tracking-widest text-gold">{notes}</h3>
-          <h2 className="text-3xl md:text-4xl font-serif">{getPerfumeDisplayName({name})}</h2>
+          <h2 className="text-3xl md:text-4xl font-serif">{getPerfumeDisplayName({
+            name
+          })}</h2>
         </div>
         <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
           {description}
@@ -67,15 +53,8 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
         <p className="text-xl font-light text-gold mt-4">
           {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
-        <button 
-          className="btn-outline mt-6" 
-          onClick={handleExplore}
-        >
-          EXPLORE
-        </button>
+        <button className="btn-outline mt-6" onClick={handleExplore}>BUY</button>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default PerfumeCard;
