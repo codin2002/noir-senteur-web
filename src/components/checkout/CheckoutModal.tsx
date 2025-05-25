@@ -46,7 +46,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     setIsProcessingPayment(true);
     
     try {
-      // Create payment with Ziina (placeholder for now)
+      // Create payment with Ziina
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           cartItems,
@@ -56,9 +56,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
       if (error) throw error;
 
-      toast.success('Payment processing initiated');
-      onConfirmCheckout('home', deliveryAddress);
-      onClose();
+      if (data.payment_url) {
+        // Redirect to Ziina payment page
+        window.location.href = data.payment_url;
+      } else {
+        throw new Error('No payment URL received from Ziina');
+      }
     } catch (error: any) {
       console.error('Payment error:', error);
       toast.error('Payment failed', {
@@ -97,7 +100,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 <span>{currencySymbol}{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
-                <span>Shipping (Home Delivery)</span>
+                <span>Delivery</span>
                 <span>{currencySymbol}{shippingCost.toFixed(2)}</span>
               </div>
               <Separator className="bg-gold/20" />
@@ -129,7 +132,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               onClick={handleConfirmCheckout}
               disabled={!isAddressValid || isProcessingPayment}
             >
-              {isProcessingPayment ? 'Processing...' : 'Continue to Payment'}
+              {isProcessingPayment ? 'Processing...' : 'Pay with Ziina'}
             </Button>
           </div>
         </div>

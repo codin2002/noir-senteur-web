@@ -37,25 +37,57 @@ serve(async (req) => {
     const shippingCost = 4.99; // Fixed delivery charge
     const total = subtotal + shippingCost;
 
-    // TODO: Integrate with Ziina API when ready
-    // For now, we'll just return a placeholder response
-    console.log('Payment request received:', {
-      userId: user.id,
-      email: user.email,
-      deliveryAddress,
-      cartItems: cartItems.map((item: any) => ({
-        perfume_id: item.perfume_id,
-        quantity: item.quantity,
-        price: item.perfume.price_value
-      })),
-      subtotal,
-      shippingCost,
-      total
+    // Get Ziina API key from environment
+    const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
+    if (!ziinaApiKey) {
+      throw new Error("Ziina API key not configured");
+    }
+
+    // Create Ziina payment request
+    const ziinaPayload = {
+      amount: total,
+      currency: "AED",
+      description: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
+      customer: {
+        name: user.user_metadata?.full_name || "Customer",
+        email: user.email,
+      },
+      metadata: {
+        user_id: user.id,
+        delivery_address: deliveryAddress,
+        order_items: cartItems.map((item: any) => ({
+          perfume_id: item.perfume_id,
+          quantity: item.quantity,
+          price: item.perfume.price_value
+        }))
+      }
+    };
+
+    console.log('Creating Ziina payment with payload:', ziinaPayload);
+
+    // Call Ziina API to create payment
+    const ziinaResponse = await fetch("https://api.ziina.com/v1/payments", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${ziinaApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(ziinaPayload),
     });
+
+    if (!ziinaResponse.ok) {
+      const errorData = await ziinaResponse.text();
+      console.error('Ziina API error:', errorData);
+      throw new Error(`Ziina payment creation failed: ${ziinaResponse.status}`);
+    }
+
+    const ziinaData = await ziinaResponse.json();
+    console.log('Ziina payment created successfully:', ziinaData);
 
     return new Response(JSON.stringify({ 
       success: true,
-      message: "Payment processing with Ziina will be implemented",
+      payment_url: ziinaData.payment_url || ziinaData.checkout_url,
+      payment_id: ziinaData.id,
       total_amount: total.toString(),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
