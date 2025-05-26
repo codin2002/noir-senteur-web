@@ -25,14 +25,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   currencySymbol
 }) => {
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
-  const { isProcessing, processCheckout } = useCheckout();
+  const { processPayment, isLoading } = useCheckout();
 
-  const handleAddressChange = (addressType: 'home', address: string) => {
+  const handleAddressChange = (address: string) => {
     setDeliveryAddress(address);
   };
 
   const handleCheckout = async () => {
-    await processCheckout(cartItems, deliveryAddress);
+    await processPayment(cartItems, deliveryAddress);
   };
 
   return (
@@ -46,14 +46,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <OrderSummary cartItems={cartItems} currencySymbol={currencySymbol} />
 
           <AddressSelection
-            userAddress={userAddress}
             onAddressChange={handleAddressChange}
+            selectedAddress={deliveryAddress}
           />
 
           <CheckoutActions
             onCancel={onClose}
             onCheckout={handleCheckout}
-            isProcessing={isProcessing}
+            isProcessing={isLoading}
             isCheckoutDisabled={!deliveryAddress.trim()}
           />
         </div>
