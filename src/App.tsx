@@ -16,6 +16,7 @@ import Cart from "./pages/Cart";
 import Profile from "./pages/Profile";
 import PerfumeDetail from "./pages/PerfumeDetail";
 import PaymentSuccess from "./components/PaymentSuccess";
+import PaymentFailed from "./pages/PaymentFailed";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ const App: React.FC = () => {
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/perfume/:id" element={<PerfumeDetail />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/payment-failed" element={<PaymentFailed />} />
               <Route path="/cart" element={<Cart />} />
               
               {/* Protected routes */}

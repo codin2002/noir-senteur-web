@@ -1,15 +1,15 @@
-
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useCheckout } from '@/hooks/useCheckout';
 import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { CheckCircle, Package, ShoppingBag } from 'lucide-react';
+import { CheckCircle, Package, ShoppingBag, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,10 +18,17 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const verifyAndProcessPayment = async () => {
-      const paymentIntentId = searchParams.get('payment_intent');
+      // Check for different possible payment parameter names
+      const paymentIntentId = searchParams.get('payment_intent') || 
+                             searchParams.get('payment_intent_id') || 
+                             searchParams.get('session_id');
       
+      console.log('Payment verification - URL params:', Object.fromEntries(searchParams.entries()));
+      console.log('Payment Intent ID found:', paymentIntentId);
+
       if (!paymentIntentId) {
-        setError('No payment information found');
+        console.error('No payment information found in URL parameters');
+        setError('No payment information found. This might be due to an incomplete payment process.');
         setIsLoading(false);
         return;
       }
@@ -34,11 +41,12 @@ const PaymentSuccess = () => {
           setOrderDetails(result);
           console.log('Payment verification successful:', result);
         } else {
-          setError('Payment verification failed');
+          console.error('Payment verification failed:', result);
+          setError(result.message || 'Payment verification failed');
         }
       } catch (error: any) {
         console.error('Payment verification error:', error);
-        setError('Failed to verify payment');
+        setError(error.message || 'Failed to verify payment');
       } finally {
         setIsLoading(false);
       }
@@ -46,6 +54,16 @@ const PaymentSuccess = () => {
 
     verifyAndProcessPayment();
   }, [searchParams, verifyPayment]);
+
+  // Auto-redirect to cart after 10 seconds if there's an error
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        navigate('/cart');
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, navigate]);
 
   if (isLoading) {
     return (
@@ -67,16 +85,38 @@ const PaymentSuccess = () => {
     return (
       <div className="min-h-screen bg-dark text-white flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center">
-            <div className="text-red-500 text-6xl mb-4">❌</div>
+        <div className="flex-1 flex items-center justify-center px-6">
+          <div className="text-center max-w-md">
+            <AlertCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
             <h2 className="text-2xl font-serif mb-4">Payment Verification Failed</h2>
             <p className="text-muted-foreground mb-6">{error}</p>
-            <Link to="/">
-              <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-darker">
-                Return to Home
-              </Button>
-            </Link>
+            
+            <div className="bg-darker/50 border border-red-500/20 rounded-lg p-4 mb-6 text-left">
+              <h3 className="text-lg font-semibold mb-2 text-red-400">What happened?</h3>
+              <ul className="text-sm text-muted-foreground space-y-1">
+                <li>• Your payment may have been processed successfully</li>
+                <li>• There was an issue verifying the payment status</li>
+                <li>• You can check your email for confirmation</li>
+                <li>• Contact support if you were charged but don't see your order</li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Link to="/cart" className="flex-1">
+                <Button variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-darker">
+                  Return to Cart
+                </Button>
+              </Link>
+              <Link to="/" className="flex-1">
+                <Button className="w-full bg-gold text-darker hover:bg-gold/90">
+                  Go to Home
+                </Button>
+              </Link>
+            </div>
+
+            <p className="text-xs text-muted-foreground mt-4">
+              You'll be automatically redirected to your cart in a few seconds.
+            </p>
           </div>
         </div>
         <Footer />

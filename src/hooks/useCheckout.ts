@@ -95,6 +95,9 @@ export const useCheckout = () => {
   };
 
   const verifyPayment = async (paymentIntentId: string) => {
+    console.log('=== PAYMENT VERIFICATION STARTED ===');
+    console.log('Payment Intent ID:', paymentIntentId);
+    
     // For payment verification, we check if it was a guest checkout
     const isGuest = localStorage.getItem('checkout_is_guest') === 'true';
     let cartItems = [];
@@ -125,9 +128,32 @@ export const useCheckout = () => {
         }
       });
 
+      console.log('Verification response received:', { success: data?.success, error });
+
       if (error) {
         console.error('Payment verification error:', error);
-        throw new Error(error.message);
+        return {
+          success: false,
+          message: error.message || 'Failed to verify payment',
+          error: error
+        };
+      }
+
+      if (!data) {
+        console.error('No data received from verification');
+        return {
+          success: false,
+          message: 'No response received from payment verification'
+        };
+      }
+
+      if (!data.success) {
+        console.error('Payment verification failed:', data);
+        return {
+          success: false,
+          message: data.message || data.error?.message || 'Payment verification failed',
+          error: data.error
+        };
       }
 
       // Clear stored data after successful verification
@@ -138,10 +164,15 @@ export const useCheckout = () => {
         localStorage.removeItem('cartItems'); // Clear guest cart
       }
       
+      console.log('Payment verification successful:', data);
       return data;
     } catch (error: any) {
       console.error('Payment verification failed:', error);
-      throw error;
+      return {
+        success: false,
+        message: error.message || 'Payment verification failed',
+        error: error
+      };
     }
   };
 
