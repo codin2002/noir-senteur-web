@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -77,13 +76,14 @@ export const useProfile = () => {
       // Filter to only show orders for the current user (extra safety)
       const userOrders = (ordersData || []).filter(order => order.user_id === user?.id);
       
-      // Process the orders to match our Order type
+      // Process the orders to match our Order type with proper type casting
       const processedOrders: Order[] = userOrders.map(order => ({
         id: order.id,
         created_at: order.created_at,
         status: order.status,
         total: order.total,
-        items: order.items || []
+        // Safely cast items from Json to OrderItem[] with validation
+        items: Array.isArray(order.items) ? order.items as OrderItem[] : []
       }));
       
       console.log('Processed orders:', processedOrders);
