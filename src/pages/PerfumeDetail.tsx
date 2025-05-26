@@ -325,6 +325,9 @@ const PerfumeDetail = () => {
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
         refreshCartCount();
       }
+
+      // Redirect to cart page after successful addition
+      navigate('/cart');
     } catch (error: any) {
       console.error('Error adding to cart:', error);
       toast.error('Failed to add to cart', {
