@@ -62,14 +62,12 @@ serve(async (req) => {
     if (paymentData.status === 'completed') {
       console.log('=== PAYMENT CONFIRMED AS COMPLETED ===');
       
-      // Get stored payment info from the request or fetch from storage
-      // Since we can't access localStorage from edge function, we'll need the client to send this data
+      // Get user from auth header
       const authHeader = req.headers.get("Authorization");
       if (!authHeader) {
         throw new Error('Authentication required');
       }
 
-      // Get user from auth header
       const supabaseClient = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_ANON_KEY") ?? ""
@@ -137,7 +135,7 @@ serve(async (req) => {
       console.log('=== CALCULATED TOTAL ===');
       console.log('Total amount:', totalAmount);
 
-      // Prepare cart items for order creation
+      // Prepare cart items for order creation - pass as JSONB array, not stringified JSON
       const cartItems = cartData.map((item: any) => ({
         perfume_id: item.perfume_id,
         quantity: item.quantity,
@@ -145,9 +143,12 @@ serve(async (req) => {
       }));
 
       console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE ===');
+      console.log('Cart items to pass:', cartItems);
+      
+      // Pass the cart items as JSONB, not as a stringified JSON
       const { data: orderId, error: orderError } = await supabaseService.rpc('create_order_with_items', {
         user_uuid: user.id,
-        cart_items: JSON.stringify(cartItems),
+        cart_items: cartItems, // Pass as JSONB array directly
         order_total: totalAmount
       });
 
