@@ -28,7 +28,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
-  const { user } = useAuth();
+  const { user, session } = useAuth();
 
   const calculateSubtotal = () => {
     return cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
@@ -48,13 +48,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return;
     }
 
-    if (!user) {
+    if (!user || !session) {
       toast.error('Please sign in to continue');
       return;
     }
 
     console.log('Starting checkout process...');
     console.log('User:', user.id, user.email);
+    console.log('Session exists:', !!session);
     console.log('Cart items:', cartItems);
     console.log('Delivery address:', deliveryAddress);
     console.log('Total amount:', total);
@@ -80,12 +81,26 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       console.log('Storing payment info in localStorage:', paymentInfo);
       localStorage.setItem('ziina_payment_info', JSON.stringify(paymentInfo));
 
+      // Get fresh session to ensure we have valid tokens
+      const { data: { session: freshSession }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError || !freshSession) {
+        console.error('Session error:', sessionError);
+        toast.error('Authentication error. Please sign in again.');
+        return;
+      }
+
+      console.log('Using fresh session for API call');
       console.log('Calling create-payment function...');
+      
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           cartItems,
           deliveryAddress
-        }
+        },
+        headers: {
+          Authorization: `Bearer ${freshSession.access_token}`,
+        },
       });
 
       console.log('Create-payment response:', { data, error });
