@@ -11,11 +11,9 @@ export const useCheckout = () => {
   const { user } = useAuth();
 
   const processPayment = async (cartItems: any[], deliveryAddress: string) => {
-    if (!user) {
-      toast.error('Please sign in to continue');
-      return;
-    }
-
+    // For guest checkout, we don't require user authentication
+    // The payment system will handle guest orders differently
+    
     setIsLoading(true);
 
     try {
@@ -25,7 +23,9 @@ export const useCheckout = () => {
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           cartItems,
-          deliveryAddress: deliveryAddress.trim()
+          deliveryAddress: deliveryAddress.trim(),
+          isGuest: !user, // Flag to indicate if this is a guest checkout
+          userId: user?.id || null // Pass user ID if available, null for guests
         }
       });
 
@@ -52,6 +52,9 @@ export const useCheckout = () => {
         localStorage.setItem('checkout_delivery_address', deliveryAddress.trim());
       }
       
+      // Store guest flag for verification
+      localStorage.setItem('checkout_is_guest', !user ? 'true' : 'false');
+      
       // Redirect to Ziina payment page
       window.location.href = data.payment_url;
       
@@ -66,21 +69,22 @@ export const useCheckout = () => {
   };
 
   const verifyPayment = async (paymentIntentId: string) => {
-    if (!user) {
-      toast.error('Please sign in to continue');
-      return null;
-    }
-
+    // For payment verification, we check if it was a guest checkout
+    const isGuest = localStorage.getItem('checkout_is_guest') === 'true';
+    
     try {
       // Get stored delivery address
       const deliveryAddress = localStorage.getItem('checkout_delivery_address') || '';
       
       console.log('Verifying payment with delivery address:', deliveryAddress);
+      console.log('Is guest checkout:', isGuest);
       
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: {
           paymentIntentId,
-          deliveryAddress
+          deliveryAddress,
+          isGuest,
+          userId: user?.id || null
         }
       });
 
@@ -89,8 +93,9 @@ export const useCheckout = () => {
         throw new Error(error.message);
       }
 
-      // Clear stored delivery address after successful verification
+      // Clear stored data after successful verification
       localStorage.removeItem('checkout_delivery_address');
+      localStorage.removeItem('checkout_is_guest');
       
       return data;
     } catch (error: any) {
