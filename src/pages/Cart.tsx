@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -16,6 +17,7 @@ const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<{ address: string }>({ address: '' });
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
   const [searchParams] = useSearchParams();
@@ -174,14 +176,19 @@ const Cart = () => {
       return;
     }
     
-    // Redirect to Auth page with checkout flow information
-    navigate('/auth', { 
-      state: { 
-        isCheckout: true, 
-        cartItems: cartItems,
-        from: '/cart' 
-      } 
-    });
+    if (user) {
+      // Show checkout modal for authenticated users
+      setShowCheckoutModal(true);
+    } else {
+      // Redirect to Auth page for guest users
+      navigate('/auth', { 
+        state: { 
+          isCheckout: true, 
+          cartItems: cartItems,
+          from: '/cart' 
+        } 
+      });
+    }
   };
 
   const handleConfirmCheckout = async (
@@ -248,6 +255,17 @@ const Cart = () => {
           )}
         </div>
       </div>
+      
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={showCheckoutModal}
+        onClose={() => setShowCheckoutModal(false)}
+        cartItems={cartItems}
+        userAddress={userProfile.address}
+        onConfirmCheckout={handleConfirmCheckout}
+        currencySymbol="AED "
+      />
+      
       <Footer />
     </div>
   );
