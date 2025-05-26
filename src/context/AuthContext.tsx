@@ -24,14 +24,50 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { toast } = useToast();
 
+  const restoreCartFromLocalStorage = async (userId: string) => {
+    try {
+      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      
+      if (cartItems.length > 0) {
+        console.log('Restoring cart items from localStorage:', cartItems);
+        
+        // Add each item to the user's cart in the database
+        for (const item of cartItems) {
+          await supabase
+            .from('cart_items')
+            .insert({
+              user_id: userId,
+              perfume_id: item.perfume.id,
+              quantity: item.quantity
+            });
+        }
+        
+        // Clear localStorage after successful restore
+        localStorage.removeItem('cartItems');
+        sonnerToast.success('Cart restored', {
+          description: `${cartItems.length} item(s) restored to your cart`
+        });
+      }
+    } catch (error) {
+      console.error('Error restoring cart:', error);
+    }
+  };
+
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      async (_event, session) => {
         console.log("Auth state changed:", _event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setIsLoading(false);
+        
+        // Restore cart from localStorage on successful sign-in/sign-up
+        if (_event === 'SIGNED_IN' && session?.user) {
+          setTimeout(() => {
+            restoreCartFromLocalStorage(session.user.id);
+          }, 100);
+        }
       }
     );
 

@@ -44,7 +44,10 @@ const Auth = () => {
   // If user is already logged in, redirect to requested page or home page
   useEffect(() => {
     if (user && !isLoading) {
-      navigate(from, { replace: true });
+      // Check if there's a cart in localStorage to determine redirect
+      const hasCart = localStorage.getItem('cartItems');
+      const redirectPath = hasCart ? '/cart' : from;
+      navigate(redirectPath, { replace: true });
     }
   }, [user, isLoading, navigate, from]);
   

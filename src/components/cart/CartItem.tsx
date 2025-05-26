@@ -1,20 +1,22 @@
+
 import React, { useState } from 'react';
-import { Trash2, Plus, Minus } from 'lucide-react';
+import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { Perfume } from '@/types/perfume';
-import ProductImage from '../common/ProductImage';
-import { PRICING, getPerfumeDisplayName } from '@/utils/constants';
-import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 export interface CartItemType {
   id: string;
-  user_id: string;
-  perfume_id: string;
   quantity: number;
-  created_at: string;
-  perfume: Perfume;
+  perfume: {
+    id: string;
+    name: string;
+    price: string;
+    price_value: number;
+    image: string;
+    notes: string;
+  };
 }
 
 interface CartItemProps {
@@ -27,144 +29,131 @@ interface CartItemProps {
 const CartItem: React.FC<CartItemProps> = ({ 
   item, 
   onItemUpdate, 
-  onItemRemove,
-  refreshCartCount
+  onItemRemove, 
+  refreshCartCount 
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isRemoving, setIsRemoving] = useState(false);
-  const [localQuantity, setLocalQuantity] = useState(item.quantity);
   const { user } = useAuth();
-  const { primaryImage } = usePerfumeImages(item.perfume.id);
 
-  const updateQuantity = async (newQuantity: number) => {
-    if (newQuantity < 1 || newQuantity > 10) return;
-    if (!user) return;
+  const updateLocalStorage = (updatedItems: CartItemType[]) => {
+    localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+  };
+
+  const handleUpdateQuantity = async (newQuantity: number) => {
+    if (newQuantity < 1) return;
+    
+    setIsUpdating(true);
     
     try {
-      setIsUpdating(true);
-      
-      // Update local state immediately for better UX
-      setLocalQuantity(newQuantity);
-      
-      // Update the local state with the new quantity before database update
-      onItemUpdate({
-        ...item,
-        quantity: newQuantity
-      });
-      
-      // Refresh the cart count in navbar
-      refreshCartCount();
-      
-      // Update the database in the background
-      const { error } = await supabase
-        .from('cart')
-        .update({ quantity: newQuantity })
-        .eq('id', item.id)
-        .eq('user_id', user.id);
+      if (user) {
+        // Update in database for authenticated users
+        const { error } = await supabase
+          .from('cart_items')
+          .update({ quantity: newQuantity })
+          .eq('id', item.id);
         
-      if (error) throw error;
+        if (error) throw error;
+      }
       
+      // Update local state and localStorage
+      const updatedItem = { ...item, quantity: newQuantity };
+      onItemUpdate(updatedItem);
+      
+      // Update localStorage for persistence
+      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      const updatedCart = cartItems.map((cartItem: CartItemType) => 
+        cartItem.id === item.id ? updatedItem : cartItem
+      );
+      updateLocalStorage(updatedCart);
+      
+      refreshCartCount();
     } catch (error: any) {
-      console.error('Error updating cart item:', error);
-      // Revert local state if there's an error
-      setLocalQuantity(item.quantity);
-      onItemUpdate({
-        ...item,
-        quantity: item.quantity
-      });
-      toast.error('Failed to update quantity', {
-        description: error.message
-      });
+      console.error('Error updating quantity:', error);
+      toast.error('Failed to update quantity');
     } finally {
       setIsUpdating(false);
     }
   };
 
-  const removeItem = async () => {
-    if (!user) return;
+  const handleRemove = async () => {
+    setIsUpdating(true);
     
     try {
-      setIsRemoving(true);
+      if (user) {
+        // Remove from database for authenticated users
+        const { error } = await supabase
+          .from('cart_items')
+          .delete()
+          .eq('id', item.id);
+        
+        if (error) throw error;
+      }
       
-      // Optimistically remove from UI first
+      // Update local state and localStorage
       onItemRemove(item.id);
       
-      const { error } = await supabase
-        .from('cart')
-        .delete()
-        .eq('id', item.id)
-        .eq('user_id', user.id);
-        
-      if (error) throw error;
+      // Update localStorage
+      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+      const updatedCart = cartItems.filter((cartItem: CartItemType) => cartItem.id !== item.id);
+      updateLocalStorage(updatedCart);
       
-      toast.success('Item removed from cart');
-      
-      // Refresh the cart count in navbar
       refreshCartCount();
-      
+      toast.success('Item removed from cart');
     } catch (error: any) {
-      console.error('Error removing cart item:', error);
-      toast.error('Failed to remove item', {
-        description: error.message
-      });
+      console.error('Error removing item:', error);
+      toast.error('Failed to remove item');
     } finally {
-      setIsRemoving(false);
+      setIsUpdating(false);
     }
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 p-4 bg-darker rounded-lg border border-gold/20">
-      {/* Product image */}
-      <div className="w-full sm:w-24 h-24 rounded-md overflow-hidden">
-        <ProductImage 
-          src={primaryImage || item.perfume.image} 
-          alt={item.perfume.name} 
-          className="w-full h-full"
-          objectFit="contain"
-        />
-      </div>
+    <div className="flex items-center gap-4 p-4 bg-darker border border-gold/20 rounded-lg">
+      <img 
+        src={item.perfume.image} 
+        alt={item.perfume.name}
+        className="w-20 h-20 object-cover rounded"
+      />
       
-      {/* Product details */}
       <div className="flex-grow">
-        <h3 className="font-serif text-lg">{getPerfumeDisplayName(item.perfume)}</h3>
+        <h3 className="font-semibold">{item.perfume.name}</h3>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
-        <p className="text-gold mt-1">
-          {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
-        </p>
+        <p className="font-medium mt-1">{item.perfume.price}</p>
       </div>
       
-      {/* Quantity controls */}
       <div className="flex items-center gap-2">
-        <button 
-          onClick={() => updateQuantity(localQuantity - 1)}
-          disabled={isUpdating || localQuantity <= 1}
-          className="p-1 rounded-full hover:bg-gold/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleUpdateQuantity(item.quantity - 1)}
+          disabled={isUpdating || item.quantity <= 1}
+          className="h-8 w-8 p-0 border-gold/30"
         >
           <Minus className="h-4 w-4" />
-        </button>
+        </Button>
         
-        <span className="w-6 text-center">{localQuantity}</span>
+        <span className="w-8 text-center">{item.quantity}</span>
         
-        <button 
-          onClick={() => updateQuantity(localQuantity + 1)}
-          disabled={isUpdating || localQuantity >= 10}
-          className="p-1 rounded-full hover:bg-gold/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => handleUpdateQuantity(item.quantity + 1)}
+          disabled={isUpdating}
+          className="h-8 w-8 p-0 border-gold/30"
         >
           <Plus className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
       
-      {/* Remove button */}
-      <div>
-        <button 
-          onClick={removeItem}
-          disabled={isRemoving}
-          className="p-2 text-muted-foreground hover:text-red-500 transition-colors"
-          aria-label="Remove item"
-        >
-          <Trash2 className="h-5 w-5" />
-        </button>
-      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleRemove}
+        disabled={isUpdating}
+        className="h-8 w-8 p-0 border-red-500/30 text-red-400 hover:bg-red-500/10"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
     </div>
   );
 };

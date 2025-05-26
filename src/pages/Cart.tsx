@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
@@ -19,6 +20,7 @@ const Cart = () => {
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.title = "Shopping Cart | Senteur Fragrances";
@@ -31,6 +33,7 @@ const Cart = () => {
       });
       // Clear cart after successful payment
       setCartItems([]);
+      localStorage.removeItem('cartItems');
       refreshCartCount();
     } else if (paymentStatus === 'cancelled') {
       toast.error('Payment was cancelled', {
@@ -42,9 +45,27 @@ const Cart = () => {
       fetchCart();
       fetchUserProfile();
     } else {
-      setIsLoading(false);
+      loadCartFromLocalStorage();
     }
   }, [user, searchParams]);
+
+  const loadCartFromLocalStorage = () => {
+    try {
+      setIsLoading(true);
+      const storedCart = localStorage.getItem('cartItems');
+      if (storedCart) {
+        const cartData = JSON.parse(storedCart);
+        setCartItems(cartData);
+      } else {
+        setCartItems([]);
+      }
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      setCartItems([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const fetchCart = async () => {
     try {
@@ -109,6 +130,17 @@ const Cart = () => {
       toast.error('Your cart is empty');
       return;
     }
+    
+    if (!user) {
+      // Store cart in localStorage before redirecting to sign-up
+      localStorage.setItem('cartItems', JSON.stringify(cartItems));
+      toast.info('Please sign in to continue checkout', {
+        description: 'Your cart will be saved during sign-up'
+      });
+      navigate('/auth', { state: { from: '/cart' } });
+      return;
+    }
+    
     setIsCheckoutModalOpen(true);
   };
 
@@ -141,8 +173,6 @@ const Cart = () => {
             <div className="flex justify-center items-center py-12">
               <div className="w-10 h-10 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin"></div>
             </div>
-          ) : !user ? (
-            <CartEmpty isAuthenticated={false} />
           ) : (
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Cart items */}
@@ -160,12 +190,12 @@ const Cart = () => {
                     ))}
                   </div>
                 ) : (
-                  <CartEmpty isAuthenticated={true} />
+                  <CartEmpty isAuthenticated={!!user} />
                 )}
               </div>
               
-              {/* Order summary - Always show for authenticated users */}
-              {user && (
+              {/* Order summary - Show for all users when cart has items */}
+              {cartItems.length > 0 && (
                 <div className="lg:w-1/3">
                   <CartSummary 
                     cartItems={cartItems} 
