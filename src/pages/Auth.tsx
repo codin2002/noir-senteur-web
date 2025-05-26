@@ -167,9 +167,9 @@ const Auth = () => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-dark via-darker to-dark flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-serif mb-4">Loading...</h2>
+          <h2 className="text-2xl font-serif mb-4 text-white">Loading...</h2>
           <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
         </div>
       </div>
@@ -179,172 +179,231 @@ const Auth = () => {
   // Render checkout flow interface
   if (isCheckoutFlow) {
     return (
-      <div className="min-h-screen bg-dark text-white flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center p-4">
-          <div className="w-full max-w-6xl">
-            <h1 className="text-3xl font-serif text-center mb-8">
-              SENTEUR<span className="gold-text">.</span>
+      <div className="min-h-screen bg-gradient-to-br from-dark via-darker to-dark text-white">
+        <div className="container mx-auto px-4 py-12">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl md:text-5xl font-serif mb-4">
+              SENTEUR<span className="text-gold">.</span>
             </h1>
+            <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-6"></div>
+            <p className="text-white/70 text-lg">Complete your purchase</p>
+          </div>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
               {/* Guest Checkout Box */}
-              <div className="bg-darker p-8 rounded-lg shadow-xl border border-gold/20">
-                <div className="text-center border-b border-gold/20 pb-4 mb-6">
-                  <h3 className="text-xl font-serif text-gold mb-2">Checkout as Guest</h3>
-                  <p className="text-sm text-white/70">Complete your order without creating an account</p>
-                </div>
-
-                <form onSubmit={handleGuestCheckout} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Personal Details */}
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-white">Personal Information</h4>
-                      
-                      <div>
-                        <Label htmlFor="guest_name" className="text-sm">Full Name *</Label>
-                        <Input
-                          id="guest_name"
-                          value={guestDetails.name}
-                          onChange={handleInputChange('name')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="Enter your full name"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_email" className="text-sm">Email Address *</Label>
-                        <Input
-                          id="guest_email"
-                          type="email"
-                          value={guestDetails.email}
-                          onChange={handleInputChange('email')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="your.email@example.com"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_phone" className="text-sm">Phone Number *</Label>
-                        <Input
-                          id="guest_phone"
-                          value={guestDetails.phoneNumber}
-                          onChange={handleInputChange('phoneNumber')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="+971 50 XXX XXXX"
-                          required
-                        />
-                      </div>
+              <div className="group">
+                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl">
+                  <div className="text-center pb-8 mb-8 border-b border-gold/20">
+                    <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <div className="w-8 h-8 bg-gold rounded-full"></div>
                     </div>
-
-                    {/* Address Details */}
-                    <div className="space-y-4">
-                      <h4 className="font-medium text-white">Delivery Address</h4>
-                      
-                      <div>
-                        <Label htmlFor="guest_building" className="text-sm">Building Name *</Label>
-                        <Input
-                          id="guest_building"
-                          value={guestDetails.buildingName}
-                          onChange={handleInputChange('buildingName')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="e.g., La vista 1"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_floor" className="text-sm">Floor Number</Label>
-                        <Input
-                          id="guest_floor"
-                          value={guestDetails.floorNumber}
-                          onChange={handleInputChange('floorNumber')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="e.g., 6"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_room" className="text-sm">Room/Office Number</Label>
-                        <Input
-                          id="guest_room"
-                          value={guestDetails.roomNumber}
-                          onChange={handleInputChange('roomNumber')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="e.g., 911"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_area" className="text-sm">Area/Locality *</Label>
-                        <Input
-                          id="guest_area"
-                          value={guestDetails.area}
-                          onChange={handleInputChange('area')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="e.g., Nad Hessa"
-                          required
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_landmark" className="text-sm">Landmark (Optional)</Label>
-                        <Input
-                          id="guest_landmark"
-                          value={guestDetails.landmark}
-                          onChange={handleInputChange('landmark')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="e.g., Near SIT"
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="guest_emirate" className="text-sm">Emirate *</Label>
-                        <Input
-                          id="guest_emirate"
-                          value={guestDetails.emirate}
-                          onChange={handleInputChange('emirate')}
-                          className="border-gold/30 focus:border-gold"
-                          placeholder="e.g., Dubai, Abu Dhabi, Sharjah"
-                          required
-                        />
-                      </div>
-                    </div>
+                    <h3 className="text-2xl font-serif text-gold mb-3">Checkout as Guest</h3>
+                    <p className="text-white/60 leading-relaxed">Complete your order quickly without creating an account</p>
                   </div>
 
-                  <Button
-                    type="submit"
-                    disabled={!isGuestFormValid() || checkoutLoading}
-                    className="w-full bg-gold text-darker hover:bg-gold/80 mt-6"
-                  >
-                    {checkoutLoading ? 'Processing...' : 'Continue to Payment'}
-                  </Button>
-                </form>
+                  <form onSubmit={handleGuestCheckout} className="space-y-6">
+                    <div className="grid grid-cols-1 gap-8">
+                      {/* Personal Details */}
+                      <div className="space-y-5">
+                        <div className="flex items-center space-x-3 mb-6">
+                          <div className="w-2 h-2 bg-gold rounded-full"></div>
+                          <h4 className="font-medium text-white text-lg">Personal Information</h4>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="guest_name" className="text-sm text-white/80 mb-2 block">Full Name *</Label>
+                            <Input
+                              id="guest_name"
+                              value={guestDetails.name}
+                              onChange={handleInputChange('name')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="Enter your full name"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_email" className="text-sm text-white/80 mb-2 block">Email Address *</Label>
+                            <Input
+                              id="guest_email"
+                              type="email"
+                              value={guestDetails.email}
+                              onChange={handleInputChange('email')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="your.email@example.com"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_phone" className="text-sm text-white/80 mb-2 block">Phone Number *</Label>
+                            <Input
+                              id="guest_phone"
+                              value={guestDetails.phoneNumber}
+                              onChange={handleInputChange('phoneNumber')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="+971 50 XXX XXXX"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Address Details */}
+                      <div className="space-y-5">
+                        <div className="flex items-center space-x-3 mb-6">
+                          <div className="w-2 h-2 bg-gold rounded-full"></div>
+                          <h4 className="font-medium text-white text-lg">Delivery Address</h4>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="guest_building" className="text-sm text-white/80 mb-2 block">Building Name *</Label>
+                            <Input
+                              id="guest_building"
+                              value={guestDetails.buildingName}
+                              onChange={handleInputChange('buildingName')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="e.g., La vista 1"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_floor" className="text-sm text-white/80 mb-2 block">Floor Number</Label>
+                            <Input
+                              id="guest_floor"
+                              value={guestDetails.floorNumber}
+                              onChange={handleInputChange('floorNumber')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="e.g., 6"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_room" className="text-sm text-white/80 mb-2 block">Room/Office Number</Label>
+                            <Input
+                              id="guest_room"
+                              value={guestDetails.roomNumber}
+                              onChange={handleInputChange('roomNumber')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="e.g., 911"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_area" className="text-sm text-white/80 mb-2 block">Area/Locality *</Label>
+                            <Input
+                              id="guest_area"
+                              value={guestDetails.area}
+                              onChange={handleInputChange('area')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="e.g., Nad Hessa"
+                              required
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_landmark" className="text-sm text-white/80 mb-2 block">Landmark (Optional)</Label>
+                            <Input
+                              id="guest_landmark"
+                              value={guestDetails.landmark}
+                              onChange={handleInputChange('landmark')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="e.g., Near SIT"
+                            />
+                          </div>
+
+                          <div>
+                            <Label htmlFor="guest_emirate" className="text-sm text-white/80 mb-2 block">Emirate *</Label>
+                            <Input
+                              id="guest_emirate"
+                              value={guestDetails.emirate}
+                              onChange={handleInputChange('emirate')}
+                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
+                              placeholder="e.g., Dubai, Abu Dhabi, Sharjah"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-6">
+                      <Button
+                        type="submit"
+                        disabled={!isGuestFormValid() || checkoutLoading}
+                        className="w-full bg-gradient-to-r from-gold to-gold-light text-dark hover:from-gold/90 hover:to-gold-light/90 h-14 text-lg font-medium rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-gold/20"
+                      >
+                        {checkoutLoading ? (
+                          <div className="flex items-center justify-center space-x-2">
+                            <div className="w-5 h-5 border-2 border-dark/30 border-t-dark rounded-full animate-spin"></div>
+                            <span>Processing...</span>
+                          </div>
+                        ) : (
+                          'Continue to Payment'
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </div>
               </div>
 
               {/* Sign In with Google Box */}
-              <div className="bg-darker p-8 rounded-lg shadow-xl border border-gold/20 flex flex-col justify-center">
-                <div className="text-center border-b border-gold/20 pb-4 mb-8">
-                  <h3 className="text-xl font-serif text-gold mb-2">Sign In with Google</h3>
-                  <p className="text-sm text-white/70">Continue with your Google account for faster checkout</p>
-                </div>
+              <div className="group">
+                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl h-full flex flex-col justify-center">
+                  <div className="text-center pb-8 mb-8 border-b border-gold/20">
+                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FcGoogle className="w-8 h-8" />
+                    </div>
+                    <h3 className="text-2xl font-serif text-gold mb-3">Sign In with Google</h3>
+                    <p className="text-white/60 leading-relaxed">Continue with your Google account for faster checkout and order tracking</p>
+                  </div>
 
-                <div className="space-y-6">
-                  <Button 
-                    type="button" 
-                    onClick={signInWithGoogle}
-                    className="w-full bg-white text-black hover:bg-gray-100 h-12 text-lg"
-                    disabled={isLoading}
-                  >
-                    <FcGoogle className="mr-3 h-6 w-6" />
-                    Continue with Google
-                  </Button>
+                  <div className="space-y-8 flex-1 flex flex-col justify-center">
+                    <div className="space-y-6">
+                      <Button 
+                        type="button" 
+                        onClick={signInWithGoogle}
+                        className="w-full bg-white text-dark hover:bg-gray-50 h-14 text-lg font-medium rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-white/10"
+                        disabled={isLoading}
+                      >
+                        <FcGoogle className="mr-3 h-6 w-6" />
+                        Continue with Google
+                      </Button>
 
-                  <div className="text-center">
-                    <p className="text-xs text-white/60">
-                      By continuing, you agree to our terms of service and privacy policy
-                    </p>
+                      <div className="space-y-4 text-center">
+                        <div className="flex items-center justify-center space-x-4">
+                          <div className="w-8 h-px bg-gold/30"></div>
+                          <span className="text-sm text-white/50">Benefits</span>
+                          <div className="w-8 h-px bg-gold/30"></div>
+                        </div>
+                        
+                        <div className="space-y-3 text-sm text-white/60">
+                          <div className="flex items-center justify-center space-x-2">
+                            <div className="w-1 h-1 bg-gold rounded-full"></div>
+                            <span>Faster checkout process</span>
+                          </div>
+                          <div className="flex items-center justify-center space-x-2">
+                            <div className="w-1 h-1 bg-gold rounded-full"></div>
+                            <span>Order history & tracking</span>
+                          </div>
+                          <div className="flex items-center justify-center space-x-2">
+                            <div className="w-1 h-1 bg-gold rounded-full"></div>
+                            <span>Personalized recommendations</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-center pt-6">
+                      <p className="text-xs text-white/40 leading-relaxed">
+                        By continuing, you agree to our terms of service and privacy policy
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
