@@ -1,20 +1,20 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
+import { Loader2, MapPin, Home, Building2 } from 'lucide-react';
 import { CartItemType } from '@/components/cart/CartItem';
-import AddressSelection from './AddressSelection';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { PRICING } from '@/utils/constants';
+import AddressSelection from './AddressSelection';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
   cartItems: CartItemType[];
   userAddress: string;
-  onConfirmCheckout: (addressType: 'home', deliveryAddress: string) => void;
+  onConfirmCheckout: (addressType: 'home', deliveryAddress: string) => Promise<void>;
   currencySymbol: string;
 }
 
@@ -26,149 +26,171 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   onConfirmCheckout,
   currencySymbol
 }) => {
-  const [deliveryAddress, setDeliveryAddress] = useState(userAddress);
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [selectedAddressType, setSelectedAddressType] = useState<'home'>('home');
+  const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
   const { user } = useAuth();
 
-  const handleAddressChange = (addressType: 'home', address: string) => {
-    setDeliveryAddress(address);
-  };
-
   const calculateSubtotal = () => {
-    return cartItems.reduce((sum, item) => 
-      sum + (item.perfume.price_value * item.quantity), 0
-    );
+    return cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
   };
 
   const subtotal = calculateSubtotal();
-  const shippingCost = PRICING.SHIPPING_COST;
-  const total = subtotal + shippingCost;
+  const shipping = 1;
+  const total = subtotal + shipping;
 
-  const handleConfirmCheckout = async () => {
+  const handleCheckout = async () => {
+    if (!deliveryAddress.trim()) {
+      toast.error('Please enter a delivery address');
+      return;
+    }
+
     if (!user) {
       toast.error('Please sign in to continue');
       return;
     }
 
-    setIsProcessingPayment(true);
+    console.log('Starting checkout process...');
+    console.log('User:', user.id, user.email);
+    console.log('Cart items:', cartItems);
+    console.log('Delivery address:', deliveryAddress);
+    console.log('Total amount:', total);
+
+    setIsProcessing(true);
     
     try {
-      // Get user profile for email
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .single();
+      // Store payment info in localStorage for later verification
+      const paymentInfo = {
+        userId: user.id,
+        userEmail: user.email,
+        userName: user.user_metadata?.full_name || user.email,
+        cartItems: cartItems.map(item => ({
+          perfume_id: item.perfume.id,
+          quantity: item.quantity,
+          price: item.perfume.price_value
+        })),
+        deliveryAddress,
+        totalAmount: total,
+        timestamp: Date.now()
+      };
+      
+      console.log('Storing payment info in localStorage:', paymentInfo);
+      localStorage.setItem('ziina_payment_info', JSON.stringify(paymentInfo));
 
-      // Prepare cart items for the payment
-      const paymentCartItems = cartItems.map(item => ({
-        perfume_id: item.perfume.id,
-        quantity: item.quantity,
-        price: item.perfume.price_value
-      }));
-
-      // Create payment with Ziina
+      console.log('Calling create-payment function...');
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
-          cartItems: paymentCartItems,
-          deliveryAddress,
-          userEmail: user.email,
-          userName: profile?.full_name || '',
-          totalAmount: total
+          cartItems,
+          deliveryAddress
         }
       });
 
-      if (error) throw error;
+      console.log('Create-payment response:', { data, error });
 
-      if (data.payment_url) {
-        console.log('Redirecting to Ziina payment page:', data.payment_url);
-        // Store payment info in localStorage for verification after redirect
-        localStorage.setItem('ziina_payment_info', JSON.stringify({
-          paymentId: data.payment_id,
-          userId: user.id,
-          userEmail: user.email,
-          userName: profile?.full_name || '',
-          deliveryAddress,
-          totalAmount: total,
-          cartItems: paymentCartItems
-        }));
+      if (error) {
+        console.error('Payment creation error:', error);
+        throw error;
+      }
+
+      if (data?.success && data?.payment_url) {
+        console.log('Payment URL received:', data.payment_url);
+        console.log('Payment ID:', data.payment_id);
         
-        // Redirect to Ziina payment page
+        // Update stored payment info with payment ID
+        const updatedPaymentInfo = {
+          ...paymentInfo,
+          paymentId: data.payment_id
+        };
+        localStorage.setItem('ziina_payment_info', JSON.stringify(updatedPaymentInfo));
+        
+        toast.success('Redirecting to payment...', {
+          description: 'You will be redirected to complete your payment.'
+        });
+        
+        console.log('Opening payment URL in current window...');
+        // Open payment URL in current window instead of new tab
         window.location.href = data.payment_url;
       } else {
-        throw new Error('No payment URL received from Ziina');
+        console.error('Invalid payment response:', data);
+        throw new Error('Failed to create payment session');
       }
     } catch (error: any) {
-      console.error('Payment error:', error);
+      console.error('Checkout error:', error);
       toast.error('Payment failed', {
         description: error.message || 'Unable to process payment. Please try again.'
       });
     } finally {
-      setIsProcessingPayment(false);
+      setIsProcessing(false);
     }
   };
 
-  const isAddressValid = !!deliveryAddress.trim();
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-darker border-gold/20 text-white max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-md bg-darker border border-gold/20 text-white">
         <DialogHeader>
-          <DialogTitle className="text-xl font-serif">Checkout</DialogTitle>
+          <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
         </DialogHeader>
-
+        
         <div className="space-y-6">
           {/* Order Summary */}
           <div className="space-y-3">
-            <h3 className="font-semibold">Order Summary</h3>
-            <div className="space-y-2">
+            <h3 className="font-medium">Order Summary</h3>
+            <div className="bg-dark border border-gold/10 rounded-lg p-4 space-y-2">
               {cartItems.map((item) => (
                 <div key={item.id} className="flex justify-between text-sm">
                   <span>{item.perfume.name} × {item.quantity}</span>
                   <span>{currencySymbol}{(item.perfume.price_value * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
-            </div>
-            <Separator className="bg-gold/20" />
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span>Subtotal</span>
-                <span>{currencySymbol}{subtotal.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Delivery</span>
-                <span>{currencySymbol}{shippingCost.toFixed(2)}</span>
-              </div>
-              <Separator className="bg-gold/20" />
-              <div className="flex justify-between font-semibold">
-                <span>Total</span>
-                <span>{currencySymbol}{total.toFixed(2)}</span>
+              <div className="border-t border-gold/20 pt-2 space-y-1">
+                <div className="flex justify-between text-sm">
+                  <span>Subtotal</span>
+                  <span>{currencySymbol}{subtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Shipping</span>
+                  <span>{currencySymbol}{shipping.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between font-medium text-gold">
+                  <span>Total</span>
+                  <span>{currencySymbol}{total.toFixed(2)}</span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Address Selection */}
-          <AddressSelection 
+          <AddressSelection
+            selectedType={selectedAddressType}
+            onTypeChange={setSelectedAddressType}
+            deliveryAddress={deliveryAddress}
+            onAddressChange={setDeliveryAddress}
             userAddress={userAddress}
-            onAddressChange={handleAddressChange}
           />
 
           {/* Action Buttons */}
-          <div className="flex gap-3 pt-4">
-            <Button
-              variant="outline"
-              className="flex-1 border-gold/30 hover:bg-gold/10"
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
               onClick={onClose}
-              disabled={isProcessingPayment}
+              className="flex-1 border-gold/30 hover:bg-gold/10"
+              disabled={isProcessing}
             >
               Cancel
             </Button>
-            <Button
+            <Button 
+              onClick={handleCheckout}
+              disabled={isProcessing || !deliveryAddress.trim()}
               className="flex-1 bg-gold text-darker hover:bg-gold/80"
-              onClick={handleConfirmCheckout}
-              disabled={!isAddressValid || isProcessingPayment}
             >
-              {isProcessingPayment ? 'Processing...' : 'Pay with Ziina'}
+              {isProcessing ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                'Pay with Ziina'
+              )}
             </Button>
           </div>
         </div>
