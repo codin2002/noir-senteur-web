@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CartItemType } from './CartItem';
+import { PRICING } from '@/utils/constants';
 
 interface CartSummaryProps {
   cartItems: CartItemType[];
@@ -21,7 +22,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
   };
 
   const subtotal = calculateSubtotal();
-  const shippingCost = subtotal > 0 ? 4.99 : 0; // Fixed delivery charge
+  const shippingCost = subtotal > 0 ? PRICING.SHIPPING_COST : 0;
   const total = subtotal + shippingCost;
 
   return (

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,6 +7,7 @@ import AddressSelection from './AddressSelection';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { PRICING } from '@/utils/constants';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -41,7 +41,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   };
 
   const subtotal = calculateSubtotal();
-  const shippingCost = 4.99; // Fixed delivery charge
+  const shippingCost = PRICING.SHIPPING_COST;
   const total = subtotal + shippingCost;
 
   const handleConfirmCheckout = async () => {

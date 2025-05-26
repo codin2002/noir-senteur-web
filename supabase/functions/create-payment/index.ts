@@ -42,7 +42,7 @@ serve(async (req) => {
       return sum + (price * quantity);
     }, 0);
     
-    const shippingCost = 4.99; // Fixed delivery charge
+    const shippingCost = 0.5; // Updated shipping cost
     const total = subtotal + shippingCost;
 
     console.log(`Calculated subtotal: ${subtotal}, shipping: ${shippingCost}, total: ${total}`);
