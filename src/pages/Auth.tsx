@@ -191,7 +191,7 @@ const Auth = () => {
           </div>
             
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 relative">
               {/* Guest Checkout Box */}
               <div className="group">
                 <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl">
@@ -352,6 +352,13 @@ const Auth = () => {
                 </div>
               </div>
 
+              {/* OR Divider - Desktop */}
+              <div className="hidden lg:flex items-center justify-center absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+                <div className="bg-gradient-to-br from-darker/95 to-dark/90 backdrop-blur-sm px-8 py-4 rounded-full border border-gold/30 shadow-2xl">
+                  <span className="text-gold font-semibold text-xl">OR</span>
+                </div>
+              </div>
+
               {/* Sign In with Google Box */}
               <div className="group">
                 <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl h-full flex flex-col justify-center">
@@ -406,6 +413,19 @@ const Auth = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* OR Divider - Mobile */}
+            <div className="lg:hidden flex items-center justify-center my-8">
+              <div className="flex items-center w-full max-w-md mx-auto">
+                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-gold/40"></div>
+                <div className="px-6">
+                  <div className="bg-gradient-to-br from-darker/95 to-dark/90 backdrop-blur-sm px-6 py-3 rounded-full border border-gold/30 shadow-xl">
+                    <span className="text-gold font-semibold text-lg">OR</span>
+                  </div>
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-gold/40"></div>
               </div>
             </div>
           </div>
