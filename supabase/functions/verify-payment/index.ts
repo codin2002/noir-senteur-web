@@ -13,12 +13,13 @@ serve(async (req) => {
   }
 
   try {
-    const { paymentIntentId, deliveryAddress, isGuest, userId } = await req.json();
+    const { paymentIntentId, deliveryAddress, isGuest, userId, cartItems } = await req.json();
     console.log('=== VERIFY PAYMENT FUNCTION CALLED ===');
     console.log('Payment Intent ID:', paymentIntentId);
     console.log('Delivery Address:', deliveryAddress);
     console.log('Is Guest:', isGuest);
     console.log('User ID:', userId);
+    console.log('Cart Items:', cartItems?.length || 0);
 
     if (!paymentIntentId) {
       return new Response(JSON.stringify({ 
@@ -87,7 +88,7 @@ serve(async (req) => {
       console.log('=== PAYMENT CONFIRMED AS COMPLETED ===');
       
       let user = null;
-      let cartItems = [];
+      let orderCartItems = [];
 
       if (!isGuest) {
         // Get user from auth header for authenticated users
@@ -198,36 +199,42 @@ serve(async (req) => {
         console.log('=== CART DATA FOUND ===');
         console.log('Cart items count:', cartData.length);
 
-        cartItems = cartData.map((item: any) => ({
+        orderCartItems = cartData.map((item: any) => ({
           perfume_id: item.perfume_id,
           quantity: item.quantity,
           price: item.perfume.price_value
         }));
       } else {
-        // For guest checkout, get cart items from localStorage (passed in the request)
-        // Since we can't access localStorage from the server, cart items should be passed in the request
+        // For guest checkout, use cart items from the request
         console.log('=== GUEST CHECKOUT ===');
         
-        // Parse guest details from delivery address
-        const addressParts = deliveryAddress.split(' | ');
-        const guestName = addressParts.find(part => part.startsWith('Contact:'))?.replace('Contact: ', '') || 'Guest';
-        const guestEmail = addressParts.find(part => part.startsWith('Email:'))?.replace('Email: ', '') || '';
-        const guestPhone = addressParts.find(part => part.startsWith('Phone:'))?.replace('Phone: ', '') || '';
+        if (!cartItems || cartItems.length === 0) {
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: { message: 'No cart items provided for guest checkout', details: 'Cart items are required for guest orders' }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          });
+        }
+
+        console.log('Guest cart items count:', cartItems.length);
         
-        // For guest checkout, we need to reconstruct cart items from payment data
-        // This is a simplified approach - in production you might want to store this data temporarily
-        cartItems = []; // This would need to be populated from the payment request data
-        
-        console.log('Guest details:', { guestName, guestEmail, guestPhone });
+        orderCartItems = cartItems.map((item: any) => ({
+          perfume_id: item.perfume.id,
+          quantity: item.quantity,
+          price: item.perfume.price_value
+        }));
       }
 
-      // Calculate total from cart or payment data
-      const totalAmount = cartItems.reduce((sum: number, item: any) => {
+      // Calculate total from cart items
+      const totalAmount = orderCartItems.reduce((sum: number, item: any) => {
         return sum + (item.price * item.quantity);
       }, 0) + 1; // Add shipping
 
       console.log('=== CALCULATED TOTAL ===');
       console.log('Total amount:', totalAmount);
+      console.log('Order cart items:', orderCartItems.length);
 
       let orderId;
 
@@ -236,7 +243,7 @@ serve(async (req) => {
         console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR USER ===');
         
         const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
-          cart_items: cartItems,
+          cart_items: orderCartItems,
           order_total: totalAmount,
           user_uuid: user.id
         });
@@ -265,19 +272,11 @@ serve(async (req) => {
         const guestPhone = addressParts.find(part => part.startsWith('Phone:'))?.replace('Phone: ', '') || '';
         const actualAddress = addressParts[0] || deliveryAddress;
         
-        // For now, create a basic order record for guest checkout
-        // In a real implementation, you'd want to pass cart items in the request
-        const guestCartItems = [
-          {
-            perfume_id: '00000000-0000-0000-0000-000000000000', // Placeholder - should be real data
-            quantity: 1,
-            price: paymentData.amount / 100 - 1 // Convert from fils and subtract shipping
-          }
-        ];
+        console.log('Guest details parsed:', { guestName, guestEmail, guestPhone, actualAddress });
 
         const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
-          cart_items: guestCartItems,
-          order_total: paymentData.amount / 100, // Convert from fils to AED
+          cart_items: orderCartItems,
+          order_total: totalAmount,
           user_uuid: null,
           guest_name: guestName,
           guest_email: guestEmail,

@@ -97,6 +97,15 @@ export const useCheckout = () => {
   const verifyPayment = async (paymentIntentId: string) => {
     // For payment verification, we check if it was a guest checkout
     const isGuest = localStorage.getItem('checkout_is_guest') === 'true';
+    let cartItems = [];
+    
+    if (isGuest) {
+      // Get cart items from localStorage for guest verification
+      const storedCartItems = localStorage.getItem('checkout_cart_items');
+      if (storedCartItems) {
+        cartItems = JSON.parse(storedCartItems);
+      }
+    }
     
     try {
       // Get stored delivery address
@@ -104,13 +113,15 @@ export const useCheckout = () => {
       
       console.log('Verifying payment with delivery address:', deliveryAddress);
       console.log('Is guest checkout:', isGuest);
+      console.log('Cart items for verification:', cartItems.length);
       
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: {
           paymentIntentId,
           deliveryAddress,
           isGuest,
-          userId: user?.id || null
+          userId: user?.id || null,
+          cartItems: isGuest ? cartItems : undefined
         }
       });
 
