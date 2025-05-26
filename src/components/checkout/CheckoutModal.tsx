@@ -7,6 +7,7 @@ import { CartItemType } from '@/components/cart/CartItem';
 import AddressSelection from './AddressSelection';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const { user } = useAuth();
 
   const handleAddressChange = (addressType: 'home', address: string) => {
     setDeliveryAddress(address);
@@ -43,20 +45,54 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const total = subtotal + shippingCost;
 
   const handleConfirmCheckout = async () => {
+    if (!user) {
+      toast.error('Please sign in to continue');
+      return;
+    }
+
     setIsProcessingPayment(true);
     
     try {
+      // Get user profile for email
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single();
+
+      // Prepare cart items for the payment
+      const paymentCartItems = cartItems.map(item => ({
+        perfume_id: item.perfume.id,
+        quantity: item.quantity,
+        price: item.perfume.price_value
+      }));
+
       // Create payment with Ziina
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
-          cartItems,
-          deliveryAddress
+          cartItems: paymentCartItems,
+          deliveryAddress,
+          userEmail: user.email,
+          userName: profile?.full_name || '',
+          totalAmount: total
         }
       });
 
       if (error) throw error;
 
       if (data.payment_url) {
+        console.log('Redirecting to Ziina payment page:', data.payment_url);
+        // Store payment info in localStorage for verification after redirect
+        localStorage.setItem('ziina_payment_info', JSON.stringify({
+          paymentId: data.payment_id,
+          userId: user.id,
+          userEmail: user.email,
+          userName: profile?.full_name || '',
+          deliveryAddress,
+          totalAmount: total,
+          cartItems: paymentCartItems
+        }));
+        
         // Redirect to Ziina payment page
         window.location.href = data.payment_url;
       } else {

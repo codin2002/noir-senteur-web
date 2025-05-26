@@ -344,6 +344,71 @@ export type Database = {
         }
         Relationships: []
       }
+      successful_payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string | null
+          delivery_address: string | null
+          email_sent: boolean
+          email_sent_at: string | null
+          id: string
+          order_id: string
+          payment_id: string
+          payment_method: string
+          payment_status: string
+          updated_at: string
+          user_id: string
+          ziina_response: Json | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          customer_email: string
+          customer_name?: string | null
+          delivery_address?: string | null
+          email_sent?: boolean
+          email_sent_at?: string | null
+          id?: string
+          order_id: string
+          payment_id: string
+          payment_method?: string
+          payment_status?: string
+          updated_at?: string
+          user_id: string
+          ziina_response?: Json | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          customer_email?: string
+          customer_name?: string | null
+          delivery_address?: string | null
+          email_sent?: boolean
+          email_sent_at?: string | null
+          id?: string
+          order_id?: string
+          payment_id?: string
+          payment_method?: string
+          payment_status?: string
+          updated_at?: string
+          user_id?: string
+          ziina_response?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "successful_payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wishlist: {
         Row: {
           created_at: string

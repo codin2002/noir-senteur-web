@@ -12,16 +12,24 @@ const PaymentSuccess: React.FC = () => {
     orderId: string;
     deliveryMethod: string;
     deliveryAddress: string;
+    paymentMethod: string;
   } | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
 
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
+    const ziinaStatus = searchParams.get('status');
+    const ziinaPaymentId = searchParams.get('payment_id');
     
     if (sessionId) {
+      // Stripe payment verification
       verifyPayment(sessionId);
+    } else if (ziinaStatus && ziinaPaymentId) {
+      // Ziina payment verification
+      verifyZiinaPayment(ziinaPaymentId, ziinaStatus);
     } else {
       setIsVerifying(false);
+      toast.error('No payment information found');
     }
   }, [searchParams]);
 
@@ -37,7 +45,8 @@ const PaymentSuccess: React.FC = () => {
         setOrderDetails({
           orderId: data.orderId,
           deliveryMethod: data.deliveryMethod,
-          deliveryAddress: data.deliveryAddress
+          deliveryAddress: data.deliveryAddress,
+          paymentMethod: data.paymentMethod || 'stripe'
         });
         toast.success('Payment successful!', {
           description: 'Your order has been confirmed and is being processed.'
@@ -50,6 +59,67 @@ const PaymentSuccess: React.FC = () => {
     } catch (error: any) {
       console.error('Payment verification error:', error);
       toast.error('Unable to verify payment', {
+        description: 'Please contact support for assistance.'
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
+  const verifyZiinaPayment = async (paymentId: string, status: string) => {
+    try {
+      // Get stored payment info from localStorage
+      const storedInfo = localStorage.getItem('ziina_payment_info');
+      if (!storedInfo) {
+        throw new Error('Payment information not found');
+      }
+
+      const paymentInfo = JSON.parse(storedInfo);
+      
+      // Verify with our backend
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: { 
+          paymentId,
+          ziinaResponse: {
+            status: status,
+            payment_id: paymentId,
+            metadata: {
+              user_id: paymentInfo.userId,
+              user_email: paymentInfo.userEmail,
+              user_name: paymentInfo.userName,
+              delivery_address: paymentInfo.deliveryAddress,
+              delivery_method: 'home',
+              total_amount: paymentInfo.totalAmount.toString(),
+              cart_items: JSON.stringify(paymentInfo.cartItems)
+            }
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.success) {
+        setOrderDetails({
+          orderId: data.orderId,
+          deliveryMethod: data.deliveryMethod || 'home',
+          deliveryAddress: data.deliveryAddress || paymentInfo.deliveryAddress,
+          paymentMethod: 'ziina'
+        });
+        
+        // Clear stored payment info
+        localStorage.removeItem('ziina_payment_info');
+        
+        toast.success('Ziina payment successful!', {
+          description: 'Your order has been confirmed and is being processed.'
+        });
+      } else {
+        toast.error('Payment verification failed', {
+          description: 'Please contact support if you believe this is an error.'
+        });
+      }
+    } catch (error: any) {
+      console.error('Ziina payment verification error:', error);
+      toast.error('Unable to verify Ziina payment', {
         description: 'Please contact support for assistance.'
       });
     } finally {
@@ -89,6 +159,16 @@ const PaymentSuccess: React.FC = () => {
               <div>
                 <p className="font-medium">Order ID</p>
                 <p className="text-sm text-muted-foreground">{orderDetails.orderId}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 flex items-center justify-center">
+                <span className="text-gold text-sm">💳</span>
+              </div>
+              <div>
+                <p className="font-medium">Payment Method</p>
+                <p className="text-sm text-muted-foreground capitalize">{orderDetails.paymentMethod}</p>
               </div>
             </div>
             
