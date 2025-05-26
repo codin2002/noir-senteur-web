@@ -70,7 +70,7 @@ const Hero = () => {
       height: '100%',
       objectFit: 'cover'
     }}>
-        <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//first.mp4" type="video/mp4" onError={e => console.error("MP4 source failed:", e)} />
+        <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4" type="video/mp4" onError={e => console.error("MP4 source failed:", e)} />
         Your browser does not support video playback.
       </video>
       
