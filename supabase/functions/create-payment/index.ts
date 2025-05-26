@@ -26,11 +26,32 @@ serve(async (req) => {
     );
 
     // Retrieve authenticated user
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    console.log('Auth header present:', !!authHeader);
+    
+    if (!authHeader) {
+      console.error('No authorization header found');
+      throw new Error("Authorization header missing");
+    }
+
     const token = authHeader.replace("Bearer ", "");
-    const { data } = await supabaseClient.auth.getUser(token);
-    const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated");
+    console.log('Token extracted, length:', token.length);
+    
+    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+    console.log('Auth response:', { user: userData.user?.email, error: authError });
+    
+    if (authError) {
+      console.error('Authentication error:', authError);
+      throw new Error(`Authentication failed: ${authError.message}`);
+    }
+    
+    const user = userData.user;
+    if (!user?.email) {
+      console.error('No user found or user has no email');
+      throw new Error("User not authenticated");
+    }
+
+    console.log('Authenticated user:', user.email);
 
     // Calculate totals - handle both data structures
     const subtotal = cartItems.reduce((sum: number, item: any) => {
