@@ -59,42 +59,35 @@ export const useProfile = () => {
 
   const fetchOrders = async () => {
     try {
-      // Get orders
-      const { data: ordersData, error: ordersError } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('user_id', user?.id)
-        .order('created_at', { ascending: false });
+      console.log('=== FETCHING ORDERS FOR USER ===');
+      console.log('User ID:', user?.id);
+      
+      // Use the RPC function to get orders with items
+      const { data: ordersData, error: ordersError } = await supabase.rpc('get_orders_with_items', {
+        user_uuid: user?.id
+      });
         
-      if (ordersError) throw ordersError;
+      if (ordersError) {
+        console.error('Orders fetch error:', ordersError);
+        throw ordersError;
+      }
       
-      // For each order, get its items
-      const ordersWithItems = await Promise.all(
-        (ordersData || []).map(async (order) => {
-          const { data: itemsData, error: itemsError } = await supabase
-            .from('order_items')
-            .select(`
-              *,
-              perfume:perfumes(*)
-            `)
-            .eq('order_id', order.id);
-            
-          if (itemsError) throw itemsError;
-          
-          // Process items to match OrderItem type
-          const processedItems: OrderItem[] = (itemsData || []).map(item => ({
-            ...item,
-            perfume: item.perfume as unknown as Perfume
-          }));
-          
-          return {
-            ...order,
-            items: processedItems
-          } as Order;
-        })
-      );
+      console.log('Orders data received:', ordersData);
       
-      setOrders(ordersWithItems);
+      // Filter to only show orders for the current user (extra safety)
+      const userOrders = (ordersData || []).filter(order => order.user_id === user?.id);
+      
+      // Process the orders to match our Order type
+      const processedOrders: Order[] = userOrders.map(order => ({
+        id: order.id,
+        created_at: order.created_at,
+        status: order.status,
+        total: order.total,
+        items: order.items || []
+      }));
+      
+      console.log('Processed orders:', processedOrders);
+      setOrders(processedOrders);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
       toast.error('Failed to load purchase history', {
@@ -113,24 +106,45 @@ export const useProfile = () => {
         .eq('id', user?.id)
         .single();
         
-      if (error) throw error;
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "not found" error
+        throw error;
+      }
       
-      // Ensure data is properly typed as Profile
-      const profileData: Profile = {
-        id: data.id,
-        full_name: data.full_name,
-        avatar_url: data.avatar_url,
-        phone: data.phone,
-        address: data.address
-      };
-      
-      setProfile(profileData);
-      setFormData(prev => ({
-        ...prev,
-        full_name: profileData.full_name || '',
-        phone: profileData.phone || '',
-        address: profileData.address || ''
-      }));
+      // If no profile exists, create one for Google users
+      if (!data && user) {
+        console.log('Creating profile for Google user:', user.id);
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            full_name: user.user_metadata?.full_name || user.user_metadata?.name || '',
+            avatar_url: user.user_metadata?.avatar_url || null
+          })
+          .select()
+          .single();
+          
+        if (createError) {
+          console.error('Error creating profile:', createError);
+        } else {
+          console.log('Profile created:', newProfile);
+          setProfile(newProfile);
+          setFormData(prev => ({
+            ...prev,
+            full_name: newProfile.full_name || '',
+            phone: newProfile.phone || '',
+            address: newProfile.address || ''
+          }));
+        }
+      } else if (data) {
+        // Profile exists
+        setProfile(data);
+        setFormData(prev => ({
+          ...prev,
+          full_name: data.full_name || '',
+          phone: data.phone || '',
+          address: data.address || ''
+        }));
+      }
     } catch (error: any) {
       console.error('Error fetching profile:', error);
       toast.error('Failed to load profile data', {
