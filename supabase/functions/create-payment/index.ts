@@ -53,12 +53,12 @@ serve(async (req) => {
       throw new Error("Ziina API key not configured");
     }
 
-    // Create Ziina payment request with production mode
+    // Create Ziina payment request with the correct success URL format using Ziina's placeholder
     const ziinaPayload = {
       amount: Math.round(total * 100), // Convert to fils
       currency_code: "AED",
       message: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
-      success_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/payment-success`,
+      success_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
       cancel_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/cart?payment=cancelled`,
       test: false, // Set to false for production mode
       transaction_source: "directApi",

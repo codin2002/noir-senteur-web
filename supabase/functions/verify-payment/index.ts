@@ -13,9 +13,41 @@ serve(async (req) => {
   }
 
   try {
-    const { sessionId, paymentId, ziinaResponse } = await req.json();
+    const { paymentIntentId } = await req.json();
     console.log('=== VERIFY PAYMENT FUNCTION CALLED ===');
-    console.log('Received parameters:', { sessionId, paymentId, ziinaResponse });
+    console.log('Payment Intent ID:', paymentIntentId);
+
+    if (!paymentIntentId) {
+      throw new Error('Payment Intent ID is required');
+    }
+
+    // Get Ziina API key from environment
+    const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
+    if (!ziinaApiKey) {
+      throw new Error("Ziina API key not configured");
+    }
+
+    // Fetch payment status from Ziina API
+    console.log('=== FETCHING PAYMENT STATUS FROM ZIINA ===');
+    const ziinaResponse = await fetch(`https://api-v2.ziina.com/api/payment_intent/${paymentIntentId}`, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${ziinaApiKey}`,
+        "Accept": "application/json",
+      },
+    });
+
+    console.log('Ziina API response status:', ziinaResponse.status);
+
+    if (!ziinaResponse.ok) {
+      const errorText = await ziinaResponse.text();
+      console.error('Ziina API error response:', errorText);
+      throw new Error(`Failed to fetch payment status: ${errorText}`);
+    }
+
+    const paymentData = await ziinaResponse.json();
+    console.log('=== ZIINA PAYMENT DATA ===');
+    console.log('Payment data:', JSON.stringify(paymentData, null, 2));
 
     // Create Supabase client using service role key to bypass RLS
     const supabaseService = createClient(
@@ -24,64 +56,97 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    let session;
-    let isZiinaPayment = false;
-
-    // Check if this is a Ziina payment or Stripe payment
-    if (paymentId && ziinaResponse) {
-      // Handle Ziina payment verification
-      isZiinaPayment = true;
-      console.log('=== PROCESSING ZIINA PAYMENT ===');
-      console.log('Payment ID:', paymentId);
-      console.log('Ziina Response:', JSON.stringify(ziinaResponse, null, 2));
-      
-      session = {
-        payment_status: ziinaResponse.status === 'success' ? 'paid' : 'unpaid',
-        metadata: ziinaResponse.metadata || {}
-      };
-    } else {
-      console.error('=== INVALID PAYMENT DATA ===');
-      console.log('Missing required data - sessionId:', sessionId, 'paymentId:', paymentId, 'ziinaResponse:', ziinaResponse);
-      throw new Error('Invalid payment data provided');
-    }
-
     console.log('=== PAYMENT STATUS CHECK ===');
-    console.log('Payment status:', session.payment_status);
-    console.log('Session metadata:', JSON.stringify(session.metadata, null, 2));
+    console.log('Payment status:', paymentData.status);
 
-    if (session.payment_status === 'paid') {
-      console.log('=== PAYMENT CONFIRMED AS PAID ===');
+    if (paymentData.status === 'completed') {
+      console.log('=== PAYMENT CONFIRMED AS COMPLETED ===');
       
-      // Parse cart items from metadata
-      const cartItems = JSON.parse(session.metadata?.cart_items || '[]');
-      const totalAmount = parseFloat(session.metadata?.total_amount || '0');
-      const userEmail = session.metadata?.user_email || '';
-      const userName = session.metadata?.user_name || '';
-      const userId = session.metadata?.user_id;
-
-      console.log('=== EXTRACTED PAYMENT DATA ===');
-      console.log('User ID:', userId);
-      console.log('User Email:', userEmail);
-      console.log('User Name:', userName);
-      console.log('Total Amount:', totalAmount);
-      console.log('Cart Items Count:', cartItems.length);
-      console.log('Cart Items:', JSON.stringify(cartItems, null, 2));
-
-      if (!userId) {
-        console.error('=== ERROR: USER ID NOT FOUND ===');
-        throw new Error('User ID not found in payment metadata');
+      // Get stored payment info from the request or fetch from storage
+      // Since we can't access localStorage from edge function, we'll need the client to send this data
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader) {
+        throw new Error('Authentication required');
       }
 
-      // Create order using the stored procedure (this also clears the cart)
-      console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE ===');
-      console.log('Parameters:', {
-        user_uuid: userId,
-        cart_items: JSON.stringify(cartItems),
-        order_total: totalAmount
+      // Get user from auth header
+      const supabaseClient = createClient(
+        Deno.env.get("SUPABASE_URL") ?? "",
+        Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+      );
+      
+      const token = authHeader.replace("Bearer ", "");
+      const { data: userData } = await supabaseClient.auth.getUser(token);
+      const user = userData.user;
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      console.log('=== AUTHENTICATED USER ===');
+      console.log('User ID:', user.id);
+      console.log('User Email:', user.email);
+
+      // Get the user's current cart to process the order
+      const { data: cartData, error: cartError } = await supabaseService.rpc('get_cart_with_perfumes', {
+        user_uuid: user.id
       });
 
+      if (cartError) {
+        console.error('=== CART FETCH ERROR ===');
+        console.error('Error details:', JSON.stringify(cartError, null, 2));
+        throw cartError;
+      }
+
+      if (!cartData || cartData.length === 0) {
+        console.log('=== NO CART ITEMS FOUND ===');
+        // Cart might already be cleared, check if order exists
+        const { data: existingOrder } = await supabaseService
+          .from('orders')
+          .select('id')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1);
+
+        if (existingOrder && existingOrder.length > 0) {
+          console.log('=== ORDER ALREADY EXISTS ===');
+          return new Response(JSON.stringify({
+            success: true,
+            orderId: existingOrder[0].id,
+            deliveryMethod: 'home',
+            deliveryAddress: 'Address on file',
+            paymentMethod: 'ziina',
+            message: 'Order already processed'
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          });
+        } else {
+          throw new Error('No cart items found and no recent order exists');
+        }
+      }
+
+      console.log('=== CART DATA FOUND ===');
+      console.log('Cart items count:', cartData.length);
+
+      // Calculate total from cart
+      const totalAmount = cartData.reduce((sum: number, item: any) => {
+        return sum + (item.perfume.price_value * item.quantity);
+      }, 0) + 1; // Add shipping
+
+      console.log('=== CALCULATED TOTAL ===');
+      console.log('Total amount:', totalAmount);
+
+      // Prepare cart items for order creation
+      const cartItems = cartData.map((item: any) => ({
+        perfume_id: item.perfume_id,
+        quantity: item.quantity,
+        price: item.perfume.price_value
+      }));
+
+      console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE ===');
       const { data: orderId, error: orderError } = await supabaseService.rpc('create_order_with_items', {
-        user_uuid: userId,
+        user_uuid: user.id,
         cart_items: JSON.stringify(cartItems),
         order_total: totalAmount
       });
@@ -95,23 +160,21 @@ serve(async (req) => {
       console.log('=== ORDER CREATED SUCCESSFULLY ===');
       console.log('Order ID:', orderId);
 
-      // Record successful payment for email notifications
+      // Record successful payment
       console.log('=== RECORDING SUCCESSFUL PAYMENT ===');
       const paymentRecord = {
-        user_id: userId,
+        user_id: user.id,
         order_id: orderId,
-        payment_id: paymentId,
+        payment_id: paymentIntentId,
         payment_method: 'ziina',
         amount: totalAmount,
         currency: 'AED',
-        customer_email: userEmail,
-        customer_name: userName,
-        delivery_address: session.metadata?.delivery_address,
+        customer_email: user.email,
+        customer_name: user.user_metadata?.full_name || user.email,
+        delivery_address: 'Home delivery', // Default for now
         payment_status: 'completed',
-        ziina_response: ziinaResponse
+        ziina_response: paymentData
       };
-      
-      console.log('Payment record to insert:', JSON.stringify(paymentRecord, null, 2));
 
       const { error: paymentRecordError } = await supabaseService
         .from('successful_payments')
@@ -125,38 +188,15 @@ serve(async (req) => {
         console.log('=== PAYMENT RECORDED SUCCESSFULLY ===');
       }
 
-      // Double-check that cart is cleared (redundant but ensures it's cleared)
-      try {
-        console.log('=== ENSURING CART IS CLEARED ===');
-        console.log('Clearing cart for user:', userId);
-        
-        const { error: cartClearError } = await supabaseService
-          .from('cart')
-          .delete()
-          .eq('user_id', userId);
-          
-        if (cartClearError) {
-          console.error('=== CART CLEAR ERROR ===');
-          console.error('Error details:', JSON.stringify(cartClearError, null, 2));
-        } else {
-          console.log('=== CART CLEARED SUCCESSFULLY ===');
-        }
-      } catch (cartClearError) {
-        console.error('=== CART CLEAR EXCEPTION ===');
-        console.error('Exception details:', cartClearError);
-      }
-
       console.log('=== RETURNING SUCCESS RESPONSE ===');
-      const successResponse = { 
-        success: true, 
+      const successResponse = {
+        success: true,
         orderId: orderId,
-        deliveryMethod: session.metadata?.delivery_method || 'home',
-        deliveryAddress: session.metadata?.delivery_address,
+        deliveryMethod: 'home',
+        deliveryAddress: 'Home delivery',
         paymentMethod: 'ziina',
         cartCleared: true
       };
-      
-      console.log('Success response:', JSON.stringify(successResponse, null, 2));
 
       return new Response(JSON.stringify(successResponse), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -164,8 +204,12 @@ serve(async (req) => {
       });
     } else {
       console.log('=== PAYMENT NOT COMPLETED ===');
-      console.log('Payment status:', session.payment_status);
-      return new Response(JSON.stringify({ success: false, status: session.payment_status }), {
+      console.log('Payment status:', paymentData.status);
+      return new Response(JSON.stringify({ 
+        success: false, 
+        status: paymentData.status,
+        message: `Payment status: ${paymentData.status}`
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
@@ -174,7 +218,6 @@ serve(async (req) => {
     console.error('=== VERIFY PAYMENT ERROR ===');
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
-    console.error('Full error:', error);
     
     return new Response(JSON.stringify({ 
       error: error.message,

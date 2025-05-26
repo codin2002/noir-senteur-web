@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, Package, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,106 +22,27 @@ const PaymentSuccess: React.FC = () => {
   useEffect(() => {
     console.log('=== PaymentSuccess Component Mounted ===');
     console.log('Full URL:', window.location.href);
-    console.log('Location pathname:', location.pathname);
-    console.log('Location search:', location.search);
-    console.log('Location hash:', location.hash);
     console.log('Current user:', user?.id);
     
-    // Parse ALL possible URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const allParams: Record<string, string> = {};
+    // Get the payment_intent_id from URL parameters
+    const paymentIntentId = searchParams.get('payment_intent_id');
     
-    console.log('=== ALL URL PARAMETERS ===');
-    for (const [key, value] of urlParams.entries()) {
-      allParams[key] = value;
-      console.log(`${key}: ${value}`);
-    }
+    console.log('=== PAYMENT INTENT ID FROM URL ===');
+    console.log('Payment Intent ID:', paymentIntentId);
     
-    // Check for common Ziina parameters
-    const ziinaParams = {
-      status: urlParams.get('status'),
-      payment_id: urlParams.get('payment_id'),
-      transaction_id: urlParams.get('transaction_id'),
-      result: urlParams.get('result'),
-      success: urlParams.get('success'),
-      payment_intent_id: urlParams.get('payment_intent_id'),
-      ziina_payment_id: urlParams.get('ziina_payment_id')
-    };
-    
-    console.log('=== ZIINA PARAMETERS CHECK ===');
-    console.log('Ziina params found:', ziinaParams);
-    
-    // Check for Stripe parameters
-    const stripeParams = {
-      session_id: urlParams.get('session_id'),
-      payment_intent: urlParams.get('payment_intent'),
-      payment_intent_client_secret: urlParams.get('payment_intent_client_secret')
-    };
-    
-    console.log('=== STRIPE PARAMETERS CHECK ===');
-    console.log('Stripe params found:', stripeParams);
-    
-    // Check localStorage for payment info
-    const storedInfo = localStorage.getItem('ziina_payment_info');
-    console.log('=== STORED PAYMENT INFO ===');
-    console.log('Stored payment info exists:', !!storedInfo);
-    if (storedInfo) {
-      try {
-        const parsedInfo = JSON.parse(storedInfo);
-        console.log('Parsed stored info:', parsedInfo);
-      } catch (e) {
-        console.error('Error parsing stored info:', e);
-      }
-    }
-    
-    // Determine payment type and proceed
-    if (stripeParams.session_id) {
-      console.log('=== PROCESSING STRIPE PAYMENT ===');
-      verifyPayment(stripeParams.session_id);
-    } else if (ziinaParams.status || ziinaParams.payment_id || ziinaParams.transaction_id) {
-      console.log('=== PROCESSING ZIINA PAYMENT ===');
-      const paymentId = ziinaParams.payment_id || ziinaParams.transaction_id || ziinaParams.payment_intent_id || ziinaParams.ziina_payment_id;
-      const status = ziinaParams.status || ziinaParams.result || (ziinaParams.success === 'true' ? 'success' : 'failed');
-      
-      console.log('Using payment ID:', paymentId);
-      console.log('Using status:', status);
-      
-      if (paymentId) {
-        verifyZiinaPayment(paymentId, status);
-      } else {
-        console.error('=== NO VALID PAYMENT ID FOUND ===');
-        console.log('All available params:', allParams);
-        setIsVerifying(false);
-        toast.error('Payment ID not found', {
-          description: 'Unable to find payment ID in URL parameters'
-        });
-      }
+    if (paymentIntentId) {
+      console.log('=== PROCEEDING WITH PAYMENT VERIFICATION ===');
+      verifyZiinaPayment(paymentIntentId);
     } else {
-      console.error('=== NO PAYMENT PARAMETERS FOUND ===');
-      console.log('Available URL params:', allParams);
-      console.log('Current URL:', window.location.href);
-      
-      // Try to handle case where user navigated directly to payment-success
-      if (storedInfo) {
-        console.log('=== ATTEMPTING TO USE STORED INFO ===');
-        try {
-          const parsedInfo = JSON.parse(storedInfo);
-          if (parsedInfo.paymentId) {
-            console.log('Using stored payment ID:', parsedInfo.paymentId);
-            verifyZiinaPayment(parsedInfo.paymentId, 'success');
-            return;
-          }
-        } catch (e) {
-          console.error('Error using stored info:', e);
-        }
-      }
+      console.error('=== NO PAYMENT INTENT ID IN URL ===');
+      console.log('Available URL params:', Object.fromEntries(searchParams.entries()));
       
       setIsVerifying(false);
-      toast.error('No payment information found', {
-        description: 'Unable to verify payment status from URL parameters'
+      toast.error('Payment verification failed', {
+        description: 'Payment intent ID not found in URL parameters'
       });
     }
-  }, [searchParams, user, location]);
+  }, [searchParams, user]);
 
   const clearCartEverywhere = async () => {
     try {
@@ -128,9 +50,6 @@ const PaymentSuccess: React.FC = () => {
       console.log('User ID:', user?.id);
       
       // Clear localStorage cart
-      const cartItemsBefore = localStorage.getItem('cartItems');
-      console.log('Cart items before clearing:', cartItemsBefore);
-      
       localStorage.removeItem('cartItems');
       localStorage.removeItem('ziina_payment_info');
       console.log('Cleared localStorage cart items and payment info');
@@ -158,46 +77,19 @@ const PaymentSuccess: React.FC = () => {
     }
   };
 
-  const verifyZiinaPayment = async (paymentId: string, status: string) => {
+  const verifyZiinaPayment = async (paymentIntentId: string) => {
     try {
       console.log('=== Starting Ziina payment verification ===');
-      console.log('Payment ID:', paymentId);
-      console.log('Status:', status);
+      console.log('Payment Intent ID:', paymentIntentId);
       
-      // Get stored payment info from localStorage
-      const storedInfo = localStorage.getItem('ziina_payment_info');
-      console.log('Retrieved stored payment info:', storedInfo);
-      
-      if (!storedInfo) {
-        throw new Error('Payment information not found in storage. Please contact support.');
+      if (!user) {
+        throw new Error('User not authenticated');
       }
-
-      const paymentInfo = JSON.parse(storedInfo);
-      console.log('Parsed payment info:', paymentInfo);
       
-      // Verify with our backend
+      // Call the updated verify-payment function with payment intent ID
       console.log('=== Calling verify-payment function ===');
-      const verifyPayload = { 
-        paymentId,
-        ziinaResponse: {
-          status: status === 'success' ? 'success' : 'failed',
-          payment_id: paymentId,
-          metadata: {
-            user_id: paymentInfo.userId || user?.id,
-            user_email: paymentInfo.userEmail || user?.email,
-            user_name: paymentInfo.userName || user?.user_metadata?.full_name || '',
-            delivery_address: paymentInfo.deliveryAddress,
-            delivery_method: 'home',
-            total_amount: paymentInfo.totalAmount.toString(),
-            cart_items: JSON.stringify(paymentInfo.cartItems)
-          }
-        }
-      };
-      
-      console.log('Verify payment payload:', verifyPayload);
-      
       const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: verifyPayload
+        body: { paymentIntentId }
       });
 
       console.log('=== Verification response ===');
@@ -216,7 +108,7 @@ const PaymentSuccess: React.FC = () => {
         setOrderDetails({
           orderId: data.orderId,
           deliveryMethod: data.deliveryMethod || 'home',
-          deliveryAddress: data.deliveryAddress || paymentInfo.deliveryAddress,
+          deliveryAddress: data.deliveryAddress || 'Home delivery',
           paymentMethod: 'ziina'
         });
         
@@ -241,57 +133,13 @@ const PaymentSuccess: React.FC = () => {
       } else {
         console.error('Payment verification failed:', data);
         toast.error('Payment verification failed', {
-          description: 'Please contact support if you believe this is an error.'
+          description: data?.message || 'Please contact support if you believe this is an error.'
         });
       }
     } catch (error: any) {
-      console.error('=== Ziina payment verification error ===', error);
+      console.error('=== Payment verification error ===', error);
       toast.error('Unable to verify payment', {
         description: error.message || 'Please contact support for assistance.'
-      });
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  const verifyPayment = async (sessionId: string) => {
-    try {
-      console.log('=== Starting Stripe payment verification ===');
-      console.log('Session ID:', sessionId);
-      
-      const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: { sessionId }
-      });
-
-      console.log('Stripe verification response:', { data, error });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        console.log('Stripe payment verification successful');
-        setOrderDetails({
-          orderId: data.orderId,
-          deliveryMethod: data.deliveryMethod,
-          deliveryAddress: data.deliveryAddress,
-          paymentMethod: data.paymentMethod || 'stripe'
-        });
-        
-        // Clear cart everywhere
-        await clearCartEverywhere();
-        
-        toast.success('Payment successful!', {
-          description: 'Your order has been confirmed and is being processed.'
-        });
-      } else {
-        console.log('Stripe payment verification failed:', data);
-        toast.error('Payment verification failed', {
-          description: 'Please contact support if you believe this is an error.'
-        });
-      }
-    } catch (error: any) {
-      console.error('Payment verification error:', error);
-      toast.error('Unable to verify payment', {
-        description: 'Please contact support for assistance.'
       });
     } finally {
       setIsVerifying(false);
