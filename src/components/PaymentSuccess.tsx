@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, Package, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,43 +21,100 @@ const PaymentSuccess: React.FC = () => {
   useEffect(() => {
     console.log('=== PaymentSuccess Component Mounted ===');
     console.log('Full URL:', window.location.href);
-    console.log('Search params object:', Object.fromEntries(searchParams.entries()));
+    console.log('Location pathname:', location.pathname);
     console.log('Location search:', location.search);
+    console.log('Location hash:', location.hash);
     console.log('Current user:', user?.id);
     
-    // Log all URL parameters
-    const allParams = new URLSearchParams(window.location.search);
-    console.log('All URL parameters:');
-    for (const [key, value] of allParams.entries()) {
-      console.log(`  ${key}: ${value}`);
+    // Parse ALL possible URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const allParams: Record<string, string> = {};
+    
+    console.log('=== ALL URL PARAMETERS ===');
+    for (const [key, value] of urlParams.entries()) {
+      allParams[key] = value;
+      console.log(`${key}: ${value}`);
     }
     
-    const sessionId = searchParams.get('session_id');
-    const ziinaStatus = searchParams.get('status');
-    const ziinaPaymentId = searchParams.get('payment_id');
-    const ziinaTransactionId = searchParams.get('transaction_id');
+    // Check for common Ziina parameters
+    const ziinaParams = {
+      status: urlParams.get('status'),
+      payment_id: urlParams.get('payment_id'),
+      transaction_id: urlParams.get('transaction_id'),
+      result: urlParams.get('result'),
+      success: urlParams.get('success'),
+      payment_intent_id: urlParams.get('payment_intent_id'),
+      ziina_payment_id: urlParams.get('ziina_payment_id')
+    };
     
-    console.log('Extracted parameters:', { 
-      sessionId, 
-      ziinaStatus, 
-      ziinaPaymentId, 
-      ziinaTransactionId 
-    });
+    console.log('=== ZIINA PARAMETERS CHECK ===');
+    console.log('Ziina params found:', ziinaParams);
+    
+    // Check for Stripe parameters
+    const stripeParams = {
+      session_id: urlParams.get('session_id'),
+      payment_intent: urlParams.get('payment_intent'),
+      payment_intent_client_secret: urlParams.get('payment_intent_client_secret')
+    };
+    
+    console.log('=== STRIPE PARAMETERS CHECK ===');
+    console.log('Stripe params found:', stripeParams);
     
     // Check localStorage for payment info
     const storedInfo = localStorage.getItem('ziina_payment_info');
-    console.log('Stored payment info:', storedInfo);
+    console.log('=== STORED PAYMENT INFO ===');
+    console.log('Stored payment info exists:', !!storedInfo);
+    if (storedInfo) {
+      try {
+        const parsedInfo = JSON.parse(storedInfo);
+        console.log('Parsed stored info:', parsedInfo);
+      } catch (e) {
+        console.error('Error parsing stored info:', e);
+      }
+    }
     
-    if (sessionId) {
-      console.log('Processing Stripe payment verification');
-      verifyPayment(sessionId);
-    } else if (ziinaStatus && (ziinaPaymentId || ziinaTransactionId)) {
-      console.log('Processing Ziina payment verification');
-      const paymentId = ziinaPaymentId || ziinaTransactionId;
-      verifyZiinaPayment(paymentId, ziinaStatus);
+    // Determine payment type and proceed
+    if (stripeParams.session_id) {
+      console.log('=== PROCESSING STRIPE PAYMENT ===');
+      verifyPayment(stripeParams.session_id);
+    } else if (ziinaParams.status || ziinaParams.payment_id || ziinaParams.transaction_id) {
+      console.log('=== PROCESSING ZIINA PAYMENT ===');
+      const paymentId = ziinaParams.payment_id || ziinaParams.transaction_id || ziinaParams.payment_intent_id || ziinaParams.ziina_payment_id;
+      const status = ziinaParams.status || ziinaParams.result || (ziinaParams.success === 'true' ? 'success' : 'failed');
+      
+      console.log('Using payment ID:', paymentId);
+      console.log('Using status:', status);
+      
+      if (paymentId) {
+        verifyZiinaPayment(paymentId, status);
+      } else {
+        console.error('=== NO VALID PAYMENT ID FOUND ===');
+        console.log('All available params:', allParams);
+        setIsVerifying(false);
+        toast.error('Payment ID not found', {
+          description: 'Unable to find payment ID in URL parameters'
+        });
+      }
     } else {
-      console.error('No valid payment information found in URL');
-      console.log('URL search string:', window.location.search);
+      console.error('=== NO PAYMENT PARAMETERS FOUND ===');
+      console.log('Available URL params:', allParams);
+      console.log('Current URL:', window.location.href);
+      
+      // Try to handle case where user navigated directly to payment-success
+      if (storedInfo) {
+        console.log('=== ATTEMPTING TO USE STORED INFO ===');
+        try {
+          const parsedInfo = JSON.parse(storedInfo);
+          if (parsedInfo.paymentId) {
+            console.log('Using stored payment ID:', parsedInfo.paymentId);
+            verifyZiinaPayment(parsedInfo.paymentId, 'success');
+            return;
+          }
+        } catch (e) {
+          console.error('Error using stored info:', e);
+        }
+      }
+      
       setIsVerifying(false);
       toast.error('No payment information found', {
         description: 'Unable to verify payment status from URL parameters'
