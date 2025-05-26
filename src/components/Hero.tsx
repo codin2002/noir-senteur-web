@@ -87,7 +87,7 @@ const Hero = () => {
         <p className="text-muted-foreground max-w-md mx-auto mb-8">
           Meticulously crafted fragrances for those who seek distinction in every detail.
         </p>
-        <a href="#collection" className="btn-outline">٣١٣</a>
+        <a href="#collection" className="btn-outline">EXPLORE ٣١٣</a>
       </div>
 
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
