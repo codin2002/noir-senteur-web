@@ -83,7 +83,7 @@ export const useProfile = () => {
         status: order.status,
         total: order.total,
         // Safely cast items from Json to OrderItem[] with validation
-        items: Array.isArray(order.items) ? order.items as OrderItem[] : []
+        items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
       }));
       
       console.log('Processed orders:', processedOrders);
