@@ -18,33 +18,34 @@ export const useCartCount = (userId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCartCount = async () => {
-    if (!userId) {
-      setCount(0);
-      setIsLoading(false);
-      return;
-    }
-
     try {
       setIsLoading(true);
       
-      // Use the get_cart_with_perfumes RPC function
-      const { data, error } = await supabase.rpc('get_cart_with_perfumes', {
-        user_uuid: userId
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (data && Array.isArray(data)) {
-        // Type-safe cast for the data returned from DB
-        const cartItems = data as unknown as CartItemFromDB[];
+      if (userId) {
+        // For authenticated users, fetch from database
+        const { data, error } = await supabase.rpc('get_cart_with_perfumes', {
+          user_uuid: userId
+        });
         
-        // Calculate the total quantity of items in the cart
-        const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-        setCount(totalItems);
+        if (error) {
+          throw error;
+        }
+        
+        if (data && Array.isArray(data)) {
+          // Type-safe cast for the data returned from DB
+          const cartItems = data as unknown as CartItemFromDB[];
+          
+          // Calculate the total quantity of items in the cart
+          const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+          setCount(totalItems);
+        } else {
+          setCount(0);
+        }
       } else {
-        setCount(0);
+        // For non-authenticated users, get from localStorage
+        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        const totalItems = cartItems.reduce((sum: number, item: any) => sum + item.quantity, 0);
+        setCount(totalItems);
       }
     } catch (error) {
       console.error('Error fetching cart count:', error);

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -257,47 +258,72 @@ const PerfumeDetail = () => {
   };
 
   const addToCart = async () => {
-    if (!user) {
-      toast.error('Please sign in to add items to your cart');
-      return;
-    }
-
-    if (!id) return;
+    if (!id || !perfume) return;
 
     setAddingToCart(true);
     try {
-      // Check if item already exists in cart
-      const { data: existingItem, error: checkError } = await supabase
-        .from('cart')
-        .select('id, quantity')
-        .eq('user_id', user.id)
-        .eq('perfume_id', id)
-        .single();
-
-      if (checkError && checkError.code !== 'PGRST116') {
-        throw checkError;
-      }
-
-      if (existingItem) {
-        // Update quantity
-        const { error: updateError } = await supabase
+      if (user) {
+        // For authenticated users, add to database
+        const { data: existingItem, error: checkError } = await supabase
           .from('cart')
-          .update({ quantity: existingItem.quantity + 1 })
-          .eq('id', existingItem.id);
+          .select('id, quantity')
+          .eq('user_id', user.id)
+          .eq('perfume_id', id)
+          .single();
 
-        if (updateError) throw updateError;
-        toast.success('Updated cart quantity');
+        if (checkError && checkError.code !== 'PGRST116') {
+          throw checkError;
+        }
+
+        if (existingItem) {
+          // Update quantity
+          const { error: updateError } = await supabase
+            .from('cart')
+            .update({ quantity: existingItem.quantity + 1 })
+            .eq('id', existingItem.id);
+
+          if (updateError) throw updateError;
+          toast.success('Updated cart quantity');
+        } else {
+          // Add new item
+          const { error: insertError } = await supabase
+            .from('cart')
+            .insert([{ user_id: user.id, perfume_id: id, quantity: 1 }]);
+
+          if (insertError) throw insertError;
+          toast.success('Added to cart');
+        }
+        
+        refreshCartCount();
       } else {
-        // Add new item
-        const { error: insertError } = await supabase
-          .from('cart')
-          .insert([{ user_id: user.id, perfume_id: id, quantity: 1 }]);
-
-        if (insertError) throw insertError;
+        // For non-authenticated users, add to localStorage
+        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        const existingItemIndex = cartItems.findIndex((item: any) => item.perfume.id === id);
+        
+        if (existingItemIndex > -1) {
+          // Update quantity
+          cartItems[existingItemIndex].quantity += 1;
+        } else {
+          // Add new item
+          const newItem = {
+            id: `temp-${Date.now()}`, // Temporary ID for localStorage
+            quantity: 1,
+            perfume: {
+              id: perfume.id,
+              name: perfume.name,
+              price: perfume.price,
+              price_value: perfume.price_value,
+              image: perfume.image,
+              notes: perfume.notes
+            }
+          };
+          cartItems.push(newItem);
+        }
+        
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
         toast.success('Added to cart');
+        refreshCartCount();
       }
-      
-      refreshCartCount(); // Refresh the cart count in navbar
     } catch (error: any) {
       toast.error('Failed to add to cart', {
         description: error.message

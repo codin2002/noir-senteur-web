@@ -33,16 +33,12 @@ const App: React.FC = () => {
               <Route path="/auth/callback" element={<AuthCallback />} />
               <Route path="/perfume/:id" element={<PerfumeDetail />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
+              <Route path="/cart" element={<Cart />} />
               
               {/* Protected routes */}
               <Route path="/wishlist" element={
                 <ProtectedRoute>
                   <Wishlist />
-                </ProtectedRoute>
-              } />
-              <Route path="/cart" element={
-                <ProtectedRoute>
-                  <Cart />
                 </ProtectedRoute>
               } />
               <Route path="/profile" element={
