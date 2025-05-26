@@ -39,7 +39,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   currencySymbol
 }) => {
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
-  const [showGuestForm, setShowGuestForm] = useState(true);
   const { processPayment, isLoading } = useCheckout();
   const { user, signInWithGoogle } = useAuth();
 
@@ -70,65 +69,25 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleSignInWithGoogle = async () => {
     try {
       await signInWithGoogle();
-      setShowGuestForm(false);
     } catch (error) {
       console.error('Google sign-in failed:', error);
     }
   };
 
-  // If user is authenticated, show the regular checkout flow
-  if (user) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
-          <DialogHeader>
-            <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Review your order details and provide delivery information.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="space-y-6 pb-4">
-            <OrderSummary cartItems={cartItems} currencySymbol={currencySymbol} />
-
-            <AddressSelection
-              onAddressChange={handleAddressChange}
-              selectedAddress={deliveryAddress}
-            />
-
-            <CheckoutActions
-              onCancel={onClose}
-              onCheckout={handleCheckout}
-              isProcessing={isLoading}
-              isCheckoutDisabled={!deliveryAddress.trim()}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
-  // Show guest checkout form for non-authenticated users
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Choose how you'd like to checkout - as a guest or with your account.
+            {user ? "Review your order details and provide delivery information." : "Choose how you'd like to checkout - as a guest or with your account."}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 pb-4">
           <OrderSummary cartItems={cartItems} currencySymbol={currencySymbol} />
 
-          {showGuestForm ? (
-            <GuestCheckoutForm
-              onGuestCheckout={handleGuestCheckout}
-              onSwitchToSignIn={handleSignInWithGoogle}
-              isLoading={isLoading}
-            />
-          ) : (
+          {user ? (
             <>
               <AddressSelection
                 onAddressChange={handleAddressChange}
@@ -142,6 +101,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                 isCheckoutDisabled={!deliveryAddress.trim()}
               />
             </>
+          ) : (
+            <GuestCheckoutForm
+              onGuestCheckout={handleGuestCheckout}
+              onSwitchToSignIn={handleSignInWithGoogle}
+              isLoading={isLoading}
+            />
           )}
         </div>
       </DialogContent>

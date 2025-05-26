@@ -175,16 +175,7 @@ const Cart = () => {
       return;
     }
     
-    if (!user) {
-      // Store cart in localStorage before redirecting to sign-up
-      localStorage.setItem('cartItems', JSON.stringify(cartItems));
-      toast.info('Please sign in to continue checkout', {
-        description: 'Your cart will be saved during sign-up'
-      });
-      navigate('/auth', { state: { from: '/cart' } });
-      return;
-    }
-    
+    // Always open the checkout modal, regardless of authentication status
     setIsCheckoutModalOpen(true);
   };
 
