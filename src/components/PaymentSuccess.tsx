@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, Package, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -112,6 +111,16 @@ const PaymentSuccess: React.FC = () => {
         toast.success('Ziina payment successful!', {
           description: 'Your order has been confirmed and is being processed.'
         });
+
+        // Send order confirmation email
+        try {
+          await supabase.functions.invoke('send-order-confirmation', {
+            body: { orderId: data.orderId }
+          });
+        } catch (emailError) {
+          console.error('Failed to send confirmation email:', emailError);
+          // Don't show error to user as the order was successful
+        }
       } else {
         toast.error('Payment verification failed', {
           description: 'Please contact support if you believe this is an error.'
@@ -199,7 +208,7 @@ const PaymentSuccess: React.FC = () => {
               <Link to="/">Continue Shopping</Link>
             </Button>
             <Button asChild variant="outline" className="flex-1 border-gold/30 hover:bg-gold/10">
-              <Link to="/profile">View Orders</Link>
+              <Link to="/profile?tab=history">View Orders</Link>
             </Button>
           </div>
         </div>
