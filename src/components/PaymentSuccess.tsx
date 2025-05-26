@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useCheckout } from '@/hooks/useCheckout';
 import { useAuth } from '@/context/AuthContext';
@@ -15,12 +16,17 @@ const PaymentSuccess = () => {
   const [error, setError] = useState<string | null>(null);
   const { verifyPayment } = useCheckout();
   const { user } = useAuth();
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     const verifyAndProcessPayment = async () => {
+      // Prevent multiple calls
+      if (hasVerified.current) return;
+      hasVerified.current = true;
+
       // Check for different possible payment parameter names
-      const paymentIntentId = searchParams.get('payment_intent') || 
-                             searchParams.get('payment_intent_id') || 
+      const paymentIntentId = searchParams.get('payment_intent_id') || 
+                             searchParams.get('payment_intent') || 
                              searchParams.get('session_id');
       
       console.log('Payment verification - URL params:', Object.fromEntries(searchParams.entries()));
@@ -37,12 +43,14 @@ const PaymentSuccess = () => {
         console.log('Verifying payment with ID:', paymentIntentId);
         const result = await verifyPayment(paymentIntentId);
         
-        if (result.success) {
+        console.log('Verification result:', result);
+        
+        if (result && result.success) {
           setOrderDetails(result);
           console.log('Payment verification successful:', result);
         } else {
           console.error('Payment verification failed:', result);
-          setError(result.message || 'Payment verification failed');
+          setError(result?.message || 'Payment verification failed');
         }
       } catch (error: any) {
         console.error('Payment verification error:', error);

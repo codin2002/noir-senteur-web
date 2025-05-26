@@ -125,7 +125,8 @@ export const useCheckout = () => {
           isGuest,
           userId: user?.id || null,
           cartItems: isGuest ? cartItems : undefined
-        }
+        },
+        headers: isGuest ? {} : undefined // Don't send auth headers for guest verification
       });
 
       console.log('Verification response received:', { success: data?.success, error });
@@ -134,8 +135,7 @@ export const useCheckout = () => {
         console.error('Payment verification error:', error);
         return {
           success: false,
-          message: error.message || 'Failed to verify payment',
-          error: error
+          message: error.message || 'Failed to verify payment'
         };
       }
 
@@ -151,8 +151,7 @@ export const useCheckout = () => {
         console.error('Payment verification failed:', data);
         return {
           success: false,
-          message: data.message || data.error?.message || 'Payment verification failed',
-          error: data.error
+          message: data.message || 'Payment verification failed'
         };
       }
 
@@ -170,8 +169,7 @@ export const useCheckout = () => {
       console.error('Payment verification failed:', error);
       return {
         success: false,
-        message: error.message || 'Payment verification failed',
-        error: error
+        message: error.message || 'Payment verification failed'
       };
     }
   };
