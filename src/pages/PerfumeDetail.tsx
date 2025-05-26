@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -78,6 +77,9 @@ const PerfumeDetail = () => {
   const [isLoadingRatings, setIsLoadingRatings] = useState(false);
   const { refresh: refreshCartCount } = useCartCount(user?.id);
 
+  // Add debug log for the id parameter
+  console.log('Perfume ID from params:', id);
+
   useEffect(() => {
     if (id) {
       fetchPerfume();
@@ -94,6 +96,7 @@ const PerfumeDetail = () => {
 
   const fetchPerfume = async () => {
     try {
+      console.log('Fetching perfume with ID:', id);
       const { data, error } = await supabase
         .from('perfumes')
         .select('*')
@@ -103,6 +106,7 @@ const PerfumeDetail = () => {
       if (error) throw error;
       setPerfume(data);
     } catch (error: any) {
+      console.error('Error fetching perfume:', error);
       toast.error('Failed to load perfume details', {
         description: error.message
       });
@@ -114,6 +118,7 @@ const PerfumeDetail = () => {
 
   const fetchPerfumeImages = async () => {
     try {
+      console.log('Fetching images for perfume ID:', id);
       const { data, error } = await supabase
         .from('perfume_images')
         .select('*')
@@ -134,6 +139,7 @@ const PerfumeDetail = () => {
   const fetchClassificationData = async () => {
     if (!id) return;
     
+    console.log('Fetching classification data for perfume ID:', id);
     setIsLoadingClassification(true);
     try {
       const { data, error } = await supabase
@@ -149,6 +155,7 @@ const PerfumeDetail = () => {
         return;
       }
       
+      console.log('Classification data response:', data);
       // Take the first result if any exist
       setClassificationData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
@@ -162,6 +169,7 @@ const PerfumeDetail = () => {
   const fetchRatingsData = async () => {
     if (!id) return;
     
+    console.log('Fetching ratings data for perfume ID:', id);
     setIsLoadingRatings(true);
     try {
       const { data, error } = await supabase
@@ -177,6 +185,7 @@ const PerfumeDetail = () => {
         return;
       }
       
+      console.log('Ratings data response:', data);
       // Take the first result if any exist
       setRatingsData(data && data.length > 0 ? data[0] : null);
     } catch (error) {

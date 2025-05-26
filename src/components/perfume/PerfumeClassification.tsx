@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
@@ -45,6 +46,7 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   
   useEffect(() => {
     console.log('Classification data:', classificationData);
+    console.log('Rendered data:', classificationData);
   }, [classificationData]);
 
   if (isLoading) {
@@ -93,6 +95,10 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
     { name: 'Unisex', value: classificationData.audience_unisex, fullMark: 100 },
   ];
 
+  // Debug logs
+  console.log("Type data:", typeData);
+  console.log("chartHeight:", isMobile ? 280 : 400);
+
   const chartConfig = {
     classification: {
       label: "Classification",
@@ -115,7 +121,7 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   };
 
   const renderRadarChart = (data: any[]) => (
-    <div className="relative">
+    <div className="relative w-full max-w-xl mx-auto border border-red-500">
       <ResponsiveContainer width="100%" height={chartHeight}>
         <RadarChart cx="50%" cy="50%" outerRadius={chartOuterRadius} data={data}>
           <PolarGrid 
