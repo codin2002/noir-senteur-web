@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -81,26 +80,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       console.log('Storing payment info in localStorage:', paymentInfo);
       localStorage.setItem('ziina_payment_info', JSON.stringify(paymentInfo));
 
-      // Get fresh session to ensure we have valid tokens
-      const { data: { session: freshSession }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError || !freshSession) {
-        console.error('Session error:', sessionError);
-        toast.error('Authentication error. Please sign in again.');
-        return;
-      }
-
-      console.log('Using fresh session for API call');
       console.log('Calling create-payment function...');
       
+      // Use the current session's access token directly
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           cartItems,
           deliveryAddress
-        },
-        headers: {
-          Authorization: `Bearer ${freshSession.access_token}`,
-        },
+        }
       });
 
       console.log('Create-payment response:', { data, error });

@@ -25,7 +25,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    // Retrieve authenticated user
+    // Get the authorization header
     const authHeader = req.headers.get("Authorization");
     console.log('Auth header present:', !!authHeader);
     
@@ -34,21 +34,17 @@ serve(async (req) => {
       throw new Error("Authorization header missing");
     }
 
+    // Extract the token from the Bearer header
     const token = authHeader.replace("Bearer ", "");
     console.log('Token extracted, length:', token.length);
     
-    const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
-    console.log('Auth response:', { user: userData.user?.email, error: authError });
+    // Get user from the token
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
+    console.log('Auth response:', { user: user?.email, error: authError });
     
-    if (authError) {
+    if (authError || !user) {
       console.error('Authentication error:', authError);
-      throw new Error(`Authentication failed: ${authError.message}`);
-    }
-    
-    const user = userData.user;
-    if (!user?.email) {
-      console.error('No user found or user has no email');
-      throw new Error("User not authenticated");
+      throw new Error(`Authentication failed: ${authError?.message || 'Invalid token'}`);
     }
 
     console.log('Authenticated user:', user.email);
