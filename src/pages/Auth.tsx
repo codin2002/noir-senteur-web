@@ -184,7 +184,7 @@ const Auth = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <h1 className="text-4xl md:text-5xl font-serif mb-4">
-              SENTEUR<span className="text-gold">.</span>
+              SENTEUR
             </h1>
             <div className="w-24 h-px bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-6"></div>
             <p className="text-white/70 text-lg">Complete your purchase</p>
@@ -440,7 +440,7 @@ const Auth = () => {
       <div className="flex-1 flex flex-col items-center justify-center p-4">
         <div className="w-full max-w-2xl bg-darker p-8 rounded-lg shadow-xl border border-gold/20">
           <h1 className="text-3xl font-serif text-center mb-6">
-            SENTEUR<span className="gold-text">.</span>
+            SENTEUR
           </h1>
           
           <Tabs 
