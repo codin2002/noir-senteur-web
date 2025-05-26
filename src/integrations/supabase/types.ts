@@ -485,17 +485,15 @@ export type Database = {
     }
     Functions: {
       create_order_with_items: {
-        Args:
-          | {
-              cart_items: Json
-              order_total: number
-              user_uuid?: string
-              guest_name?: string
-              guest_email?: string
-              guest_phone?: string
-              delivery_address?: string
-            }
-          | { user_uuid: string; cart_items: Json; order_total: number }
+        Args: {
+          cart_items: Json
+          order_total: number
+          user_uuid?: string
+          guest_name?: string
+          guest_email?: string
+          guest_phone?: string
+          delivery_address?: string
+        }
         Returns: string
       }
       delete_cart_item: {

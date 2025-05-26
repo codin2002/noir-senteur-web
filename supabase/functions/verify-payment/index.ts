@@ -239,7 +239,7 @@ serve(async (req) => {
       let orderId;
 
       if (!isGuest && user) {
-        // Authenticated user order
+        // Authenticated user order - use new function signature
         console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR USER ===');
         
         const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
@@ -262,7 +262,7 @@ serve(async (req) => {
 
         orderId = orderIdResult;
       } else {
-        // Guest order
+        // Guest order - use new function signature
         console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR GUEST ===');
         
         // Parse guest details from delivery address
