@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-12 border-b border-gray-800">
           <div>
-            <h2 className="text-2xl font-serif mb-6">SENTEUR<span className="gold-text">.</span></h2>
+            <h2 className="text-2xl font-serif mb-6">SENTEUR</h2>
             <p className="text-muted-foreground mb-6">
               Crafting exceptional fragrances for those who appreciate the art of scent.
             </p>

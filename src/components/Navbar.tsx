@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -57,7 +58,7 @@ const Navbar = () => {
   return <nav className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-12', isScrolled ? 'py-2 bg-darker bg-opacity-95 backdrop-blur-sm' : 'py-4 bg-transparent')}>
       <div className="flex items-center justify-between">
         <Link to="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
-          SENTEUR<span className="gold-text"></span>
+          SENTEUR
         </Link>
 
         {/* Desktop Menu */}
