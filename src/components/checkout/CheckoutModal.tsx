@@ -37,7 +37,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md bg-darker border border-gold/20 text-white">
+      <DialogContent className="sm:max-w-2xl mt-8 bg-darker border border-gold/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
         </DialogHeader>
