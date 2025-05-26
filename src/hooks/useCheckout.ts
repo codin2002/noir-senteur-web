@@ -11,21 +11,32 @@ export const useCheckout = () => {
   const { user } = useAuth();
 
   const processPayment = async (cartItems: any[], deliveryAddress: string) => {
-    // For guest checkout, we don't require user authentication
-    // The payment system will handle guest orders differently
-    
     setIsLoading(true);
 
     try {
       console.log('Processing payment with delivery address:', deliveryAddress);
       
+      // For guest checkout, we need to get cart items from localStorage if no user
+      let itemsToProcess = cartItems;
+      
+      if (!user && (!cartItems || cartItems.length === 0)) {
+        // Get cart items from localStorage for guest checkout
+        const localCart = localStorage.getItem('cartItems');
+        if (localCart) {
+          itemsToProcess = JSON.parse(localCart);
+        } else {
+          toast.error('No items found in cart');
+          return;
+        }
+      }
+
       // Call the create-payment edge function
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
-          cartItems,
+          cartItems: itemsToProcess,
           deliveryAddress: deliveryAddress.trim(),
-          isGuest: !user, // Flag to indicate if this is a guest checkout
-          userId: user?.id || null // Pass user ID if available, null for guests
+          isGuest: !user,
+          userId: user?.id || null
         }
       });
 

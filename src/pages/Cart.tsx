@@ -15,7 +15,6 @@ import { mergeCartItems, cleanupCartStorage } from '@/utils/cartUtils';
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<{ address: string }>({ address: '' });
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
@@ -175,8 +174,14 @@ const Cart = () => {
       return;
     }
     
-    // Always open the checkout modal, regardless of authentication status
-    setIsCheckoutModalOpen(true);
+    // Redirect to Auth page with checkout flow information
+    navigate('/auth', { 
+      state: { 
+        isCheckout: true, 
+        cartItems: cartItems,
+        from: '/cart' 
+      } 
+    });
   };
 
   const handleConfirmCheckout = async (
@@ -244,16 +249,6 @@ const Cart = () => {
         </div>
       </div>
       <Footer />
-
-      {/* Checkout Modal */}
-      <CheckoutModal
-        isOpen={isCheckoutModalOpen}
-        onClose={() => setIsCheckoutModalOpen(false)}
-        cartItems={cartItems}
-        userAddress={userProfile.address}
-        onConfirmCheckout={handleConfirmCheckout}
-        currencySymbol="AED "
-      />
     </div>
   );
 };
