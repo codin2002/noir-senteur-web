@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { CheckCircle, Package, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
 const PaymentSuccess: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -14,6 +16,7 @@ const PaymentSuccess: React.FC = () => {
     paymentMethod: string;
   } | null>(null);
   const [isVerifying, setIsVerifying] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const sessionId = searchParams.get('session_id');
@@ -30,7 +33,91 @@ const PaymentSuccess: React.FC = () => {
       setIsVerifying(false);
       toast.error('No payment information found');
     }
-  }, [searchParams]);
+  }, [searchParams, user]);
+
+  const verifyZiinaPayment = async (paymentId: string, status: string) => {
+    try {
+      console.log('Verifying Ziina payment:', { paymentId, status });
+      
+      // Get stored payment info from localStorage
+      const storedInfo = localStorage.getItem('ziina_payment_info');
+      if (!storedInfo) {
+        throw new Error('Payment information not found in storage');
+      }
+
+      const paymentInfo = JSON.parse(storedInfo);
+      console.log('Retrieved payment info:', paymentInfo);
+      
+      // Verify with our backend
+      const { data, error } = await supabase.functions.invoke('verify-payment', {
+        body: { 
+          paymentId,
+          ziinaResponse: {
+            status: status === 'success' ? 'success' : 'failed',
+            payment_id: paymentId,
+            metadata: {
+              user_id: paymentInfo.userId,
+              user_email: paymentInfo.userEmail,
+              user_name: paymentInfo.userName,
+              delivery_address: paymentInfo.deliveryAddress,
+              delivery_method: 'home',
+              total_amount: paymentInfo.totalAmount.toString(),
+              cart_items: JSON.stringify(paymentInfo.cartItems)
+            }
+          }
+        }
+      });
+
+      console.log('Verification response:', { data, error });
+
+      if (error) {
+        console.error('Verification error:', error);
+        throw error;
+      }
+
+      if (data?.success) {
+        setOrderDetails({
+          orderId: data.orderId,
+          deliveryMethod: data.deliveryMethod || 'home',
+          deliveryAddress: data.deliveryAddress || paymentInfo.deliveryAddress,
+          paymentMethod: 'ziina'
+        });
+        
+        // Clear stored payment info
+        localStorage.removeItem('ziina_payment_info');
+        
+        toast.success('Payment successful!', {
+          description: 'Your order has been confirmed and is being processed.'
+        });
+
+        // Clear the cart from localStorage if user is not authenticated
+        if (!user) {
+          localStorage.removeItem('cartItems');
+        }
+
+        // Send order confirmation email
+        try {
+          await supabase.functions.invoke('send-order-confirmation', {
+            body: { orderId: data.orderId }
+          });
+        } catch (emailError) {
+          console.error('Failed to send confirmation email:', emailError);
+          // Don't show error to user as the order was successful
+        }
+      } else {
+        toast.error('Payment verification failed', {
+          description: 'Please contact support if you believe this is an error.'
+        });
+      }
+    } catch (error: any) {
+      console.error('Ziina payment verification error:', error);
+      toast.error('Unable to verify payment', {
+        description: error.message || 'Please contact support for assistance.'
+      });
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const verifyPayment = async (sessionId: string) => {
     try {
@@ -58,77 +145,6 @@ const PaymentSuccess: React.FC = () => {
     } catch (error: any) {
       console.error('Payment verification error:', error);
       toast.error('Unable to verify payment', {
-        description: 'Please contact support for assistance.'
-      });
-    } finally {
-      setIsVerifying(false);
-    }
-  };
-
-  const verifyZiinaPayment = async (paymentId: string, status: string) => {
-    try {
-      // Get stored payment info from localStorage
-      const storedInfo = localStorage.getItem('ziina_payment_info');
-      if (!storedInfo) {
-        throw new Error('Payment information not found');
-      }
-
-      const paymentInfo = JSON.parse(storedInfo);
-      
-      // Verify with our backend
-      const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: { 
-          paymentId,
-          ziinaResponse: {
-            status: status,
-            payment_id: paymentId,
-            metadata: {
-              user_id: paymentInfo.userId,
-              user_email: paymentInfo.userEmail,
-              user_name: paymentInfo.userName,
-              delivery_address: paymentInfo.deliveryAddress,
-              delivery_method: 'home',
-              total_amount: paymentInfo.totalAmount.toString(),
-              cart_items: JSON.stringify(paymentInfo.cartItems)
-            }
-          }
-        }
-      });
-
-      if (error) throw error;
-
-      if (data?.success) {
-        setOrderDetails({
-          orderId: data.orderId,
-          deliveryMethod: data.deliveryMethod || 'home',
-          deliveryAddress: data.deliveryAddress || paymentInfo.deliveryAddress,
-          paymentMethod: 'ziina'
-        });
-        
-        // Clear stored payment info
-        localStorage.removeItem('ziina_payment_info');
-        
-        toast.success('Ziina payment successful!', {
-          description: 'Your order has been confirmed and is being processed.'
-        });
-
-        // Send order confirmation email
-        try {
-          await supabase.functions.invoke('send-order-confirmation', {
-            body: { orderId: data.orderId }
-          });
-        } catch (emailError) {
-          console.error('Failed to send confirmation email:', emailError);
-          // Don't show error to user as the order was successful
-        }
-      } else {
-        toast.error('Payment verification failed', {
-          description: 'Please contact support if you believe this is an error.'
-        });
-      }
-    } catch (error: any) {
-      console.error('Ziina payment verification error:', error);
-      toast.error('Unable to verify Ziina payment', {
         description: 'Please contact support for assistance.'
       });
     } finally {
