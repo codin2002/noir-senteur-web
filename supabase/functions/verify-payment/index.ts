@@ -232,7 +232,7 @@ serve(async (req) => {
       console.log('=== ORDER CREATED SUCCESSFULLY ===');
       console.log('Order ID:', orderId);
 
-      // Record successful payment
+      // Record successful payment with the complete delivery address
       console.log('=== RECORDING SUCCESSFUL PAYMENT ===');
       const paymentRecord = {
         user_id: user.id,
@@ -243,7 +243,7 @@ serve(async (req) => {
         currency: 'AED',
         customer_email: user.email,
         customer_name: user.user_metadata?.full_name || user.email,
-        delivery_address: deliveryAddress || 'Home delivery',
+        delivery_address: deliveryAddress || 'No address provided',
         payment_status: 'completed',
         ziina_response: paymentData
       };
@@ -265,7 +265,7 @@ serve(async (req) => {
         success: true,
         orderId: orderId,
         deliveryMethod: 'home',
-        deliveryAddress: deliveryAddress || 'Home delivery',
+        deliveryAddress: deliveryAddress || 'No address provided',
         paymentMethod: 'ziina',
         cartCleared: true
       };
