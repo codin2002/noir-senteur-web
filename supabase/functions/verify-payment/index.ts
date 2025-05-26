@@ -305,7 +305,7 @@ serve(async (req) => {
       // Record successful payment with the complete delivery address
       console.log('=== RECORDING SUCCESSFUL PAYMENT ===');
       const paymentRecord = {
-        user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use placeholder for guests
+        user_id: user?.id || null, // Allow null for guest users
         order_id: orderId,
         payment_id: paymentIntentId,
         payment_method: 'ziina',
