@@ -75,8 +75,11 @@ export const useCheckout = () => {
         localStorage.setItem('checkout_delivery_address', deliveryAddress.trim());
       }
       
-      // Store guest flag for verification
+      // Store guest flag and cart items for verification
       localStorage.setItem('checkout_is_guest', isGuest ? 'true' : 'false');
+      if (isGuest) {
+        localStorage.setItem('checkout_cart_items', JSON.stringify(itemsToProcess));
+      }
       
       // Redirect to Ziina payment page
       window.location.href = data.payment_url;
@@ -119,6 +122,10 @@ export const useCheckout = () => {
       // Clear stored data after successful verification
       localStorage.removeItem('checkout_delivery_address');
       localStorage.removeItem('checkout_is_guest');
+      if (isGuest) {
+        localStorage.removeItem('checkout_cart_items');
+        localStorage.removeItem('cartItems'); // Clear guest cart
+      }
       
       return data;
     } catch (error: any) {

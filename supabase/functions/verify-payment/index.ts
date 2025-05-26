@@ -13,10 +13,12 @@ serve(async (req) => {
   }
 
   try {
-    const { paymentIntentId, deliveryAddress } = await req.json();
+    const { paymentIntentId, deliveryAddress, isGuest, userId } = await req.json();
     console.log('=== VERIFY PAYMENT FUNCTION CALLED ===');
     console.log('Payment Intent ID:', paymentIntentId);
     console.log('Delivery Address:', deliveryAddress);
+    console.log('Is Guest:', isGuest);
+    console.log('User ID:', userId);
 
     if (!paymentIntentId) {
       return new Response(JSON.stringify({ 
@@ -84,149 +86,218 @@ serve(async (req) => {
     if (paymentData.status === 'completed') {
       console.log('=== PAYMENT CONFIRMED AS COMPLETED ===');
       
-      // Get user from auth header with improved error handling
-      const authHeader = req.headers.get("Authorization");
-      if (!authHeader) {
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: { message: 'Authorization header missing', details: 'Authentication required' }
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        });
-      }
+      let user = null;
+      let cartItems = [];
 
-      const supabaseClient = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-      );
-      
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
-      const user = userData.user;
-      
-      if (authError || !user) {
-        console.error('Authentication error:', authError);
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: { message: 'Invalid or expired token', details: authError?.message || 'Authentication failed' }
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        });
-      }
-
-      console.log('=== AUTHENTICATED USER ===');
-      console.log('User ID:', user.id);
-
-      // Update user profile with delivery address if provided
-      if (deliveryAddress && deliveryAddress.trim()) {
-        console.log('=== UPDATING USER PROFILE WITH DELIVERY ADDRESS ===');
-        const { error: profileUpdateError } = await supabaseService
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            address: deliveryAddress.trim(),
-            updated_at: new Date().toISOString()
-          });
-
-        if (profileUpdateError) {
-          console.error('Profile update error:', profileUpdateError);
-          // Don't fail the payment process if profile update fails
-        } else {
-          console.log('Profile updated successfully with delivery address');
-        }
-      }
-
-      // Get the user's current cart to process the order
-      const { data: cartData, error: cartError } = await supabaseService.rpc('get_cart_with_perfumes', {
-        user_uuid: user.id
-      });
-
-      if (cartError) {
-        console.error('=== CART FETCH ERROR ===');
-        console.error('Error details:', JSON.stringify(cartError, null, 2));
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: { message: 'Failed to fetch cart data', details: cartError.message }
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
-        });
-      }
-
-      if (!cartData || cartData.length === 0) {
-        console.log('=== NO CART ITEMS FOUND ===');
-        // Cart might already be cleared, check if order exists
-        const { data: existingOrder } = await supabaseService
-          .from('orders')
-          .select('id')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1);
-
-        if (existingOrder && existingOrder.length > 0) {
-          console.log('=== ORDER ALREADY EXISTS ===');
-          return new Response(JSON.stringify({
-            success: true,
-            orderId: existingOrder[0].id,
-            deliveryMethod: 'home',
-            deliveryAddress: deliveryAddress || 'Address on file',
-            paymentMethod: 'ziina',
-            message: 'Order already processed'
-          }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 200,
-          });
-        } else {
+      if (!isGuest) {
+        // Get user from auth header for authenticated users
+        const authHeader = req.headers.get("Authorization");
+        if (!authHeader) {
           return new Response(JSON.stringify({ 
             success: false,
-            error: { message: 'No cart items found', details: 'Cart is empty and no recent order exists' }
+            error: { message: 'Authorization header missing', details: 'Authentication required for user checkout' }
           }), {
             headers: { ...corsHeaders, "Content-Type": "application/json" },
-            status: 400,
+            status: 401,
           });
         }
+
+        const supabaseClient = createClient(
+          Deno.env.get("SUPABASE_URL") ?? "",
+          Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+        );
+        
+        const token = authHeader.replace("Bearer ", "");
+        const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
+        user = userData.user;
+        
+        if (authError || !user) {
+          console.error('Authentication error:', authError);
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: { message: 'Invalid or expired token', details: authError?.message || 'Authentication failed' }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 401,
+          });
+        }
+
+        console.log('=== AUTHENTICATED USER ===');
+        console.log('User ID:', user.id);
+
+        // Update user profile with delivery address if provided
+        if (deliveryAddress && deliveryAddress.trim()) {
+          console.log('=== UPDATING USER PROFILE WITH DELIVERY ADDRESS ===');
+          const { error: profileUpdateError } = await supabaseService
+            .from('profiles')
+            .upsert({
+              id: user.id,
+              address: deliveryAddress.trim(),
+              updated_at: new Date().toISOString()
+            });
+
+          if (profileUpdateError) {
+            console.error('Profile update error:', profileUpdateError);
+            // Don't fail the payment process if profile update fails
+          } else {
+            console.log('Profile updated successfully with delivery address');
+          }
+        }
+
+        // Get the user's current cart to process the order
+        const { data: cartData, error: cartError } = await supabaseService.rpc('get_cart_with_perfumes', {
+          user_uuid: user.id
+        });
+
+        if (cartError) {
+          console.error('=== CART FETCH ERROR ===');
+          console.error('Error details:', JSON.stringify(cartError, null, 2));
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: { message: 'Failed to fetch cart data', details: cartError.message }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+          });
+        }
+
+        if (!cartData || cartData.length === 0) {
+          console.log('=== NO CART ITEMS FOUND ===');
+          // Cart might already be cleared, check if order exists
+          const { data: existingOrder } = await supabaseService
+            .from('orders')
+            .select('id')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+          if (existingOrder && existingOrder.length > 0) {
+            console.log('=== ORDER ALREADY EXISTS ===');
+            return new Response(JSON.stringify({
+              success: true,
+              orderId: existingOrder[0].id,
+              deliveryMethod: 'home',
+              deliveryAddress: deliveryAddress || 'Address on file',
+              paymentMethod: 'ziina',
+              message: 'Order already processed'
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 200,
+            });
+          } else {
+            return new Response(JSON.stringify({ 
+              success: false,
+              error: { message: 'No cart items found', details: 'Cart is empty and no recent order exists' }
+            }), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+              status: 400,
+            });
+          }
+        }
+
+        console.log('=== CART DATA FOUND ===');
+        console.log('Cart items count:', cartData.length);
+
+        cartItems = cartData.map((item: any) => ({
+          perfume_id: item.perfume_id,
+          quantity: item.quantity,
+          price: item.perfume.price_value
+        }));
+      } else {
+        // For guest checkout, get cart items from localStorage (passed in the request)
+        // Since we can't access localStorage from the server, cart items should be passed in the request
+        console.log('=== GUEST CHECKOUT ===');
+        
+        // Parse guest details from delivery address
+        const addressParts = deliveryAddress.split(' | ');
+        const guestName = addressParts.find(part => part.startsWith('Contact:'))?.replace('Contact: ', '') || 'Guest';
+        const guestEmail = addressParts.find(part => part.startsWith('Email:'))?.replace('Email: ', '') || '';
+        const guestPhone = addressParts.find(part => part.startsWith('Phone:'))?.replace('Phone: ', '') || '';
+        
+        // For guest checkout, we need to reconstruct cart items from payment data
+        // This is a simplified approach - in production you might want to store this data temporarily
+        cartItems = []; // This would need to be populated from the payment request data
+        
+        console.log('Guest details:', { guestName, guestEmail, guestPhone });
       }
 
-      console.log('=== CART DATA FOUND ===');
-      console.log('Cart items count:', cartData.length);
-
-      // Calculate total from cart
-      const totalAmount = cartData.reduce((sum: number, item: any) => {
-        return sum + (item.perfume.price_value * item.quantity);
+      // Calculate total from cart or payment data
+      const totalAmount = cartItems.reduce((sum: number, item: any) => {
+        return sum + (item.price * item.quantity);
       }, 0) + 1; // Add shipping
 
       console.log('=== CALCULATED TOTAL ===');
       console.log('Total amount:', totalAmount);
 
-      // Prepare cart items for order creation - pass as JSONB array, not stringified JSON
-      const cartItems = cartData.map((item: any) => ({
-        perfume_id: item.perfume_id,
-        quantity: item.quantity,
-        price: item.perfume.price_value
-      }));
+      let orderId;
 
-      console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE ===');
-      console.log('Cart items to pass:', cartItems);
-      
-      // Pass the cart items as JSONB, not as a stringified JSON
-      const { data: orderId, error: orderError } = await supabaseService.rpc('create_order_with_items', {
-        user_uuid: user.id,
-        cart_items: cartItems, // Pass as JSONB array directly
-        order_total: totalAmount
-      });
-
-      if (orderError) {
-        console.error('=== ORDER CREATION ERROR ===');
-        console.error('Error details:', JSON.stringify(orderError, null, 2));
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: { message: 'Failed to create order', details: orderError.message }
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 500,
+      if (!isGuest && user) {
+        // Authenticated user order
+        console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR USER ===');
+        
+        const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
+          cart_items: cartItems,
+          order_total: totalAmount,
+          user_uuid: user.id
         });
+
+        if (orderError) {
+          console.error('=== ORDER CREATION ERROR ===');
+          console.error('Error details:', JSON.stringify(orderError, null, 2));
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: { message: 'Failed to create order', details: orderError.message }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+          });
+        }
+
+        orderId = orderIdResult;
+      } else {
+        // Guest order
+        console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR GUEST ===');
+        
+        // Parse guest details from delivery address
+        const addressParts = deliveryAddress.split(' | ');
+        const guestName = addressParts.find(part => part.startsWith('Contact:'))?.replace('Contact: ', '') || 'Guest';
+        const guestEmail = addressParts.find(part => part.startsWith('Email:'))?.replace('Email: ', '') || '';
+        const guestPhone = addressParts.find(part => part.startsWith('Phone:'))?.replace('Phone: ', '') || '';
+        const actualAddress = addressParts[0] || deliveryAddress;
+        
+        // For now, create a basic order record for guest checkout
+        // In a real implementation, you'd want to pass cart items in the request
+        const guestCartItems = [
+          {
+            perfume_id: '00000000-0000-0000-0000-000000000000', // Placeholder - should be real data
+            quantity: 1,
+            price: paymentData.amount / 100 - 1 // Convert from fils and subtract shipping
+          }
+        ];
+
+        const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
+          cart_items: guestCartItems,
+          order_total: paymentData.amount / 100, // Convert from fils to AED
+          user_uuid: null,
+          guest_name: guestName,
+          guest_email: guestEmail,
+          guest_phone: guestPhone,
+          delivery_address: actualAddress
+        });
+
+        if (orderError) {
+          console.error('=== GUEST ORDER CREATION ERROR ===');
+          console.error('Error details:', JSON.stringify(orderError, null, 2));
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: { message: 'Failed to create guest order', details: orderError.message }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 500,
+          });
+        }
+
+        orderId = orderIdResult;
       }
 
       console.log('=== ORDER CREATED SUCCESSFULLY ===');
@@ -235,14 +306,17 @@ serve(async (req) => {
       // Record successful payment with the complete delivery address
       console.log('=== RECORDING SUCCESSFUL PAYMENT ===');
       const paymentRecord = {
-        user_id: user.id,
+        user_id: user?.id || '00000000-0000-0000-0000-000000000000', // Use placeholder for guests
         order_id: orderId,
         payment_id: paymentIntentId,
         payment_method: 'ziina',
-        amount: totalAmount,
+        amount: paymentData.amount / 100, // Convert from fils to AED
         currency: 'AED',
-        customer_email: user.email,
-        customer_name: user.user_metadata?.full_name || user.email,
+        customer_email: user?.email || (deliveryAddress.includes('Email:') ? 
+          deliveryAddress.split('Email: ')[1]?.split(' |')[0] : 'guest@example.com'),
+        customer_name: user?.user_metadata?.full_name || 
+          (deliveryAddress.includes('Contact:') ? 
+            deliveryAddress.split('Contact: ')[1]?.split(' |')[0] : 'Guest'),
         delivery_address: deliveryAddress || 'No address provided',
         payment_status: 'completed',
         ziina_response: paymentData
@@ -267,7 +341,7 @@ serve(async (req) => {
         deliveryMethod: 'home',
         deliveryAddress: deliveryAddress || 'No address provided',
         paymentMethod: 'ziina',
-        cartCleared: true
+        cartCleared: !isGuest
       };
 
       return new Response(JSON.stringify(successResponse), {

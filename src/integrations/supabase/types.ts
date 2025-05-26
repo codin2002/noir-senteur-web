@@ -93,24 +93,36 @@ export type Database = {
       orders: {
         Row: {
           created_at: string
+          delivery_address: string | null
+          guest_email: string | null
+          guest_name: string | null
+          guest_phone: string | null
           id: string
           status: string
           total: number
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string
+          delivery_address?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           status?: string
           total: number
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string
+          delivery_address?: string | null
+          guest_email?: string | null
+          guest_name?: string | null
+          guest_phone?: string | null
           id?: string
           status?: string
           total?: number
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -473,7 +485,17 @@ export type Database = {
     }
     Functions: {
       create_order_with_items: {
-        Args: { user_uuid: string; cart_items: Json; order_total: number }
+        Args:
+          | {
+              cart_items: Json
+              order_total: number
+              user_uuid?: string
+              guest_name?: string
+              guest_email?: string
+              guest_phone?: string
+              delivery_address?: string
+            }
+          | { user_uuid: string; cart_items: Json; order_total: number }
         Returns: string
       }
       delete_cart_item: {
@@ -489,6 +511,21 @@ export type Database = {
           quantity: number
           created_at: string
           perfume: Json
+        }[]
+      }
+      get_orders_with_items: {
+        Args: { user_uuid?: string }
+        Returns: {
+          id: string
+          user_id: string
+          total: number
+          status: string
+          created_at: string
+          guest_name: string
+          guest_email: string
+          guest_phone: string
+          delivery_address: string
+          items: Json
         }[]
       }
       get_wishlist_with_perfumes: {
