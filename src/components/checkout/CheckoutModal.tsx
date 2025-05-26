@@ -27,7 +27,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   currencySymbol
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedAddressType, setSelectedAddressType] = useState<'home'>('home');
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
   const { user } = useAuth();
 
@@ -38,6 +37,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const subtotal = calculateSubtotal();
   const shipping = 1;
   const total = subtotal + shipping;
+
+  const handleAddressChange = (addressType: 'home', address: string) => {
+    setDeliveryAddress(address);
+  };
 
   const handleCheckout = async () => {
     if (!deliveryAddress.trim()) {
@@ -161,11 +164,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
           {/* Address Selection */}
           <AddressSelection
-            selectedType={selectedAddressType}
-            onTypeChange={setSelectedAddressType}
-            deliveryAddress={deliveryAddress}
-            onAddressChange={setDeliveryAddress}
             userAddress={userAddress}
+            onAddressChange={handleAddressChange}
           />
 
           {/* Action Buttons */}
