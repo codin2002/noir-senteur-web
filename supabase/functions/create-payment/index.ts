@@ -16,6 +16,8 @@ serve(async (req) => {
   try {
     // Get the request body
     const { cartItems, deliveryAddress } = await req.json();
+    
+    console.log('Received cart items:', JSON.stringify(cartItems, null, 2));
 
     // Create Supabase client using the anon key for user authentication
     const supabaseClient = createClient(
@@ -30,12 +32,20 @@ serve(async (req) => {
     const user = data.user;
     if (!user?.email) throw new Error("User not authenticated");
 
-    // Calculate totals
-    const subtotal = cartItems.reduce((sum: number, item: any) => 
-      sum + (item.perfume.price_value * item.quantity), 0
-    );
+    // Calculate totals - handle both data structures
+    const subtotal = cartItems.reduce((sum: number, item: any) => {
+      // Handle both structures: item.perfume.price_value or item.price
+      const price = item.perfume?.price_value || item.price || 0;
+      const quantity = item.quantity || 1;
+      
+      console.log(`Item price: ${price}, quantity: ${quantity}`);
+      return sum + (price * quantity);
+    }, 0);
+    
     const shippingCost = 4.99; // Fixed delivery charge
     const total = subtotal + shippingCost;
+
+    console.log(`Calculated subtotal: ${subtotal}, shipping: ${shippingCost}, total: ${total}`);
 
     // Get Ziina API key from environment
     const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
