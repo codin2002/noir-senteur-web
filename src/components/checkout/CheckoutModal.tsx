@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { CartItemType } from '@/components/cart/CartItem';
 import AddressSelection from './AddressSelection';
 import OrderSummary from './OrderSummary';
@@ -37,12 +37,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl mt-8 bg-darker border border-gold/20 text-white">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Review your order details and provide delivery information.
+          </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
+        <div className="space-y-6 pb-4">
           <OrderSummary cartItems={cartItems} currencySymbol={currencySymbol} />
 
           <AddressSelection
