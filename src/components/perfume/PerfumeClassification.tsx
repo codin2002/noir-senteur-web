@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartLegend, ChartLegendContent } from "@/components/ui/chart";
@@ -137,7 +136,6 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
             domain={[0, 100]} 
             tick={false}
             axisLine={false}
-            grid={false}
           />
           <Tooltip content={<CustomTooltip />} />
           <Radar 
