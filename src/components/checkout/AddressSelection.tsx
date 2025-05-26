@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { MapPin, Home } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -24,11 +23,19 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     { id: '3', name: 'City Centre Deira', address: 'Ground Floor, City Centre Deira, Port Saeed' }
   ]);
   const [selectedPickup, setSelectedPickup] = useState('');
-  const [homeAddress, setHomeAddress] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [addressComponents, setAddressComponents] = useState({
+    buildingName: '',
+    floorNumber: '',
+    roomNumber: '',
+    area: '',
+    landmark: '',
+    emirate: ''
+  });
   const [isLoadingProfile, setIsLoadingProfile] = useState(false);
   const { user } = useAuth();
 
-  // Load user's saved address on component mount
+  // Load user's saved address and phone on component mount
   useEffect(() => {
     const loadUserProfile = async () => {
       if (!user) return;
@@ -37,14 +44,30 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
       try {
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('address')
+          .select('address, phone')
           .eq('id', user.id)
           .single();
 
-        if (!error && profile?.address) {
-          setHomeAddress(profile.address);
-          if (deliveryMethod === 'home') {
-            onAddressChange(profile.address);
+        if (!error && profile) {
+          if (profile.phone) {
+            setPhoneNumber(profile.phone);
+          }
+          
+          if (profile.address) {
+            const lines = profile.address.split('\n');
+            const components = {
+              buildingName: lines[0] || '',
+              floorNumber: lines[1] || '',
+              roomNumber: lines[2] || '',
+              area: lines[3] || '',
+              landmark: lines[4] || '',
+              emirate: lines[5] || ''
+            };
+            setAddressComponents(components);
+            
+            if (deliveryMethod === 'home') {
+              updateSelectedAddress(components, profile.phone || phoneNumber);
+            }
           }
         }
       } catch (error) {
@@ -57,48 +80,51 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     loadUserProfile();
   }, [user]);
 
+  const updateSelectedAddress = (components: typeof addressComponents, phone: string) => {
+    const addressParts = [
+      components.buildingName,
+      components.floorNumber,
+      components.roomNumber,
+      components.area,
+      components.landmark,
+      components.emirate
+    ].filter(Boolean);
+    
+    const fullAddress = addressParts.join(', ');
+    const addressWithPhone = phone ? `${fullAddress} | Phone: ${phone}` : fullAddress;
+    onAddressChange(addressWithPhone);
+  };
+
   // Update selected address when delivery method or selections change
   useEffect(() => {
     if (deliveryMethod === 'pickup' && selectedPickup) {
       const pickup = pickupPoints.find(p => p.id === selectedPickup);
       if (pickup) {
-        onAddressChange(`Pickup: ${pickup.name} - ${pickup.address}`);
+        const addressWithPhone = phoneNumber ? 
+          `Pickup: ${pickup.name} - ${pickup.address} | Phone: ${phoneNumber}` :
+          `Pickup: ${pickup.name} - ${pickup.address}`;
+        onAddressChange(addressWithPhone);
       }
-    } else if (deliveryMethod === 'home' && homeAddress.trim()) {
-      onAddressChange(homeAddress.trim());
+    } else if (deliveryMethod === 'home') {
+      updateSelectedAddress(addressComponents, phoneNumber);
     }
-  }, [deliveryMethod, selectedPickup, homeAddress, onAddressChange, pickupPoints]);
+  }, [deliveryMethod, selectedPickup, addressComponents, phoneNumber, onAddressChange, pickupPoints]);
 
   const handleDeliveryMethodChange = (method: 'pickup' | 'home') => {
     setDeliveryMethod(method);
-    
-    if (method === 'pickup') {
-      if (selectedPickup) {
-        const pickup = pickupPoints.find(p => p.id === selectedPickup);
-        if (pickup) {
-          onAddressChange(`Pickup: ${pickup.name} - ${pickup.address}`);
-        }
-      } else {
-        onAddressChange('');
-      }
-    } else {
-      onAddressChange(homeAddress.trim());
-    }
   };
 
   const handlePickupChange = (pickupId: string) => {
     setSelectedPickup(pickupId);
-    const pickup = pickupPoints.find(p => p.id === pickupId);
-    if (pickup) {
-      onAddressChange(`Pickup: ${pickup.name} - ${pickup.address}`);
-    }
   };
 
-  const handleHomeAddressChange = (address: string) => {
-    setHomeAddress(address);
-    if (deliveryMethod === 'home') {
-      onAddressChange(address.trim());
-    }
+  const handleAddressComponentChange = (component: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newComponents = { ...addressComponents, [component]: e.target.value };
+    setAddressComponents(newComponents);
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(e.target.value);
   };
 
   return (
@@ -140,6 +166,25 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
         </div>
       </div>
 
+      {/* Phone Number - Always visible */}
+      <div>
+        <Label htmlFor="phone_number" className="text-base mb-3 block">
+          Phone Number
+        </Label>
+        {isLoadingProfile ? (
+          <div className="text-sm text-muted-foreground">Loading phone number...</div>
+        ) : (
+          <Input
+            id="phone_number"
+            placeholder="+971 50 XXX XXXX"
+            value={phoneNumber}
+            onChange={handlePhoneChange}
+            className="border-gold/30 focus:border-gold"
+            required
+          />
+        )}
+      </div>
+
       {deliveryMethod === 'pickup' && (
         <div>
           <Label className="text-base mb-3 block">Select Pickup Point</Label>
@@ -172,25 +217,80 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
       )}
 
       {deliveryMethod === 'home' && (
-        <div>
-          <Label htmlFor="address" className="text-base mb-3 block">
-            Delivery Address
-          </Label>
+        <div className="space-y-4">
+          <Label className="text-base font-semibold">Delivery Address</Label>
+          
           {isLoadingProfile ? (
             <div className="text-sm text-muted-foreground">Loading saved address...</div>
           ) : (
-            <Textarea
-              id="address"
-              placeholder="Enter your complete delivery address including building, street, area, and emirate"
-              value={homeAddress}
-              onChange={(e) => handleHomeAddressChange(e.target.value)}
-              className="min-h-[100px] border-gold/30 focus:border-gold"
-              required
-            />
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <Label htmlFor="building_name" className="text-sm">Building Name</Label>
+                <Input 
+                  id="building_name"
+                  value={addressComponents.buildingName}
+                  onChange={handleAddressComponentChange('buildingName')}
+                  className="border-gold/30 focus:border-gold"
+                  placeholder="Enter building name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="floor_number" className="text-sm">Floor Number</Label>
+                <Input 
+                  id="floor_number"
+                  value={addressComponents.floorNumber}
+                  onChange={handleAddressComponentChange('floorNumber')}
+                  className="border-gold/30 focus:border-gold"
+                  placeholder="e.g., Ground Floor, 1st Floor"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="room_number" className="text-sm">Room/Office Number</Label>
+                <Input 
+                  id="room_number"
+                  value={addressComponents.roomNumber}
+                  onChange={handleAddressComponentChange('roomNumber')}
+                  className="border-gold/30 focus:border-gold"
+                  placeholder="e.g., Apt 101, Office 205"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="area" className="text-sm">Area/Locality</Label>
+                <Input 
+                  id="area"
+                  value={addressComponents.area}
+                  onChange={handleAddressComponentChange('area')}
+                  className="border-gold/30 focus:border-gold"
+                  placeholder="e.g., Downtown, Marina, Jumeirah"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="landmark" className="text-sm">Landmark (Optional)</Label>
+                <Input 
+                  id="landmark"
+                  value={addressComponents.landmark}
+                  onChange={handleAddressComponentChange('landmark')}
+                  className="border-gold/30 focus:border-gold"
+                  placeholder="e.g., Near Mall, Behind Metro Station"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="emirate" className="text-sm">Emirate</Label>
+                <Input 
+                  id="emirate"
+                  value={addressComponents.emirate}
+                  onChange={handleAddressComponentChange('emirate')}
+                  className="border-gold/30 focus:border-gold"
+                  placeholder="e.g., Dubai, Abu Dhabi, Sharjah"
+                />
+              </div>
+            </div>
           )}
-          <p className="text-sm text-muted-foreground mt-2">
-            Please provide a complete address including building number, street name, area, and emirate for accurate delivery.
-          </p>
         </div>
       )}
 
