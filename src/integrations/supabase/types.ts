@@ -394,7 +394,7 @@ export type Database = {
           payment_method: string
           payment_status: string
           updated_at: string
-          user_id: string
+          user_id: string | null
           ziina_response: Json | null
         }
         Insert: {
@@ -412,7 +412,7 @@ export type Database = {
           payment_method?: string
           payment_status?: string
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           ziina_response?: Json | null
         }
         Update: {
@@ -430,7 +430,7 @@ export type Database = {
           payment_method?: string
           payment_status?: string
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           ziina_response?: Json | null
         }
         Relationships: [

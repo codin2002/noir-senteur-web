@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -168,11 +169,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     try {
       console.log("Signing out");
+      
+      // Clear local state immediately to prevent UI issues
+      setUser(null);
+      setSession(null);
+      
+      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      // Don't throw error if session doesn't exist - user is already signed out
+      if (error && error.message !== "Session not found" && !error.message.includes("session")) {
+        console.error("Sign out error:", error.message);
+        throw error;
+      }
+      
+      console.log("Sign out successful");
       sonnerToast.success("Signed out successfully");
     } catch (error: any) {
       console.error("Sign out error:", error.message);
+      // Re-set user state if sign out failed
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setUser(session?.user ?? null);
+      
       sonnerToast.error("Sign out failed", {
         description: error.message || "An error occurred during sign out"
       });
