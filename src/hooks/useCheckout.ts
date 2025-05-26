@@ -15,11 +15,13 @@ export const useCheckout = () => {
 
     try {
       console.log('Processing payment with delivery address:', deliveryAddress);
+      console.log('User authenticated:', !!user);
       
       // For guest checkout, we need to get cart items from localStorage if no user
       let itemsToProcess = cartItems;
+      const isGuest = !user;
       
-      if (!user && (!cartItems || cartItems.length === 0)) {
+      if (isGuest && (!cartItems || cartItems.length === 0)) {
         // Get cart items from localStorage for guest checkout
         const localCart = localStorage.getItem('cartItems');
         if (localCart) {
@@ -30,14 +32,24 @@ export const useCheckout = () => {
         }
       }
 
+      // Prepare the request body
+      const requestBody = {
+        cartItems: itemsToProcess,
+        deliveryAddress: deliveryAddress.trim(),
+        isGuest: isGuest,
+        userId: user?.id || null
+      };
+
+      console.log('Sending payment request:', { 
+        itemCount: itemsToProcess.length, 
+        isGuest, 
+        hasDeliveryAddress: !!deliveryAddress.trim() 
+      });
+
       // Call the create-payment edge function
       const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          cartItems: itemsToProcess,
-          deliveryAddress: deliveryAddress.trim(),
-          isGuest: !user,
-          userId: user?.id || null
-        }
+        body: requestBody,
+        headers: isGuest ? {} : undefined // Don't send auth headers for guest checkout
       });
 
       if (error) {
@@ -64,7 +76,7 @@ export const useCheckout = () => {
       }
       
       // Store guest flag for verification
-      localStorage.setItem('checkout_is_guest', !user ? 'true' : 'false');
+      localStorage.setItem('checkout_is_guest', isGuest ? 'true' : 'false');
       
       // Redirect to Ziina payment page
       window.location.href = data.payment_url;

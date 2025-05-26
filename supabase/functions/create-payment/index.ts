@@ -15,7 +15,7 @@ serve(async (req) => {
 
   try {
     // Get the request body
-    const { cartItems, deliveryAddress } = await req.json();
+    const { cartItems, deliveryAddress, isGuest, userId } = await req.json();
     
     // Validate request payload
     if (!Array.isArray(cartItems) || typeof deliveryAddress !== "string") {
@@ -30,48 +30,57 @@ serve(async (req) => {
     }
 
     console.log('Received cart items:', JSON.stringify(cartItems, null, 2));
+    console.log('Is guest checkout:', isGuest);
+    console.log('User ID:', userId);
 
-    // Create Supabase client using the anon key for user authentication
+    // Create Supabase client using the anon key
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
 
-    // Get the authorization header
-    const authHeader = req.headers.get("Authorization");
-    console.log('Auth header present:', !!authHeader);
-    
-    if (!authHeader) {
-      console.error('No authorization header found');
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: { message: "Authorization header missing", details: "Authentication required" }
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
+    let user = null;
 
-    // Extract the token from the Bearer header
-    const token = authHeader.replace("Bearer ", "");
-    console.log('Token extracted, length:', token.length);
-    
-    // Get user from the token
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
-    console.log('Auth response:', { user: user?.email, error: authError });
-    
-    if (authError || !user) {
-      console.error('Authentication error:', authError);
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: { message: "Invalid or expired token", details: authError?.message || 'Authentication failed' }
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 401,
-      });
-    }
+    // Only authenticate if it's not a guest checkout
+    if (!isGuest) {
+      const authHeader = req.headers.get("Authorization");
+      console.log('Auth header present:', !!authHeader);
+      
+      if (!authHeader) {
+        console.error('No authorization header found for user checkout');
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: { message: "Authorization header missing", details: "Authentication required for user checkout" }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        });
+      }
 
-    console.log('Authenticated user:', user.email);
+      // Extract the token from the Bearer header
+      const token = authHeader.replace("Bearer ", "");
+      console.log('Token extracted, length:', token.length);
+      
+      // Get user from the token
+      const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser(token);
+      console.log('Auth response:', { user: authUser?.email, error: authError });
+      
+      if (authError || !authUser) {
+        console.error('Authentication error:', authError);
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: { message: "Invalid or expired token", details: authError?.message || 'Authentication failed' }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        });
+      }
+
+      user = authUser;
+      console.log('Authenticated user:', user.email);
+    } else {
+      console.log('Processing guest checkout');
+    }
 
     // Calculate totals - handle both data structures
     const subtotal = cartItems.reduce((sum: number, item: any) => {
@@ -103,7 +112,7 @@ serve(async (req) => {
     const ziinaPayload = {
       amount: Math.round(total * 100), // Convert to fils
       currency_code: "AED",
-      message: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
+      message: `Senteur Fragrances Order - ${cartItems.length} item(s)${isGuest ? ' (Guest)' : ''}`,
       success_url: `${baseUrl}/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
       cancel_url: `${baseUrl}/cart?payment=cancelled`,
       failure_url: `${baseUrl}/payment-failed`,
