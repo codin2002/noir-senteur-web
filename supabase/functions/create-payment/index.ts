@@ -96,7 +96,7 @@ serve(async (req) => {
 
     const baseUrl = req.headers.get("origin") || "https://senteurfragrances.com";
     
-    // Set payment expiry to 15 minutes from now as Unix timestamp
+    // Set payment expiry to 15 minutes from now as Unix timestamp string
     const expiryTimestamp = Math.floor(Date.now() / 1000) + (15 * 60); // 15 minutes in seconds
 
     // Create Ziina payment request with enhanced configuration
@@ -107,7 +107,7 @@ serve(async (req) => {
       success_url: `${baseUrl}/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
       cancel_url: `${baseUrl}/cart?payment=cancelled`,
       failure_url: `${baseUrl}/payment-failed`,
-      expiry: expiryTimestamp, // Unix timestamp format
+      expiry: expiryTimestamp.toString(), // Convert to string format as required by Ziina API
       test: false, // Set to false for production mode
       transaction_source: "directApi",
       allow_tips: false,
@@ -152,7 +152,7 @@ serve(async (req) => {
       payment_url: ziinaData.redirect_url,
       payment_id: ziinaData.id,
       total_amount: total.toString(),
-      expiry: expiryTimestamp,
+      expiry: expiryTimestamp.toString(),
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
