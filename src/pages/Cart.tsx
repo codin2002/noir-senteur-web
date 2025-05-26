@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -11,6 +10,7 @@ import CartSummary from '@/components/cart/CartSummary';
 import CartEmpty from '@/components/cart/CartEmpty';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
+import { mergeCartItems, cleanupCartStorage } from '@/utils/cartUtils';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
@@ -52,13 +52,9 @@ const Cart = () => {
   const loadCartFromLocalStorage = () => {
     try {
       setIsLoading(true);
-      const storedCart = localStorage.getItem('cartItems');
-      if (storedCart) {
-        const cartData = JSON.parse(storedCart);
-        setCartItems(cartData);
-      } else {
-        setCartItems([]);
-      }
+      // Clean up and merge any duplicate items in localStorage
+      const cleanedCartItems = cleanupCartStorage();
+      setCartItems(cleanedCartItems);
     } catch (error) {
       console.error('Error loading cart from localStorage:', error);
       setCartItems([]);
@@ -85,7 +81,14 @@ const Cart = () => {
           perfume: item.perfume as unknown as CartItemType['perfume']
         }));
         
-        setCartItems(typedData);
+        // Merge any duplicate items that might exist in the database
+        const mergedData = mergeCartItems(typedData);
+        setCartItems(mergedData);
+        
+        // If we had to merge items, update the database to clean up duplicates
+        if (mergedData.length !== typedData.length) {
+          await cleanupDatabaseCart(typedData, mergedData);
+        }
       } else {
         setCartItems([]);
       }
@@ -96,6 +99,31 @@ const Cart = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const cleanupDatabaseCart = async (originalItems: CartItemType[], mergedItems: CartItemType[]) => {
+    try {
+      // Delete all existing cart items for this user
+      await supabase
+        .from('cart')
+        .delete()
+        .eq('user_id', user?.id);
+      
+      // Insert the merged items
+      const itemsToInsert = mergedItems.map(item => ({
+        user_id: user?.id,
+        perfume_id: item.perfume.id,
+        quantity: item.quantity
+      }));
+      
+      await supabase
+        .from('cart')
+        .insert(itemsToInsert);
+        
+      console.log('Database cart cleaned up successfully');
+    } catch (error) {
+      console.error('Error cleaning up database cart:', error);
     }
   };
 

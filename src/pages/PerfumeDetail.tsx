@@ -263,7 +263,7 @@ const PerfumeDetail = () => {
     setAddingToCart(true);
     try {
       if (user) {
-        // For authenticated users, add to database
+        // For authenticated users, check for existing item and update quantity
         const { data: existingItem, error: checkError } = await supabase
           .from('cart')
           .select('id, quantity')
@@ -276,7 +276,7 @@ const PerfumeDetail = () => {
         }
 
         if (existingItem) {
-          // Update quantity
+          // Update existing item quantity
           const { error: updateError } = await supabase
             .from('cart')
             .update({ quantity: existingItem.quantity + 1 })
@@ -296,17 +296,18 @@ const PerfumeDetail = () => {
         
         refreshCartCount();
       } else {
-        // For non-authenticated users, add to localStorage
+        // For non-authenticated users, use localStorage with proper duplicate handling
         const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
         const existingItemIndex = cartItems.findIndex((item: any) => item.perfume.id === id);
         
         if (existingItemIndex > -1) {
-          // Update quantity
+          // Update quantity of existing item
           cartItems[existingItemIndex].quantity += 1;
+          toast.success('Updated cart quantity');
         } else {
-          // Add new item
+          // Add new item with proper structure
           const newItem = {
-            id: `temp-${Date.now()}`, // Temporary ID for localStorage
+            id: `temp-${Date.now()}-${id}`, // More unique ID that includes perfume ID
             quantity: 1,
             perfume: {
               id: perfume.id,
@@ -318,13 +319,14 @@ const PerfumeDetail = () => {
             }
           };
           cartItems.push(newItem);
+          toast.success('Added to cart');
         }
         
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
-        toast.success('Added to cart');
         refreshCartCount();
       }
     } catch (error: any) {
+      console.error('Error adding to cart:', error);
       toast.error('Failed to add to cart', {
         description: error.message
       });
