@@ -44,11 +44,6 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   const [activeTab, setActiveTab] = useState("type");
   const isMobile = useIsMobile();
   
-  useEffect(() => {
-    console.log('Classification data:', classificationData);
-    console.log('Rendered data:', classificationData);
-  }, [classificationData]);
-
   if (isLoading) {
     return (
       <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
@@ -95,10 +90,6 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
     { name: 'Unisex', value: classificationData.audience_unisex, fullMark: 100 },
   ];
 
-  // Debug logs
-  console.log("Type data:", typeData);
-  console.log("chartHeight:", isMobile ? 280 : 400);
-
   const chartConfig = {
     classification: {
       label: "Classification",
@@ -121,7 +112,7 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   };
 
   const renderRadarChart = (data: any[]) => (
-    <div className="relative w-full max-w-xl mx-auto border border-red-500">
+    <div className="relative w-full max-w-xl mx-auto">
       <ResponsiveContainer width="100%" height={chartHeight}>
         <RadarChart cx="50%" cy="50%" outerRadius={chartOuterRadius} data={data}>
           <PolarGrid 
