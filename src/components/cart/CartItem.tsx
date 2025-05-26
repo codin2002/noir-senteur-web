@@ -48,7 +48,7 @@ const CartItem: React.FC<CartItemProps> = ({
       if (user) {
         // Update in database for authenticated users
         const { error } = await supabase
-          .from('cart_items')
+          .from('cart')
           .update({ quantity: newQuantity })
           .eq('id', item.id);
         
@@ -82,7 +82,7 @@ const CartItem: React.FC<CartItemProps> = ({
       if (user) {
         // Remove from database for authenticated users
         const { error } = await supabase
-          .from('cart_items')
+          .from('cart')
           .delete()
           .eq('id', item.id);
         

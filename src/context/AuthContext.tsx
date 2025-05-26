@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -34,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Add each item to the user's cart in the database
         for (const item of cartItems) {
           await supabase
-            .from('cart_items')
+            .from('cart')
             .insert({
               user_id: userId,
               perfume_id: item.perfume.id,
