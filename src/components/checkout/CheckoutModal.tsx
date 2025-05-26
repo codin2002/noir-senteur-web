@@ -39,6 +39,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   currencySymbol
 }) => {
   const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
+  const [showUserCheckout, setShowUserCheckout] = useState(false);
   const { processPayment, isLoading } = useCheckout();
   const { user, signInWithGoogle } = useAuth();
 
@@ -69,6 +70,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const handleSignInWithGoogle = async () => {
     try {
       await signInWithGoogle();
+      setShowUserCheckout(true);
     } catch (error) {
       console.error('Google sign-in failed:', error);
     }
@@ -80,14 +82,14 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <DialogHeader>
           <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            {user ? "Review your order details and provide delivery information." : "Choose how you'd like to checkout - as a guest or with your account."}
+            {(user || showUserCheckout) ? "Review your order details and provide delivery information." : "Choose how you'd like to checkout"}
           </DialogDescription>
         </DialogHeader>
         
         <div className="space-y-6 pb-4">
           <OrderSummary cartItems={cartItems} currencySymbol={currencySymbol} />
 
-          {user ? (
+          {(user || showUserCheckout) ? (
             <>
               <AddressSelection
                 onAddressChange={handleAddressChange}
