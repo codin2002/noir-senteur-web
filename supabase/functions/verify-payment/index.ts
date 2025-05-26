@@ -13,9 +13,10 @@ serve(async (req) => {
   }
 
   try {
-    const { paymentIntentId } = await req.json();
+    const { paymentIntentId, deliveryAddress } = await req.json();
     console.log('=== VERIFY PAYMENT FUNCTION CALLED ===');
     console.log('Payment Intent ID:', paymentIntentId);
+    console.log('Delivery Address:', deliveryAddress);
 
     if (!paymentIntentId) {
       return new Response(JSON.stringify({ 
@@ -118,6 +119,25 @@ serve(async (req) => {
       console.log('=== AUTHENTICATED USER ===');
       console.log('User ID:', user.id);
 
+      // Update user profile with delivery address if provided
+      if (deliveryAddress && deliveryAddress.trim()) {
+        console.log('=== UPDATING USER PROFILE WITH DELIVERY ADDRESS ===');
+        const { error: profileUpdateError } = await supabaseService
+          .from('profiles')
+          .upsert({
+            id: user.id,
+            address: deliveryAddress.trim(),
+            updated_at: new Date().toISOString()
+          });
+
+        if (profileUpdateError) {
+          console.error('Profile update error:', profileUpdateError);
+          // Don't fail the payment process if profile update fails
+        } else {
+          console.log('Profile updated successfully with delivery address');
+        }
+      }
+
       // Get the user's current cart to process the order
       const { data: cartData, error: cartError } = await supabaseService.rpc('get_cart_with_perfumes', {
         user_uuid: user.id
@@ -151,7 +171,7 @@ serve(async (req) => {
             success: true,
             orderId: existingOrder[0].id,
             deliveryMethod: 'home',
-            deliveryAddress: 'Address on file',
+            deliveryAddress: deliveryAddress || 'Address on file',
             paymentMethod: 'ziina',
             message: 'Order already processed'
           }), {
@@ -223,7 +243,7 @@ serve(async (req) => {
         currency: 'AED',
         customer_email: user.email,
         customer_name: user.user_metadata?.full_name || user.email,
-        delivery_address: 'Home delivery', // Default for now
+        delivery_address: deliveryAddress || 'Home delivery',
         payment_status: 'completed',
         ziina_response: paymentData
       };
@@ -245,7 +265,7 @@ serve(async (req) => {
         success: true,
         orderId: orderId,
         deliveryMethod: 'home',
-        deliveryAddress: 'Home delivery',
+        deliveryAddress: deliveryAddress || 'Home delivery',
         paymentMethod: 'ziina',
         cartCleared: true
       };
