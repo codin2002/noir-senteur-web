@@ -78,7 +78,7 @@ const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80 z-10"></div>
       
       {/* Content positioned above the video */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6 z-20">
+      <div className="absolute inset-0 flex flex-col items-center justify-center text-center z-20 bg-transparent px-[25px]">
         <h2 className="text-sm md:text-base uppercase tracking-[0.3em] text-gold mb-4">Artisanal Fragrances</h2>
         <h1 className="text-4xl md:text-6xl lg:text-7xl font-serif mb-6">
           Discover <span className="italic">Extraordinary</span> <br />
@@ -87,7 +87,7 @@ const Hero = () => {
         <p className="text-muted-foreground max-w-md mx-auto mb-8">
           Meticulously crafted fragrances for those who seek distinction in every detail.
         </p>
-        <a href="#collection" className="btn-outline">313</a>
+        <a href="#collection" className="btn-outline">٣١٣</a>
       </div>
 
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce z-20">
