@@ -19,17 +19,25 @@ const PaymentSuccess: React.FC = () => {
   const { user } = useAuth();
 
   useEffect(() => {
+    console.log('PaymentSuccess mounted, search params:', Object.fromEntries(searchParams.entries()));
+    console.log('Current user:', user?.id);
+    
     const sessionId = searchParams.get('session_id');
     const ziinaStatus = searchParams.get('status');
     const ziinaPaymentId = searchParams.get('payment_id');
     
+    console.log('Payment params:', { sessionId, ziinaStatus, ziinaPaymentId });
+    
     if (sessionId) {
       // Stripe payment verification
+      console.log('Processing Stripe payment verification');
       verifyPayment(sessionId);
     } else if (ziinaStatus && ziinaPaymentId) {
       // Ziina payment verification
+      console.log('Processing Ziina payment verification');
       verifyZiinaPayment(ziinaPaymentId, ziinaStatus);
     } else {
+      console.log('No payment information found in URL params');
       setIsVerifying(false);
       toast.error('No payment information found');
     }
@@ -37,21 +45,30 @@ const PaymentSuccess: React.FC = () => {
 
   const clearCartEverywhere = async () => {
     try {
+      console.log('Clearing cart everywhere for user:', user?.id);
+      
       // Clear localStorage cart
       localStorage.removeItem('cartItems');
       localStorage.removeItem('ziina_payment_info');
+      console.log('Cleared localStorage cart items');
       
       // Clear database cart if user is authenticated
       if (user) {
-        await supabase
+        const { error } = await supabase
           .from('cart')
           .delete()
           .eq('user_id', user.id);
-        console.log('Cart cleared from database for user:', user.id);
+          
+        if (error) {
+          console.error('Error clearing database cart:', error);
+        } else {
+          console.log('Cart cleared from database for user:', user.id);
+        }
       }
       
       // Trigger cart count refresh by dispatching a custom event
       window.dispatchEvent(new CustomEvent('cartUpdated'));
+      console.log('Cart update event dispatched');
     } catch (error) {
       console.error('Error clearing cart:', error);
     }
@@ -59,18 +76,21 @@ const PaymentSuccess: React.FC = () => {
 
   const verifyZiinaPayment = async (paymentId: string, status: string) => {
     try {
-      console.log('Verifying Ziina payment:', { paymentId, status });
+      console.log('Starting Ziina payment verification:', { paymentId, status });
       
       // Get stored payment info from localStorage
       const storedInfo = localStorage.getItem('ziina_payment_info');
+      console.log('Stored payment info:', storedInfo);
+      
       if (!storedInfo) {
         throw new Error('Payment information not found in storage');
       }
 
       const paymentInfo = JSON.parse(storedInfo);
-      console.log('Retrieved payment info:', paymentInfo);
+      console.log('Parsed payment info:', paymentInfo);
       
       // Verify with our backend
+      console.log('Calling verify-payment function...');
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: { 
           paymentId,
@@ -78,9 +98,9 @@ const PaymentSuccess: React.FC = () => {
             status: status === 'success' ? 'success' : 'failed',
             payment_id: paymentId,
             metadata: {
-              user_id: paymentInfo.userId,
-              user_email: paymentInfo.userEmail,
-              user_name: paymentInfo.userName,
+              user_id: paymentInfo.userId || user?.id,
+              user_email: paymentInfo.userEmail || user?.email,
+              user_name: paymentInfo.userName || '',
               delivery_address: paymentInfo.deliveryAddress,
               delivery_method: 'home',
               total_amount: paymentInfo.totalAmount.toString(),
@@ -98,6 +118,7 @@ const PaymentSuccess: React.FC = () => {
       }
 
       if (data?.success) {
+        console.log('Payment verification successful, order ID:', data.orderId);
         setOrderDetails({
           orderId: data.orderId,
           deliveryMethod: data.deliveryMethod || 'home',
@@ -114,14 +135,17 @@ const PaymentSuccess: React.FC = () => {
 
         // Send order confirmation email
         try {
+          console.log('Sending order confirmation email...');
           await supabase.functions.invoke('send-order-confirmation', {
             body: { orderId: data.orderId }
           });
+          console.log('Order confirmation email sent');
         } catch (emailError) {
           console.error('Failed to send confirmation email:', emailError);
           // Don't show error to user as the order was successful
         }
       } else {
+        console.log('Payment verification failed:', data);
         toast.error('Payment verification failed', {
           description: 'Please contact support if you believe this is an error.'
         });
@@ -138,13 +162,17 @@ const PaymentSuccess: React.FC = () => {
 
   const verifyPayment = async (sessionId: string) => {
     try {
+      console.log('Starting Stripe payment verification for session:', sessionId);
       const { data, error } = await supabase.functions.invoke('verify-payment', {
         body: { sessionId }
       });
 
+      console.log('Stripe verification response:', { data, error });
+
       if (error) throw error;
 
       if (data?.success) {
+        console.log('Stripe payment verification successful');
         setOrderDetails({
           orderId: data.orderId,
           deliveryMethod: data.deliveryMethod,
@@ -159,6 +187,7 @@ const PaymentSuccess: React.FC = () => {
           description: 'Your order has been confirmed and is being processed. Your cart has been cleared.'
         });
       } else {
+        console.log('Stripe payment verification failed:', data);
         toast.error('Payment verification failed', {
           description: 'Please contact support if you believe this is an error.'
         });

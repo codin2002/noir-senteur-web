@@ -62,6 +62,7 @@ serve(async (req) => {
       }
 
       // Create order using the stored procedure (this also clears the cart)
+      console.log('Calling create_order_with_items stored procedure...');
       const { data: orderId, error: orderError } = await supabaseService.rpc('create_order_with_items', {
         user_uuid: userId,
         cart_items: JSON.stringify(cartItems),
@@ -76,6 +77,7 @@ serve(async (req) => {
       console.log('Order created successfully:', orderId);
 
       // Record successful payment for email notifications
+      console.log('Recording successful payment...');
       const { error: paymentRecordError } = await supabaseService
         .from('successful_payments')
         .insert({
@@ -95,15 +97,23 @@ serve(async (req) => {
       if (paymentRecordError) {
         console.error('Error recording payment:', paymentRecordError);
         // Don't fail the whole process if payment recording fails
+      } else {
+        console.log('Payment recorded successfully');
       }
 
       // Double-check that cart is cleared (redundant but ensures it's cleared)
       try {
-        await supabaseService
+        console.log('Ensuring cart is cleared for user:', userId);
+        const { error: cartClearError } = await supabaseService
           .from('cart')
           .delete()
           .eq('user_id', userId);
-        console.log('Cart cleared for user:', userId);
+          
+        if (cartClearError) {
+          console.error('Error clearing cart:', cartClearError);
+        } else {
+          console.log('Cart cleared successfully for user:', userId);
+        }
       } catch (cartClearError) {
         console.error('Error clearing cart:', cartClearError);
         // Don't fail if cart clearing fails as the stored procedure should handle this
