@@ -49,6 +49,22 @@ const Cart = () => {
     }
   }, [user, searchParams]);
 
+  // Listen for cart updates from other components
+  useEffect(() => {
+    const handleCartUpdate = () => {
+      console.log('Cart update event received, refreshing cart...');
+      if (user) {
+        fetchCart();
+      } else {
+        loadCartFromLocalStorage();
+      }
+      refreshCartCount();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
+  }, [user, refreshCartCount]);
+
   const loadCartFromLocalStorage = () => {
     try {
       setIsLoading(true);

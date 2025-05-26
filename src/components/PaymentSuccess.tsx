@@ -35,6 +35,28 @@ const PaymentSuccess: React.FC = () => {
     }
   }, [searchParams, user]);
 
+  const clearCartEverywhere = async () => {
+    try {
+      // Clear localStorage cart
+      localStorage.removeItem('cartItems');
+      localStorage.removeItem('ziina_payment_info');
+      
+      // Clear database cart if user is authenticated
+      if (user) {
+        await supabase
+          .from('cart')
+          .delete()
+          .eq('user_id', user.id);
+        console.log('Cart cleared from database for user:', user.id);
+      }
+      
+      // Trigger cart count refresh by dispatching a custom event
+      window.dispatchEvent(new CustomEvent('cartUpdated'));
+    } catch (error) {
+      console.error('Error clearing cart:', error);
+    }
+  };
+
   const verifyZiinaPayment = async (paymentId: string, status: string) => {
     try {
       console.log('Verifying Ziina payment:', { paymentId, status });
@@ -83,17 +105,12 @@ const PaymentSuccess: React.FC = () => {
           paymentMethod: 'ziina'
         });
         
-        // Clear stored payment info
-        localStorage.removeItem('ziina_payment_info');
+        // Clear cart everywhere
+        await clearCartEverywhere();
         
         toast.success('Payment successful!', {
-          description: 'Your order has been confirmed and is being processed.'
+          description: 'Your order has been confirmed and is being processed. Your cart has been cleared.'
         });
-
-        // Clear the cart from localStorage if user is not authenticated
-        if (!user) {
-          localStorage.removeItem('cartItems');
-        }
 
         // Send order confirmation email
         try {
@@ -134,8 +151,12 @@ const PaymentSuccess: React.FC = () => {
           deliveryAddress: data.deliveryAddress,
           paymentMethod: data.paymentMethod || 'stripe'
         });
+        
+        // Clear cart everywhere
+        await clearCartEverywhere();
+        
         toast.success('Payment successful!', {
-          description: 'Your order has been confirmed and is being processed.'
+          description: 'Your order has been confirmed and is being processed. Your cart has been cleared.'
         });
       } else {
         toast.error('Payment verification failed', {
@@ -173,7 +194,7 @@ const PaymentSuccess: React.FC = () => {
         <div className="space-y-2">
           <h1 className="text-3xl font-serif">Payment Successful!</h1>
           <p className="text-muted-foreground">
-            Thank you for your order. Your payment has been processed successfully.
+            Thank you for your order. Your payment has been processed successfully and your cart has been cleared.
           </p>
         </div>
 

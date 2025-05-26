@@ -61,7 +61,7 @@ serve(async (req) => {
         throw new Error('User ID not found in payment metadata');
       }
 
-      // Create order using the stored procedure
+      // Create order using the stored procedure (this also clears the cart)
       const { data: orderId, error: orderError } = await supabaseService.rpc('create_order_with_items', {
         user_uuid: userId,
         cart_items: JSON.stringify(cartItems),
@@ -97,12 +97,25 @@ serve(async (req) => {
         // Don't fail the whole process if payment recording fails
       }
 
+      // Double-check that cart is cleared (redundant but ensures it's cleared)
+      try {
+        await supabaseService
+          .from('cart')
+          .delete()
+          .eq('user_id', userId);
+        console.log('Cart cleared for user:', userId);
+      } catch (cartClearError) {
+        console.error('Error clearing cart:', cartClearError);
+        // Don't fail if cart clearing fails as the stored procedure should handle this
+      }
+
       return new Response(JSON.stringify({ 
         success: true, 
         orderId: orderId,
         deliveryMethod: session.metadata?.delivery_method || 'home',
         deliveryAddress: session.metadata?.delivery_address,
-        paymentMethod: 'ziina'
+        paymentMethod: 'ziina',
+        cartCleared: true
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,

@@ -57,6 +57,15 @@ export const useCartCount = (userId?: string) => {
 
   useEffect(() => {
     fetchCartCount();
+    
+    // Listen for cart updates from other components
+    const handleCartUpdate = () => {
+      console.log('Cart count refreshing due to cart update event');
+      fetchCartCount();
+    };
+
+    window.addEventListener('cartUpdated', handleCartUpdate);
+    return () => window.removeEventListener('cartUpdated', handleCartUpdate);
   }, [userId]);
 
   return {
