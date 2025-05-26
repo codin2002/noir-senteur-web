@@ -44,22 +44,25 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
   const [activeTab, setActiveTab] = useState("type");
   const isMobile = useIsMobile();
   
-  // For platforms that have issue with chart rendering, we'll use useEffect to handle initial render
   useEffect(() => {
-    // This empty effect helps with chart rendering on some mobile platforms
-    return () => {
-      // Cleanup if needed
-    };
-  }, []);
+    console.log('Classification data:', classificationData);
+  }, [classificationData]);
 
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (!classificationData) {
     return (
-      <div className="text-center py-8">
-        <p className="text-white/70">No classification data available for this perfume.</p>
+      <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
+        <h3 className="text-xl font-serif mb-4 text-white">Classification</h3>
+        <div className="text-center py-8">
+          <p className="text-white/70">No classification data available for this perfume.</p>
+        </div>
       </div>
     );
   }
@@ -98,132 +101,106 @@ const PerfumeClassification: React.FC<PerfumeClassificationProps> = ({
     }
   };
 
-  // Adjust chart size based on device
-  const chartHeight = isMobile ? 250 : 350;
-  const chartOuterRadius = isMobile ? 70 : 90;
+  const chartHeight = isMobile ? 280 : 400;
+  const chartOuterRadius = isMobile ? 80 : 120;
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-black/90 backdrop-blur-sm border border-gold/30 rounded-lg px-3 py-2">
+          <p className="text-gold font-medium">{`${label}: ${payload[0].value}%`}</p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderRadarChart = (data: any[]) => (
+    <div className="relative">
+      <ResponsiveContainer width="100%" height={chartHeight}>
+        <RadarChart cx="50%" cy="50%" outerRadius={chartOuterRadius} data={data}>
+          <PolarGrid 
+            stroke="#333333" 
+            strokeWidth={1}
+            gridType="polygon"
+          />
+          <PolarAngleAxis 
+            dataKey="name" 
+            tick={{ 
+              fill: '#ffffff', 
+              fontSize: isMobile ? 12 : 14,
+              fontWeight: 500
+            }}
+            className="text-white"
+          />
+          <PolarRadiusAxis 
+            domain={[0, 100]} 
+            tick={false}
+            axisLine={false}
+            grid={false}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Radar 
+            name="Classification" 
+            dataKey="value" 
+            stroke="#d4af37" 
+            fill="#d4af37" 
+            fillOpacity={0.15}
+            strokeWidth={2}
+            dot={{ fill: '#d4af37', strokeWidth: 0, r: 4 }}
+          />
+        </RadarChart>
+      </ResponsiveContainer>
+    </div>
+  );
 
   return (
-    <div className="mt-8">
-      <h3 className="text-xl font-serif mb-4">Perfume Classification</h3>
+    <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
+      <h3 className="text-xl font-serif mb-2 text-white">Classification</h3>
+      <p className="text-white/60 text-sm mb-6">Fragrance Profile Analysis</p>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-4 bg-darker border border-gold/20 mb-6 overflow-x-auto">
+        <TabsList className="w-full grid grid-cols-4 bg-black/30 border border-gold/20 mb-6 h-12">
           <TabsTrigger 
             value="type"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Type
           </TabsTrigger>
           <TabsTrigger 
             value="occasion"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Occasion
           </TabsTrigger>
           <TabsTrigger 
             value="season"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Season
           </TabsTrigger>
           <TabsTrigger 
             value="audience"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Audience
           </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="type" className="border-none p-0">
-          <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart outerRadius={chartOuterRadius} data={typeData}>
-                <PolarGrid stroke="#5b5b5b" />
-                <PolarAngleAxis dataKey="name" stroke="#d4d4d4" />
-                <PolarRadiusAxis domain={[0, 100]} stroke="#5b5b5b" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#222", borderColor: "#d4af37" }}
-                  labelStyle={{ color: "#d4af37" }}
-                />
-                <Radar 
-                  name="Classification" 
-                  dataKey="value" 
-                  stroke="#d4af37" 
-                  fill="#d4af37" 
-                  fillOpacity={0.3} 
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        <TabsContent value="type" className="border-none p-0 mt-0">
+          {renderRadarChart(typeData)}
         </TabsContent>
 
-        <TabsContent value="occasion" className="border-none p-0">
-          <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart outerRadius={chartOuterRadius} data={occasionData}>
-                <PolarGrid stroke="#5b5b5b" />
-                <PolarAngleAxis dataKey="name" stroke="#d4d4d4" />
-                <PolarRadiusAxis domain={[0, 100]} stroke="#5b5b5b" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#222", borderColor: "#d4af37" }}
-                  labelStyle={{ color: "#d4af37" }}
-                />
-                <Radar 
-                  name="Classification" 
-                  dataKey="value" 
-                  stroke="#d4af37" 
-                  fill="#d4af37" 
-                  fillOpacity={0.3} 
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        <TabsContent value="occasion" className="border-none p-0 mt-0">
+          {renderRadarChart(occasionData)}
         </TabsContent>
 
-        <TabsContent value="season" className="border-none p-0">
-          <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart outerRadius={chartOuterRadius} data={seasonData}>
-                <PolarGrid stroke="#5b5b5b" />
-                <PolarAngleAxis dataKey="name" stroke="#d4d4d4" />
-                <PolarRadiusAxis domain={[0, 100]} stroke="#5b5b5b" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#222", borderColor: "#d4af37" }}
-                  labelStyle={{ color: "#d4af37" }}
-                />
-                <Radar 
-                  name="Classification" 
-                  dataKey="value" 
-                  stroke="#d4af37" 
-                  fill="#d4af37" 
-                  fillOpacity={0.3} 
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        <TabsContent value="season" className="border-none p-0 mt-0">
+          {renderRadarChart(seasonData)}
         </TabsContent>
 
-        <TabsContent value="audience" className="border-none p-0">
-          <ChartContainer config={chartConfig} className={`h-[${chartHeight}px]`}>
-            <ResponsiveContainer width="100%" height="100%">
-              <RadarChart outerRadius={chartOuterRadius} data={audienceData}>
-                <PolarGrid stroke="#5b5b5b" />
-                <PolarAngleAxis dataKey="name" stroke="#d4d4d4" />
-                <PolarRadiusAxis domain={[0, 100]} stroke="#5b5b5b" />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: "#222", borderColor: "#d4af37" }}
-                  labelStyle={{ color: "#d4af37" }}
-                />
-                <Radar 
-                  name="Classification" 
-                  dataKey="value" 
-                  stroke="#d4af37" 
-                  fill="#d4af37" 
-                  fillOpacity={0.3} 
-                />
-              </RadarChart>
-            </ResponsiveContainer>
-          </ChartContainer>
+        <TabsContent value="audience" className="border-none p-0 mt-0">
+          {renderRadarChart(audienceData)}
         </TabsContent>
       </Tabs>
     </div>
