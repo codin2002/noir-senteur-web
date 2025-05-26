@@ -17,6 +17,18 @@ serve(async (req) => {
     // Get the request body
     const { cartItems, deliveryAddress } = await req.json();
     
+    // Validate request payload
+    if (!Array.isArray(cartItems) || typeof deliveryAddress !== "string") {
+      console.error('Invalid request payload:', { cartItems: Array.isArray(cartItems), deliveryAddress: typeof deliveryAddress });
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { message: "Invalid request payload", details: "cartItems must be array and deliveryAddress must be string" }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
     console.log('Received cart items:', JSON.stringify(cartItems, null, 2));
 
     // Create Supabase client using the anon key for user authentication
@@ -31,7 +43,13 @@ serve(async (req) => {
     
     if (!authHeader) {
       console.error('No authorization header found');
-      throw new Error("Authorization header missing");
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { message: "Authorization header missing", details: "Authentication required" }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
     }
 
     // Extract the token from the Bearer header
@@ -44,7 +62,13 @@ serve(async (req) => {
     
     if (authError || !user) {
       console.error('Authentication error:', authError);
-      throw new Error(`Authentication failed: ${authError?.message || 'Invalid token'}`);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { message: "Invalid or expired token", details: authError?.message || 'Authentication failed' }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
     }
 
     console.log('Authenticated user:', user.email);
@@ -70,13 +94,20 @@ serve(async (req) => {
       throw new Error("Ziina API key not configured");
     }
 
-    // Create Ziina payment request with the correct success URL format using Ziina's placeholder
+    const baseUrl = req.headers.get("origin") || "https://senteurfragrances.com";
+    
+    // Set payment expiry to 15 minutes from now
+    const expiryTime = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    // Create Ziina payment request with enhanced configuration
     const ziinaPayload = {
       amount: Math.round(total * 100), // Convert to fils
       currency_code: "AED",
       message: `Senteur Fragrances Order - ${cartItems.length} item(s)`,
-      success_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
-      cancel_url: `${req.headers.get("origin") || "https://senteurfragrances.com"}/cart?payment=cancelled`,
+      success_url: `${baseUrl}/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
+      cancel_url: `${baseUrl}/cart?payment=cancelled`,
+      failure_url: `${baseUrl}/payment-failed`,
+      expiry: expiryTime,
       test: false, // Set to false for production mode
       transaction_source: "directApi",
       allow_tips: false,
@@ -100,7 +131,16 @@ serve(async (req) => {
     if (!ziinaResponse.ok) {
       const errorText = await ziinaResponse.text();
       console.error('Ziina API error response:', errorText);
-      throw new Error(`Ziina API error (${ziinaResponse.status}): ${errorText}`);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { 
+          message: `Ziina API error (${ziinaResponse.status})`,
+          details: errorText 
+        }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
     }
 
     const ziinaData = await ziinaResponse.json();
@@ -112,15 +152,23 @@ serve(async (req) => {
       payment_url: ziinaData.redirect_url,
       payment_id: ziinaData.id,
       total_amount: total.toString(),
+      expiry: expiryTime,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
   } catch (error) {
-    console.error('Error creating payment session:', error);
+    console.error('Error creating payment session:', {
+      message: error.message,
+      stack: error.stack,
+      requestBody: { cartItems: 'redacted', deliveryAddress: 'redacted' }, // Don't log sensitive data
+    });
     return new Response(JSON.stringify({ 
-      error: error.message || "Payment creation failed",
-      details: error.toString()
+      success: false,
+      error: {
+        message: error.message || "Payment creation failed",
+        details: error.toString()
+      }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,

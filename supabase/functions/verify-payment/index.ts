@@ -18,13 +18,25 @@ serve(async (req) => {
     console.log('Payment Intent ID:', paymentIntentId);
 
     if (!paymentIntentId) {
-      throw new Error('Payment Intent ID is required');
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { message: 'Payment Intent ID is required', details: 'Missing paymentIntentId in request body' }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
 
     // Get Ziina API key from environment
     const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
     if (!ziinaApiKey) {
-      throw new Error("Ziina API key not configured");
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { message: "Ziina API key not configured", details: 'Service configuration error' }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
     }
 
     // Fetch payment status from Ziina API
@@ -42,7 +54,16 @@ serve(async (req) => {
     if (!ziinaResponse.ok) {
       const errorText = await ziinaResponse.text();
       console.error('Ziina API error response:', errorText);
-      throw new Error(`Failed to fetch payment status: ${errorText}`);
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: { 
+          message: `Failed to fetch payment status: ${ziinaResponse.status}`,
+          details: errorText 
+        }
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
     }
 
     const paymentData = await ziinaResponse.json();
@@ -62,10 +83,16 @@ serve(async (req) => {
     if (paymentData.status === 'completed') {
       console.log('=== PAYMENT CONFIRMED AS COMPLETED ===');
       
-      // Get user from auth header
+      // Get user from auth header with improved error handling
       const authHeader = req.headers.get("Authorization");
       if (!authHeader) {
-        throw new Error('Authentication required');
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: { message: 'Authorization header missing', details: 'Authentication required' }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        });
       }
 
       const supabaseClient = createClient(
@@ -74,16 +101,22 @@ serve(async (req) => {
       );
       
       const token = authHeader.replace("Bearer ", "");
-      const { data: userData } = await supabaseClient.auth.getUser(token);
+      const { data: userData, error: authError } = await supabaseClient.auth.getUser(token);
       const user = userData.user;
       
-      if (!user) {
-        throw new Error('User not authenticated');
+      if (authError || !user) {
+        console.error('Authentication error:', authError);
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: { message: 'Invalid or expired token', details: authError?.message || 'Authentication failed' }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 401,
+        });
       }
 
       console.log('=== AUTHENTICATED USER ===');
       console.log('User ID:', user.id);
-      console.log('User Email:', user.email);
 
       // Get the user's current cart to process the order
       const { data: cartData, error: cartError } = await supabaseService.rpc('get_cart_with_perfumes', {
@@ -93,7 +126,13 @@ serve(async (req) => {
       if (cartError) {
         console.error('=== CART FETCH ERROR ===');
         console.error('Error details:', JSON.stringify(cartError, null, 2));
-        throw cartError;
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: { message: 'Failed to fetch cart data', details: cartError.message }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
       }
 
       if (!cartData || cartData.length === 0) {
@@ -120,7 +159,13 @@ serve(async (req) => {
             status: 200,
           });
         } else {
-          throw new Error('No cart items found and no recent order exists');
+          return new Response(JSON.stringify({ 
+            success: false,
+            error: { message: 'No cart items found', details: 'Cart is empty and no recent order exists' }
+          }), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 400,
+          });
         }
       }
 
@@ -155,7 +200,13 @@ serve(async (req) => {
       if (orderError) {
         console.error('=== ORDER CREATION ERROR ===');
         console.error('Error details:', JSON.stringify(orderError, null, 2));
-        throw orderError;
+        return new Response(JSON.stringify({ 
+          success: false,
+          error: { message: 'Failed to create order', details: orderError.message }
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 500,
+        });
       }
 
       console.log('=== ORDER CREATED SUCCESSFULLY ===');
@@ -215,14 +266,17 @@ serve(async (req) => {
         status: 200,
       });
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('=== VERIFY PAYMENT ERROR ===');
     console.error('Error message:', error.message);
     console.error('Error stack:', error.stack);
     
     return new Response(JSON.stringify({ 
-      error: error.message,
-      details: error.toString()
+      success: false,
+      error: {
+        message: error.message || "Payment verification failed",
+        details: error.toString()
+      }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
