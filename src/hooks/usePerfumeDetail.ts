@@ -8,14 +8,12 @@ import {
   checkWishlistStatus 
 } from '@/services/perfumeService';
 import { 
-  fetchClassificationData, 
-  fetchRatingsData 
+  fetchClassificationData
 } from '@/services/perfumeAnalyticsService';
 import { 
   Perfume, 
   PerfumeImage, 
-  PerfumeClassificationData, 
-  PerfumeRatingData 
+  PerfumeClassificationData
 } from '@/types/perfumeDetail';
 
 export const usePerfumeDetail = () => {
@@ -26,9 +24,7 @@ export const usePerfumeDetail = () => {
   const [loading, setLoading] = useState(true);
   const [isInWishlist, setIsInWishlist] = useState(false);
   const [classificationData, setClassificationData] = useState<PerfumeClassificationData | null>(null);
-  const [ratingsData, setRatingsData] = useState<PerfumeRatingData | null>(null);
   const [isLoadingClassification, setIsLoadingClassification] = useState(false);
-  const [isLoadingRatings, setIsLoadingRatings] = useState(false);
 
   console.log('usePerfumeDetail - ID from params:', id);
   console.log('usePerfumeDetail - User:', user);
@@ -59,15 +55,6 @@ export const usePerfumeDetail = () => {
     setIsLoadingClassification(false);
   };
 
-  const loadRatingsData = async () => {
-    if (!id) return;
-    
-    setIsLoadingRatings(true);
-    const data = await fetchRatingsData(id);
-    setRatingsData(data);
-    setIsLoadingRatings(false);
-  };
-
   const loadWishlistStatus = async () => {
     if (!user || !id) return;
     const status = await checkWishlistStatus(user.id, id);
@@ -75,9 +62,8 @@ export const usePerfumeDetail = () => {
   };
 
   const refreshAnalytics = () => {
-    console.log('Refreshing analytics data');
+    console.log('Refreshing classification data');
     loadClassificationData();
-    loadRatingsData();
   };
 
   useEffect(() => {
@@ -95,7 +81,6 @@ export const usePerfumeDetail = () => {
   useEffect(() => {
     if (id) {
       loadClassificationData();
-      loadRatingsData();
     }
   }, [id]);
 
@@ -111,9 +96,7 @@ export const usePerfumeDetail = () => {
     isInWishlist,
     setIsInWishlist,
     classificationData,
-    ratingsData,
     isLoadingClassification,
-    isLoadingRatings,
     refreshAnalytics
   };
 };

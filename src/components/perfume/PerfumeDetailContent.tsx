@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { RefreshCw } from 'lucide-react';
 import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
-import PerfumeRatings from '@/components/perfume/PerfumeRatings';
 import PerfumeInfo from '@/components/perfume/PerfumeInfo';
 import PerfumeActions from '@/components/perfume/PerfumeActions';
 
@@ -36,16 +35,6 @@ interface PerfumeClassificationData {
   season_winter: number;
 }
 
-interface PerfumeRatingData {
-  id: string;
-  perfume_id: string;
-  scent_rating: number;
-  durability_rating: number;
-  sillage_rating: number;
-  bottle_rating: number;
-  total_votes: number;
-}
-
 interface Perfume {
   id: string;
   name: string;
@@ -62,7 +51,7 @@ interface PerfumeDetailContentProps {
   isInWishlist: boolean;
   setIsInWishlist: (value: boolean) => void;
   classificationData: PerfumeClassificationData | null;
-  ratingsData: PerfumeRatingData | null;
+  ratingsData: any;
   isLoadingClassification: boolean;
   isLoadingRatings: boolean;
   refreshAnalytics: () => void;
@@ -74,15 +63,9 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
   isInWishlist,
   setIsInWishlist,
   classificationData,
-  ratingsData,
   isLoadingClassification,
-  isLoadingRatings,
   refreshAnalytics
 }) => {
-  console.log('PerfumeDetailContent - Classification Data:', classificationData);
-  console.log('PerfumeDetailContent - Ratings Data:', ratingsData);
-  console.log('PerfumeDetailContent - Loading states:', { isLoadingClassification, isLoadingRatings });
-
   return (
     <div className="max-w-7xl mx-auto">
       <div className="grid md:grid-cols-2 gap-12 mb-16">
@@ -107,45 +90,27 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
         </div>
       </div>
       
-      {/* Classification & Ratings - Give more space and better layout */}
+      {/* Classification Only */}
       <div className="mt-16 border-t border-gold/30 pt-12">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-serif">Perfume Analytics</h2>
+          <h2 className="text-2xl font-serif">Fragrance Profile</h2>
           <Button
             variant="outline"
             size="sm"
             onClick={refreshAnalytics}
             className="border-gold/50 text-gold hover:bg-gold/10"
-            disabled={isLoadingClassification || isLoadingRatings}
+            disabled={isLoadingClassification}
           >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingClassification || isLoadingRatings ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingClassification ? 'animate-spin' : ''}`} />
             Refresh Data
           </Button>
         </div>
         
-        {/* Debug info to see what data we have */}
-        <div className="mb-4 p-4 bg-black/20 rounded text-xs text-gold">
-          <p>Debug Info:</p>
-          <p>Classification Data: {classificationData ? 'Available' : 'Not Available'}</p>
-          <p>Ratings Data: {ratingsData ? 'Available' : 'Not Available'}</p>
-          <p>Loading Classification: {isLoadingClassification ? 'Yes' : 'No'}</p>
-          <p>Loading Ratings: {isLoadingRatings ? 'Yes' : 'No'}</p>
-        </div>
-        
-        {/* Single column layout for better space utilization */}
-        <div className="space-y-12">
-          <div className="w-full">
-            <PerfumeClassification 
-              classificationData={classificationData} 
-              isLoading={isLoadingClassification}
-            />
-          </div>
-          <div className="w-full">
-            <PerfumeRatings 
-              ratingsData={ratingsData} 
-              isLoading={isLoadingRatings}
-            />
-          </div>
+        <div className="w-full">
+          <PerfumeClassification 
+            classificationData={classificationData} 
+            isLoading={isLoadingClassification}
+          />
         </div>
       </div>
     </div>

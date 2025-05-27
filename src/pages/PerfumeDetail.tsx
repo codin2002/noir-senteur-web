@@ -7,7 +7,6 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PerfumeDetailContent from '@/components/perfume/PerfumeDetailContent';
-import DebugPerfumeData from '@/components/DebugPerfumeData';
 import { usePerfumeDetail } from '@/hooks/usePerfumeDetail';
 
 const PerfumeDetail = () => {
@@ -19,9 +18,7 @@ const PerfumeDetail = () => {
     isInWishlist,
     setIsInWishlist,
     classificationData,
-    ratingsData,
     isLoadingClassification,
-    isLoadingRatings,
     refreshAnalytics
   } = usePerfumeDetail();
 
@@ -35,7 +32,6 @@ const PerfumeDetail = () => {
           <LoadingSpinner />
         </div>
         <Footer />
-        <DebugPerfumeData />
       </div>
     );
   }
@@ -55,7 +51,6 @@ const PerfumeDetail = () => {
           </div>
         </div>
         <Footer />
-        <DebugPerfumeData />
       </div>
     );
   }
@@ -80,14 +75,13 @@ const PerfumeDetail = () => {
           isInWishlist={isInWishlist}
           setIsInWishlist={setIsInWishlist}
           classificationData={classificationData}
-          ratingsData={ratingsData}
+          ratingsData={null}
           isLoadingClassification={isLoadingClassification}
-          isLoadingRatings={isLoadingRatings}
+          isLoadingRatings={false}
           refreshAnalytics={refreshAnalytics}
         />
       </div>
       <Footer />
-      <DebugPerfumeData />
     </div>
   );
 };
