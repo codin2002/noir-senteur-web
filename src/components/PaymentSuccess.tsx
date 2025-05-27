@@ -29,8 +29,10 @@ const PaymentSuccess = () => {
                              searchParams.get('payment_intent') || 
                              searchParams.get('session_id');
       
+      console.log('=== PAYMENT SUCCESS PAGE ===');
       console.log('Payment verification - URL params:', Object.fromEntries(searchParams.entries()));
       console.log('Payment Intent ID found:', paymentIntentId);
+      console.log('Current URL:', window.location.href);
 
       if (!paymentIntentId) {
         console.error('No payment information found in URL parameters');

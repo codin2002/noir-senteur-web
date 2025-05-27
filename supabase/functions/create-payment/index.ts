@@ -1,6 +1,5 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -8,123 +7,88 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Get the request body
     const { cartItems, deliveryAddress, isGuest, userId } = await req.json();
     
-    // Validate request payload
-    if (!Array.isArray(cartItems) || typeof deliveryAddress !== "string") {
-      console.error('Invalid request payload:', { cartItems: Array.isArray(cartItems), deliveryAddress: typeof deliveryAddress });
+    console.log('=== CREATE PAYMENT FUNCTION CALLED ===');
+    console.log('Is guest checkout:', isGuest);
+    console.log('User ID:', userId);
+    console.log('Received cart items:', JSON.stringify(cartItems, null, 2));
+
+    // Get Ziina API key from environment
+    const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
+    if (!ziinaApiKey) {
       return new Response(JSON.stringify({ 
         success: false,
-        error: { message: "Invalid request payload", details: "cartItems must be array and deliveryAddress must be string" }
+        error: "Ziina API key not configured" 
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    // Validate cart items
+    if (!cartItems || cartItems.length === 0) {
+      return new Response(JSON.stringify({ 
+        success: false,
+        error: "No cart items provided" 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
       });
     }
 
-    console.log('Received cart items:', JSON.stringify(cartItems, null, 2));
-    console.log('Is guest checkout:', isGuest);
-    console.log('User ID:', userId);
-
-    // Create Supabase client using the anon key
-    const supabaseClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
-    );
-
-    let user = null;
-
-    // Only authenticate if it's not a guest checkout
-    if (!isGuest) {
-      const authHeader = req.headers.get("Authorization");
-      console.log('Auth header present:', !!authHeader);
-      
-      if (!authHeader) {
-        console.error('No authorization header found for user checkout');
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: { message: "Authorization header missing", details: "Authentication required for user checkout" }
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        });
-      }
-
-      // Extract the token from the Bearer header
-      const token = authHeader.replace("Bearer ", "");
-      console.log('Token extracted, length:', token.length);
-      
-      // Get user from the token
-      const { data: { user: authUser }, error: authError } = await supabaseClient.auth.getUser(token);
-      console.log('Auth response:', { user: authUser?.email, error: authError });
-      
-      if (authError || !authUser) {
-        console.error('Authentication error:', authError);
-        return new Response(JSON.stringify({ 
-          success: false,
-          error: { message: "Invalid or expired token", details: authError?.message || 'Authentication failed' }
-        }), {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 401,
-        });
-      }
-
-      user = authUser;
-      console.log('Authenticated user:', user.email);
-    } else {
+    // Process cart items based on checkout type
+    if (isGuest) {
       console.log('Processing guest checkout');
+    } else {
+      console.log('Processing authenticated user checkout');
     }
 
-    // Calculate totals - handle both data structures
-    const subtotal = cartItems.reduce((sum: number, item: any) => {
-      // Handle both structures: item.perfume.price_value or item.price
-      const price = item.perfume?.price_value || item.price || 0;
+    // Calculate total amount
+    let subtotal = 0;
+    for (const item of cartItems) {
+      const price = item.perfume?.price_value || 0;
       const quantity = item.quantity || 1;
-      
       console.log(`Item price: ${price}, quantity: ${quantity}`);
-      return sum + (price * quantity);
-    }, 0);
-    
-    const shippingCost = 1; // Updated shipping cost
-    const total = subtotal + shippingCost;
-
-    console.log(`Calculated subtotal: ${subtotal}, shipping: ${shippingCost}, total: ${total}`);
-
-    // Get Ziina API key from environment
-    const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
-    if (!ziinaApiKey) {
-      throw new Error("Ziina API key not configured");
+      subtotal += price * quantity;
     }
 
-    const baseUrl = req.headers.get("origin") || "https://senteurfragrances.com";
+    const shipping = 1; // AED 1 shipping
+    const total = subtotal + shipping;
     
-    // Set payment expiry to 15 minutes from now in milliseconds
-    const expiryTimestamp = Date.now() + (15 * 60 * 1000); // 15 minutes in milliseconds
+    console.log(`Calculated subtotal: ${subtotal}, shipping: ${shipping}, total: ${total}`);
 
-    // Create Ziina payment request with enhanced configuration
+    // Convert to fils (1 AED = 100 fils)
+    const amountInFils = Math.round(total * 100);
+
+    // Create payment message
+    const itemCount = cartItems.length;
+    const paymentMessage = `Senteur Fragrances Order - ${itemCount} item(s)${isGuest ? ' (Guest)' : ''}`;
+
+    // Set expiry to 15 minutes from now
+    const expiryTime = Date.now() + (15 * 60 * 1000);
+
+    // Create Ziina payment
     const ziinaPayload = {
-      amount: Math.round(total * 100), // Convert to fils
+      amount: amountInFils,
       currency_code: "AED",
-      message: `Senteur Fragrances Order - ${cartItems.length} item(s)${isGuest ? ' (Guest)' : ''}`,
-      success_url: `${baseUrl}/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
-      cancel_url: `${baseUrl}/cart?payment=cancelled`,
-      failure_url: `${baseUrl}/payment-failed`,
-      expiry: expiryTimestamp.toString(), // Convert to string format with milliseconds
-      test: false, // Set to false for production mode
+      message: paymentMessage,
+      success_url: `https://senteurfragrances.com/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
+      cancel_url: "https://senteurfragrances.com/cart?payment=cancelled",
+      failure_url: "https://senteurfragrances.com/payment-failed",
+      expiry: expiryTime.toString(),
+      test: false,
       transaction_source: "directApi",
-      allow_tips: false,
+      allow_tips: false
     };
 
-    console.log('Creating Ziina payment with payload:', ziinaPayload);
+    console.log('Creating Ziina payment with payload:', JSON.stringify(ziinaPayload, null, 2));
 
-    // Call Ziina API using the correct v2 endpoint
     const ziinaResponse = await fetch("https://api-v2.ziina.com/api/payment_intent", {
       method: "POST",
       headers: {
@@ -139,45 +103,33 @@ serve(async (req) => {
 
     if (!ziinaResponse.ok) {
       const errorText = await ziinaResponse.text();
-      console.error('Ziina API error response:', errorText);
+      console.error('Ziina API error:', errorText);
       return new Response(JSON.stringify({ 
         success: false,
-        error: { 
-          message: `Ziina API error (${ziinaResponse.status})`,
-          details: errorText 
-        }
+        error: `Ziina API error: ${ziinaResponse.status}` 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
       });
     }
 
-    const ziinaData = await ziinaResponse.json();
-    console.log('Ziina payment created successfully:', ziinaData);
+    const paymentData = await ziinaResponse.json();
+    console.log('Ziina payment created successfully:', JSON.stringify(paymentData, null, 2));
 
-    // Return the payment URL and details
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       success: true,
-      payment_url: ziinaData.redirect_url,
-      payment_id: ziinaData.id,
-      total_amount: total.toString(),
-      expiry: expiryTimestamp.toString(),
+      payment_url: paymentData.redirect_url,
+      payment_intent_id: paymentData.id
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
-  } catch (error) {
-    console.error('Error creating payment session:', {
-      message: error.message,
-      stack: error.stack,
-      requestBody: { cartItems: 'redacted', deliveryAddress: 'redacted' }, // Don't log sensitive data
-    });
+
+  } catch (error: any) {
+    console.error('Payment creation error:', error);
     return new Response(JSON.stringify({ 
       success: false,
-      error: {
-        message: error.message || "Payment creation failed",
-        details: error.toString()
-      }
+      error: error.message || "Payment creation failed" 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
