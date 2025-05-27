@@ -27,7 +27,7 @@ export interface PerfumeClassificationData {
 
 export const transformTypeData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
   { name: 'Floral', value: data.type_floral, fullMark: 100 },
-  { name: 'Fresh', value: data.type_fresh, fullMark: 100 },
+  { name: 'Chypre', value: data.type_fresh, fullMark: 100 },
   { name: 'Oriental', value: data.type_oriental, fullMark: 100 },
   { name: 'Woody', value: data.type_woody, fullMark: 100 },
 ];
