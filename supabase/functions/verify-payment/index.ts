@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -331,6 +330,28 @@ serve(async (req) => {
         // Don't fail the whole process if payment recording fails
       } else {
         console.log('=== PAYMENT RECORDED SUCCESSFULLY ===');
+      }
+
+      // Send order confirmation emails
+      console.log('=== TRIGGERING ORDER CONFIRMATION EMAILS ===');
+      try {
+        const emailResponse = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-order-confirmation`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+          },
+          body: JSON.stringify({ orderId: orderId }),
+        });
+
+        if (!emailResponse.ok) {
+          console.error('Failed to send order confirmation emails:', await emailResponse.text());
+        } else {
+          console.log('Order confirmation emails triggered successfully');
+        }
+      } catch (emailError) {
+        console.error('Error triggering order confirmation emails:', emailError);
+        // Don't fail the payment process if email sending fails
       }
 
       console.log('=== RETURNING SUCCESS RESPONSE ===');

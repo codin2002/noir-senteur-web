@@ -25,7 +25,7 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Get payment details with user profile for phone number
+    // Get payment details with order and items
     const { data: payment, error: paymentError } = await supabaseService
       .from('successful_payments')
       .select(`
@@ -34,7 +34,7 @@ serve(async (req) => {
           *,
           order_items(
             *,
-            perfumes(name, price)
+            perfumes(name, price_value, image)
           )
         )
       `)
@@ -50,32 +50,42 @@ serve(async (req) => {
       });
     }
 
-    // Get user profile for phone number
-    const { data: profile } = await supabaseService
-      .from('profiles')
-      .select('phone')
-      .eq('id', payment.user_id)
-      .single();
+    // Get user profile for additional details if user exists
+    let customerPhone = 'Not provided';
+    if (payment.user_id) {
+      const { data: profile } = await supabaseService
+        .from('profiles')
+        .select('phone')
+        .eq('id', payment.user_id)
+        .single();
+      customerPhone = profile?.phone || 'Not provided';
+    }
 
-    const customerPhone = profile?.phone || 'Not provided';
-
-    // Format order items for email
-    const orderItemsHtml = payment.orders.order_items.map((item: any) => `
-      <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 12px; text-align: left;">${item.perfumes.name}</td>
-        <td style="padding: 12px; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px; text-align: right;">AED ${item.price}</td>
-        <td style="padding: 12px; text-align: right;">AED ${(item.price * item.quantity).toFixed(2)}</td>
-      </tr>
-    `).join('');
-
-    const subtotal = payment.orders.order_items.reduce((sum: number, item: any) => 
+    // Calculate totals
+    const orderItems = payment.orders.order_items;
+    const subtotal = orderItems.reduce((sum: number, item: any) => 
       sum + (item.price * item.quantity), 0
     );
     const shipping = 1;
     const total = subtotal + shipping;
 
-    // Enhanced customer email HTML with better styling
+    // Format order items for email
+    const orderItemsHtml = orderItems.map((item: any) => `
+      <tr style="border-bottom: 1px solid #eee;">
+        <td style="padding: 12px; text-align: left;">
+          <div style="display: flex; align-items: center;">
+            <img src="${item.perfumes.image}" alt="${item.perfumes.name}" 
+                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
+            <span>${item.perfumes.name}</span>
+          </div>
+        </td>
+        <td style="padding: 12px; text-align: center;">${item.quantity}</td>
+        <td style="padding: 12px; text-align: right;">AED ${item.price.toFixed(2)}</td>
+        <td style="padding: 12px; text-align: right;">AED ${(item.price * item.quantity).toFixed(2)}</td>
+      </tr>
+    `).join('');
+
+    // Customer thank you email
     const customerEmailHtml = `
       <!DOCTYPE html>
       <html>
@@ -102,14 +112,14 @@ serve(async (req) => {
               <h3 style="margin-top: 0; color: #d4af37; font-size: 18px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">Order Details</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
                 <div>
-                  <p style="margin: 5px 0;"><strong>Order ID:</strong> ${payment.order_id}</p>
+                  <p style="margin: 5px 0;"><strong>Order ID:</strong> #${payment.order_id.substring(0, 8)}</p>
                   <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(payment.created_at).toLocaleDateString()}</p>
                   <p style="margin: 5px 0;"><strong>Customer:</strong> ${payment.customer_name}</p>
                 </div>
                 <div>
                   <p style="margin: 5px 0;"><strong>Email:</strong> ${payment.customer_email}</p>
                   <p style="margin: 5px 0;"><strong>Phone:</strong> ${customerPhone}</p>
-                  <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #d4af37; font-weight: bold;">AED ${payment.amount}</span></p>
+                  <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #d4af37; font-weight: bold;">AED ${total.toFixed(2)}</span></p>
                 </div>
               </div>
             </div>
@@ -162,7 +172,7 @@ serve(async (req) => {
               <p style="margin: 5px 0;"><strong>Amount Paid:</strong> <span style="color: #d4af37; font-weight: bold;">AED ${payment.amount}</span></p>
             </div>
 
-            <!-- Important Information -->
+            <!-- What's Next -->
             <div style="background-color: #fff3cd; padding: 25px 20px; border-left: 4px solid #d4af37;">
               <h3 style="margin-top: 0; color: #333; font-size: 18px;">What's Next?</h3>
               <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
@@ -186,7 +196,7 @@ serve(async (req) => {
       </html>
     `;
 
-    // Enhanced delivery team email HTML
+    // Delivery team email
     const deliveryEmailHtml = `
       <!DOCTYPE html>
       <html>
@@ -207,11 +217,11 @@ serve(async (req) => {
               <h3 style="margin-top: 0; color: #dc3545; font-size: 18px; border-bottom: 2px solid #dc3545; padding-bottom: 8px;">Order Summary</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
                 <div>
-                  <p style="margin: 5px 0;"><strong>Order ID:</strong> ${payment.order_id}</p>
+                  <p style="margin: 5px 0;"><strong>Order ID:</strong> #${payment.order_id.substring(0, 8)}</p>
                   <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(payment.created_at).toLocaleDateString()}</p>
                 </div>
                 <div>
-                  <p style="margin: 5px 0;"><strong>Total Amount:</strong> <span style="color: #dc3545; font-weight: bold;">AED ${payment.amount}</span></p>
+                  <p style="margin: 5px 0;"><strong>Total Amount:</strong> <span style="color: #dc3545; font-weight: bold;">AED ${total.toFixed(2)}</span></p>
                   <p style="margin: 5px 0;"><strong>Payment:</strong> <span style="color: #28a745;">CONFIRMED</span></p>
                 </div>
               </div>
@@ -243,15 +253,27 @@ serve(async (req) => {
                   <tr style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);">
                     <th style="padding: 12px; text-align: left; color: white; font-weight: bold;">Perfume</th>
                     <th style="padding: 12px; text-align: center; color: white; font-weight: bold;">Quantity</th>
+                    <th style="padding: 12px; text-align: right; color: white; font-weight: bold;">Price</th>
                   </tr>
                 </thead>
                 <tbody>
-                  ${payment.orders.order_items.map((item: any) => `
+                  ${orderItems.map((item: any) => `
                     <tr style="border-bottom: 1px solid #eee;">
-                      <td style="padding: 15px; text-align: left; font-weight: 500;">${item.perfumes.name}</td>
+                      <td style="padding: 15px; text-align: left;">
+                        <div style="display: flex; align-items: center;">
+                          <img src="${item.perfumes.image}" alt="${item.perfumes.name}" 
+                               style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 10px;">
+                          <span style="font-weight: 500;">${item.perfumes.name}</span>
+                        </div>
+                      </td>
                       <td style="padding: 15px; text-align: center; font-weight: bold; color: #dc3545; font-size: 16px;">${item.quantity}</td>
+                      <td style="padding: 15px; text-align: right; font-weight: 500;">AED ${item.price.toFixed(2)}</td>
                     </tr>
                   `).join('')}
+                  <tr style="background-color: #f9f9f9; border-top: 2px solid #dc3545;">
+                    <td style="padding: 15px; text-align: right; font-weight: bold;" colspan="2">Total Amount:</td>
+                    <td style="padding: 15px; text-align: right; font-weight: bold; color: #dc3545; font-size: 18px;">AED ${total.toFixed(2)}</td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -287,18 +309,18 @@ serve(async (req) => {
     const customerEmailResult = await resend.emails.send({
       from: 'Senteur Fragrances <onboarding@resend.dev>',
       to: [payment.customer_email],
-      subject: `Thank You for Your Order #${payment.order_id} - Senteur Fragrances`,
+      subject: `Thank You for Your Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: customerEmailHtml,
     });
 
     console.log('Customer email sent:', customerEmailResult);
 
-    // Send email to delivery team using the specific Gmail address
+    // Send email to delivery team
     const deliveryTeamEmail = "ashrafshamma09@gmail.com";
     const deliveryEmailResult = await resend.emails.send({
       from: 'Senteur Fragrances <onboarding@resend.dev>',
       to: [deliveryTeamEmail],
-      subject: `🚚 New Delivery Order #${payment.order_id} - Senteur Fragrances`,
+      subject: `🚚 New Delivery Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: deliveryEmailHtml,
     });
 
