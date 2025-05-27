@@ -97,6 +97,7 @@ export const useCheckout = () => {
   const verifyPayment = async (paymentIntentId: string) => {
     console.log('=== PAYMENT VERIFICATION STARTED ===');
     console.log('Payment Intent ID:', paymentIntentId);
+    console.log('Current user:', user?.id || 'No user');
     
     // For payment verification, we check if it was a guest checkout
     const isGuest = localStorage.getItem('checkout_is_guest') === 'true';
@@ -117,16 +118,20 @@ export const useCheckout = () => {
       console.log('Verifying payment with delivery address:', deliveryAddress);
       console.log('Is guest checkout:', isGuest);
       console.log('Cart items for verification:', cartItems.length);
+      console.log('User ID being sent:', isGuest ? null : user?.id);
       
+      const requestBody = {
+        paymentIntentId,
+        deliveryAddress,
+        isGuest,
+        userId: isGuest ? null : user?.id,
+        cartItems: isGuest ? cartItems : undefined
+      };
+
+      console.log('Request body:', requestBody);
+
       const { data, error } = await supabase.functions.invoke('verify-payment', {
-        body: {
-          paymentIntentId,
-          deliveryAddress,
-          isGuest,
-          userId: user?.id || null,
-          cartItems: isGuest ? cartItems : undefined
-        },
-        headers: isGuest ? {} : undefined // Don't send auth headers for guest verification
+        body: requestBody
       });
 
       console.log('Verification response received:', { success: data?.success, error });

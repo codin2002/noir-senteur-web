@@ -19,8 +19,9 @@ serve(async (req) => {
     
     console.log('Payment Intent ID:', paymentIntentId);
     console.log('Is Guest:', isGuest);
-    console.log('User ID:', userId);
+    console.log('User ID from request:', userId);
     console.log('Delivery Address:', deliveryAddress);
+    console.log('Cart Items from request:', cartItems?.length || 0);
 
     // Create Supabase client
     const supabaseService = createClient(
@@ -28,6 +29,27 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
+
+    // If not guest but no userId provided, try to get from auth header
+    let actualUserId = userId;
+    if (!isGuest && !actualUserId) {
+      const authHeader = req.headers.get('authorization');
+      if (authHeader) {
+        try {
+          const { data: { user }, error } = await supabaseService.auth.getUser(
+            authHeader.replace('Bearer ', '')
+          );
+          if (!error && user) {
+            actualUserId = user.id;
+            console.log('Retrieved user ID from auth token:', actualUserId);
+          }
+        } catch (authError) {
+          console.error('Error getting user from auth token:', authError);
+        }
+      }
+    }
+
+    console.log('Final User ID:', actualUserId);
 
     console.log('=== STEP 1: CHECKING PAYMENT STATUS WITH ZIINA ===');
 
@@ -77,11 +99,23 @@ serve(async (req) => {
     if (isGuest && cartItems) {
       console.log('=== STEP 3A: PROCESSING GUEST ORDER ===');
       orderCartItems = cartItems;
-    } else if (!isGuest && userId) {
+    } else if (!isGuest) {
       console.log('=== STEP 3B: PROCESSING AUTHENTICATED USER ORDER ===');
+      
+      if (!actualUserId) {
+        console.error('No user ID available for authenticated user');
+        return new Response(JSON.stringify({
+          success: false,
+          message: 'User authentication required but no user ID found'
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
+        });
+      }
+
       // Get cart items from database for authenticated user
       const { data: userCartItems, error: cartError } = await supabaseService
-        .rpc('get_cart_with_perfumes', { user_uuid: userId });
+        .rpc('get_cart_with_perfumes', { user_uuid: actualUserId });
 
       if (cartError) {
         console.error('Error fetching user cart:', cartError);
@@ -102,10 +136,10 @@ serve(async (req) => {
       orderCartItems = userCartItems;
       console.log('Found cart items for user:', orderCartItems.length);
     } else {
-      console.error('Invalid request: missing user ID or cart items');
+      console.error('Invalid request: either guest with cart items or authenticated user required');
       return new Response(JSON.stringify({
         success: false,
-        message: 'Invalid request: missing user ID or cart items'
+        message: 'Invalid request: either guest checkout with cart items or authenticated user required'
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
@@ -140,12 +174,12 @@ serve(async (req) => {
     let customerEmail = 'guest@example.com';
     let customerPhone = 'Not provided';
 
-    if (!isGuest && userId) {
+    if (!isGuest && actualUserId) {
       // Get user profile for authenticated users
       const { data: profile, error: profileError } = await supabaseService
         .from('profiles')
         .select('full_name, phone')
-        .eq('id', userId)
+        .eq('id', actualUserId)
         .single();
 
       if (!profileError && profile) {
@@ -154,7 +188,7 @@ serve(async (req) => {
       }
 
       // Get user email from auth
-      const { data: { user }, error: userError } = await supabaseService.auth.admin.getUserById(userId);
+      const { data: { user }, error: userError } = await supabaseService.auth.admin.getUserById(actualUserId);
       if (!userError && user) {
         customerEmail = user.email || 'user@example.com';
       }
@@ -172,12 +206,14 @@ serve(async (req) => {
       }
     }
 
+    console.log('Customer details:', { customerName, customerEmail, customerPhone });
+
     // Create order using the stored procedure
     const { data: orderId, error: orderError } = await supabaseService
       .rpc('create_order_with_items', {
         cart_items: orderItems,
         order_total: totalAmount,
-        user_uuid: isGuest ? null : userId,
+        user_uuid: isGuest ? null : actualUserId,
         guest_name: isGuest ? customerName : null,
         guest_email: isGuest ? customerEmail : null,
         guest_phone: isGuest ? customerPhone : null,
@@ -202,7 +238,7 @@ serve(async (req) => {
         currency: 'AED',
         payment_method: 'ziina',
         payment_status: 'completed',
-        user_id: isGuest ? null : userId,
+        user_id: isGuest ? null : actualUserId,
         customer_name: customerName,
         customer_email: customerEmail,
         delivery_address: deliveryAddress
