@@ -173,7 +173,10 @@ serve(async (req) => {
     const shipping = 1;
     const total = subtotal + shipping;
 
-    console.log('Order totals:', { subtotal, shipping, total });
+    // FIXED: Calculate total item count correctly
+    const totalItemCount = orderItems.reduce((sum, item) => sum + item.quantity, 0);
+
+    console.log('Order totals:', { subtotal, shipping, total, totalItemCount });
 
     // Create product details string for database - FIXED FORMAT
     const productDetails = orderItems.map((item) => {
@@ -205,7 +208,7 @@ serve(async (req) => {
     }).join('');
 
     console.log('=== STEP 6: PREPARING EMAIL TEMPLATES ===');
-    // Customer thank you email
+    // Customer thank you email - UPDATED: Changed header color from gold to red
     const customerEmailHtml = `
       <!DOCTYPE html>
       <html>
@@ -215,21 +218,21 @@ serve(async (req) => {
         </head>
         <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
           <div style="background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-            <!-- Header -->
-            <div style="background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%); padding: 30px 20px; text-align: center;">
-              <h1 style="color: #333; margin: 0; font-size: 28px; font-weight: bold;">SENTEUR</h1>
-              <p style="color: #666; margin: 5px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">F R A G R A N C E S</p>
+            <!-- Header - UPDATED: Changed from gold gradient to red gradient -->
+            <div style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%); padding: 30px 20px; text-align: center;">
+              <h1 style="color: white; margin: 0; font-size: 28px; font-weight: bold;">SENTEUR</h1>
+              <p style="color: rgba(255,255,255,0.9); margin: 5px 0 0 0; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">F R A G R A N C E S</p>
             </div>
             
             <!-- Thank You Message -->
             <div style="padding: 30px 20px; text-align: center; background-color: #fff;">
-              <h2 style="color: #d4af37; margin: 0 0 15px 0; font-size: 24px;">Thank You for Shopping with Us!</h2>
+              <h2 style="color: #dc3545; margin: 0 0 15px 0; font-size: 24px;">Thank You for Shopping with Us!</h2>
               <p style="color: #666; margin: 0; font-size: 16px;">Your order has been confirmed and will be processed shortly.</p>
             </div>
             
             <!-- Order Details -->
             <div style="background-color: #f9f9f9; padding: 25px 20px; margin: 0;">
-              <h3 style="margin-top: 0; color: #d4af37; font-size: 18px; border-bottom: 2px solid #d4af37; padding-bottom: 8px;">Order Details</h3>
+              <h3 style="margin-top: 0; color: #dc3545; font-size: 18px; border-bottom: 2px solid #dc3545; padding-bottom: 8px;">Order Details</h3>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
                 <div>
                   <p style="margin: 5px 0;"><strong>Order ID:</strong> #${payment.order_id.substring(0, 8)}</p>
@@ -239,15 +242,16 @@ serve(async (req) => {
                 <div>
                   <p style="margin: 5px 0;"><strong>Email:</strong> ${customerEmail}</p>
                   <p style="margin: 5px 0;"><strong>Phone:</strong> ${customerPhone}</p>
-                  <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #d4af37; font-weight: bold;">AED ${total.toFixed(2)}</span></p>
+                  <p style="margin: 5px 0;"><strong>Items:</strong> ${totalItemCount} item${totalItemCount === 1 ? '' : 's'}</p>
+                  <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #dc3545; font-weight: bold;">AED ${total.toFixed(2)} (includes shipping)</span></p>
                 </div>
               </div>
             </div>
 
             <!-- Delivery Address -->
             <div style="padding: 25px 20px; background-color: white;">
-              <h3 style="color: #d4af37; margin-top: 0; font-size: 18px;">Delivery Address</h3>
-              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #d4af37;">
+              <h3 style="color: #dc3545; margin-top: 0; font-size: 18px;">Delivery Address</h3>
+              <div style="background-color: #f9f9f9; padding: 15px; border-radius: 8px; border-left: 4px solid #dc3545;">
                 <p style="margin: 0; font-size: 15px; line-height: 1.5;">
                   ${payment.delivery_address || 'Address not provided'}
                 </p>
@@ -256,19 +260,19 @@ serve(async (req) => {
 
             <!-- Order Items -->
             <div style="padding: 25px 20px; background-color: white;">
-              <h3 style="color: #d4af37; margin-top: 0; font-size: 18px;">Your Order</h3>
+              <h3 style="color: #dc3545; margin-top: 0; font-size: 18px;">Your Order</h3>
               <table style="width: 100%; border-collapse: collapse; background-color: white; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
                 <thead>
-                  <tr style="background: linear-gradient(135deg, #d4af37 0%, #f4e4bc 100%);">
-                    <th style="padding: 12px; text-align: left; color: #333; font-weight: bold;">Item</th>
-                    <th style="padding: 12px; text-align: center; color: #333; font-weight: bold;">Qty</th>
-                    <th style="padding: 12px; text-align: right; color: #333; font-weight: bold;">Price</th>
-                    <th style="padding: 12px; text-align: right; color: #333; font-weight: bold;">Total</th>
+                  <tr style="background: linear-gradient(135deg, #dc3545 0%, #ff6b6b 100%);">
+                    <th style="padding: 12px; text-align: left; color: white; font-weight: bold;">Item</th>
+                    <th style="padding: 12px; text-align: center; color: white; font-weight: bold;">Qty</th>
+                    <th style="padding: 12px; text-align: right; color: white; font-weight: bold;">Price</th>
+                    <th style="padding: 12px; text-align: right; color: white; font-weight: bold;">Total</th>
                   </tr>
                 </thead>
                 <tbody>
                   ${orderItemsHtml}
-                  <tr style="border-top: 2px solid #d4af37; background-color: #f9f9f9;">
+                  <tr style="border-top: 2px solid #dc3545; background-color: #f9f9f9;">
                     <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold;">Subtotal:</td>
                     <td style="padding: 12px; text-align: right; font-weight: bold;">AED ${subtotal.toFixed(2)}</td>
                   </tr>
@@ -277,8 +281,8 @@ serve(async (req) => {
                     <td style="padding: 12px; text-align: right; font-weight: bold;">AED ${shipping.toFixed(2)}</td>
                   </tr>
                   <tr style="background-color: #f9f9f9;">
-                    <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px;">Total:</td>
-                    <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px; color: #d4af37;">AED ${total.toFixed(2)}</td>
+                    <td colspan="3" style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px;">Total (includes shipping):</td>
+                    <td style="padding: 12px; text-align: right; font-weight: bold; font-size: 16px; color: #dc3545;">AED ${total.toFixed(2)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -289,11 +293,11 @@ serve(async (req) => {
               <h3 style="margin-top: 0; color: #333; font-size: 18px;">Payment Information</h3>
               <p style="margin: 5px 0;"><strong>Payment Method:</strong> ${payment.payment_method.toUpperCase()}</p>
               <p style="margin: 5px 0;"><strong>Payment Status:</strong> <span style="color: #28a745; font-weight: bold;">${payment.payment_status.toUpperCase()}</span></p>
-              <p style="margin: 5px 0;"><strong>Amount Paid:</strong> <span style="color: #d4af37; font-weight: bold;">AED ${payment.amount}</span></p>
+              <p style="margin: 5px 0;"><strong>Amount Paid:</strong> <span style="color: #dc3545; font-weight: bold;">AED ${payment.amount}</span></p>
             </div>
 
             <!-- What's Next -->
-            <div style="background-color: #fff3cd; padding: 25px 20px; border-left: 4px solid #d4af37;">
+            <div style="background-color: #fff3cd; padding: 25px 20px; border-left: 4px solid #dc3545;">
               <h3 style="margin-top: 0; color: #333; font-size: 18px;">What's Next?</h3>
               <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
                 <li>Your order will be delivered within 2-4 business days</li>
@@ -358,9 +362,10 @@ serve(async (req) => {
                 <div>
                   <p style="margin: 5px 0;"><strong>Order ID:</strong> #${payment.order_id.substring(0, 8)}</p>
                   <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(payment.created_at).toLocaleDateString()}</p>
+                  <p style="margin: 5px 0;"><strong>Items:</strong> ${totalItemCount} item${totalItemCount === 1 ? '' : 's'}</p>
                 </div>
                 <div>
-                  <p style="margin: 5px 0;"><strong>Total Amount:</strong> <span style="color: #dc3545; font-weight: bold;">AED ${total.toFixed(2)}</span></p>
+                  <p style="margin: 5px 0;"><strong>Total Amount:</strong> <span style="color: #dc3545; font-weight: bold;">AED ${total.toFixed(2)} (includes shipping)</span></p>
                   <p style="margin: 5px 0;"><strong>Payment:</strong> <span style="color: #28a745;">CONFIRMED</span></p>
                 </div>
               </div>
@@ -398,7 +403,7 @@ serve(async (req) => {
                 <tbody>
                   ${deliveryItemsHtml}
                   <tr style="background-color: #f9f9f9; border-top: 2px solid #dc3545;">
-                    <td style="padding: 15px; text-align: right; font-weight: bold;" colspan="2">Total Amount:</td>
+                    <td style="padding: 15px; text-align: right; font-weight: bold;" colspan="2">Total Amount (includes shipping):</td>
                     <td style="padding: 15px; text-align: right; font-weight: bold; color: #dc3545; font-size: 18px;">AED ${total.toFixed(2)}</td>
                   </tr>
                 </tbody>
@@ -496,7 +501,7 @@ serve(async (req) => {
       deliveryEmail: deliveryEmailResult,
       productDetails: productDetails,
       orderTotal: total,
-      itemCount: orderItems.length
+      itemCount: totalItemCount
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,

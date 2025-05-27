@@ -61,7 +61,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
         <Separator className="bg-gold/20" />
         
         <div className="flex justify-between items-center pt-2">
-          <span className="text-lg font-serif text-gold">Total</span>
+          <span className="text-lg font-serif text-gold">Total (includes shipping)</span>
           <span className="text-xl font-bold text-gold">{currencySymbol}{total.toFixed(2)}</span>
         </div>
       </div>
