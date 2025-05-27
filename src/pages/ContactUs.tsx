@@ -86,12 +86,12 @@ const ContactUs = () => {
                 </li>
                 <li>
                   TikTok: <a 
-                    href="https://www.tiktok.com/@senteurfragrances?_t=ZS-8wGnFChmyoB&_r=1" 
+                    href="https://www.tiktok.com/@senteur.fragrance?_t=ZS-8wi9CI5uMit&_r=1" 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-gold hover:underline"
                   >
-                    @senteurfragrances
+                    @senteur.fragrance
                   </a>
                 </li>
               </ul>
