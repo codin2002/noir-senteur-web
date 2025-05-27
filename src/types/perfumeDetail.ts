@@ -16,15 +16,18 @@ export interface PerfumeClassificationData {
   type_woody: number;
   audience_masculine: number;
   audience_feminine: number;
-  audience_classic: string;
-  occasion_casual: number;
-  occasion_formal: number;
+  audience_classic: number;
+  occasion_daily: number;
+  occasion_sport: number;
+  occasion_leisure: number;
+  occasion_night_out: number;
+  occasion_business: number;
   occasion_evening: number;
-  occasion_special: number;
   season_spring: number;
   season_summer: number;
   season_fall: number;
   season_winter: number;
+  updated_at: string;
 }
 
 export interface PerfumeRatingData {

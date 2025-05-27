@@ -128,14 +128,16 @@ export type Database = {
       }
       perfume_classifications: {
         Row: {
-          audience_classic: string
+          audience_classic: number
           audience_feminine: number
           audience_masculine: number
           id: string
-          occasion_casual: number
+          occasion_business: number
+          occasion_daily: number
           occasion_evening: number
-          occasion_formal: number
-          occasion_special: number
+          occasion_leisure: number
+          occasion_night_out: number
+          occasion_sport: number
           perfume_id: string
           season_fall: number
           season_spring: number
@@ -148,14 +150,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          audience_classic?: string
+          audience_classic?: number
           audience_feminine?: number
           audience_masculine?: number
           id?: string
-          occasion_casual?: number
+          occasion_business?: number
+          occasion_daily?: number
           occasion_evening?: number
-          occasion_formal?: number
-          occasion_special?: number
+          occasion_leisure?: number
+          occasion_night_out?: number
+          occasion_sport?: number
           perfume_id: string
           season_fall?: number
           season_spring?: number
@@ -168,14 +172,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          audience_classic?: string
+          audience_classic?: number
           audience_feminine?: number
           audience_masculine?: number
           id?: string
-          occasion_casual?: number
+          occasion_business?: number
+          occasion_daily?: number
           occasion_evening?: number
-          occasion_formal?: number
-          occasion_special?: number
+          occasion_leisure?: number
+          occasion_night_out?: number
+          occasion_sport?: number
           perfume_id?: string
           season_fall?: number
           season_spring?: number
@@ -191,7 +197,7 @@ export type Database = {
           {
             foreignKeyName: "perfume_classifications_perfume_id_fkey"
             columns: ["perfume_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "perfumes"
             referencedColumns: ["id"]
           },

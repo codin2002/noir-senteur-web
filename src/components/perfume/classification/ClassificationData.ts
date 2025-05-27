@@ -12,17 +12,20 @@ export interface PerfumeClassificationData {
   type_fresh: number;
   type_oriental: number;
   type_woody: number;
-  occasion_casual: number;
-  occasion_formal: number;
+  occasion_daily: number;
+  occasion_sport: number;
+  occasion_leisure: number;
+  occasion_night_out: number;
+  occasion_business: number;
   occasion_evening: number;
-  occasion_special: number;
   season_spring: number;
   season_summer: number;
   season_fall: number;
   season_winter: number;
   audience_feminine: number;
   audience_masculine: number;
-  audience_classic: string;
+  audience_classic: number;
+  updated_at: string;
 }
 
 export const transformTypeData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
@@ -33,11 +36,11 @@ export const transformTypeData = (data: PerfumeClassificationData): Classificati
 ];
 
 export const transformOccasionData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
-  { name: 'Daily', value: data.occasion_casual, fullMark: 100 },
-  { name: 'Sport', value: data.occasion_formal, fullMark: 100 },
-  { name: 'Leisure', value: data.occasion_evening, fullMark: 100 },
-  { name: 'Night Out', value: data.occasion_special, fullMark: 100 },
-  { name: 'Business', value: Math.round((data.occasion_formal + data.occasion_casual) / 2), fullMark: 100 },
+  { name: 'Daily', value: data.occasion_daily, fullMark: 100 },
+  { name: 'Sport', value: data.occasion_sport, fullMark: 100 },
+  { name: 'Leisure', value: data.occasion_leisure, fullMark: 100 },
+  { name: 'Night Out', value: data.occasion_night_out, fullMark: 100 },
+  { name: 'Business', value: data.occasion_business, fullMark: 100 },
   { name: 'Evening', value: data.occasion_evening, fullMark: 100 },
 ];
 
@@ -49,6 +52,7 @@ export const transformSeasonData = (data: PerfumeClassificationData): Classifica
 ];
 
 export const transformAudienceData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
-  { name: 'Feminine', value: data.audience_feminine, fullMark: 100 },
   { name: 'Masculine', value: data.audience_masculine, fullMark: 100 },
+  { name: 'Feminine', value: data.audience_feminine, fullMark: 100 },
+  { name: 'Classic', value: data.audience_classic, fullMark: 100 },
 ];
