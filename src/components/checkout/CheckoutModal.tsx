@@ -56,7 +56,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           </div>
           
           <div>
-            <OrderSummary cartItems={cartItems} total={total} />
+            <OrderSummary 
+              cartItems={cartItems} 
+              total={total}
+              currencySymbol="AED "
+            />
             
             <div className="mt-6">
               <Button

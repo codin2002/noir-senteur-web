@@ -7,12 +7,12 @@ import { Package2, Truck } from 'lucide-react';
 interface OrderSummaryProps {
   cartItems: CartItemType[];
   currencySymbol: string;
+  total: number;
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol }) => {
+const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, total }) => {
   const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
   const shipping = 1;
-  const total = subtotal + shipping;
 
   return (
     <div className="bg-darker/80 border border-gold/20 rounded-xl p-6 backdrop-blur-sm">

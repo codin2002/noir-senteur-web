@@ -70,11 +70,10 @@ const CartContent: React.FC<CartContentProps> = ({
     }
   };
 
-  const handleConfirmCheckout = async (
-    addressType: 'home', 
-    deliveryAddress: string
-  ) => {
-    console.log('Checkout confirmed with:', { addressType, deliveryAddress });
+  const calculateTotal = () => {
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
+    const shipping = 1;
+    return subtotal + shipping;
   };
 
   if (isLoading) {
@@ -124,9 +123,7 @@ const CartContent: React.FC<CartContentProps> = ({
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
         cartItems={cartItems}
-        userAddress={userProfile.address}
-        onConfirmCheckout={handleConfirmCheckout}
-        currencySymbol="AED "
+        total={calculateTotal()}
       />
     </>
   );
