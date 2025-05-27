@@ -26,6 +26,7 @@ const AppRoutes = () => {
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment/success" element={<PaymentSuccess />} />
+      <Route path="/payment-failed" element={<PaymentFailed />} />
       <Route path="/payment/failed" element={<PaymentFailed />} />
       <Route path="/perfume/:id" element={<PerfumeDetail />} />
       <Route path="/wishlist" element={<Wishlist />} />

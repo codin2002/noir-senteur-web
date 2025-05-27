@@ -20,8 +20,10 @@ serve(async (req) => {
     console.log('Is Guest:', isGuest);
     console.log('User ID:', userId);
     console.log('Cart Items:', cartItems?.length || 0);
+    console.log('Request body:', JSON.stringify({ paymentIntentId, deliveryAddress, isGuest, userId, cartItems }, null, 2));
 
     if (!paymentIntentId) {
+      console.error('Missing payment intent ID');
       return new Response(JSON.stringify({ 
         success: false,
         error: { message: 'Payment Intent ID is required', details: 'Missing paymentIntentId in request body' }
@@ -34,6 +36,7 @@ serve(async (req) => {
     // Get Ziina API key from environment
     const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
     if (!ziinaApiKey) {
+      console.error('Ziina API key not configured');
       return new Response(JSON.stringify({ 
         success: false,
         error: { message: "Ziina API key not configured", details: 'Service configuration error' }
@@ -45,6 +48,8 @@ serve(async (req) => {
 
     // Fetch payment status from Ziina API
     console.log('=== FETCHING PAYMENT STATUS FROM ZIINA ===');
+    console.log('Calling Ziina API with payment ID:', paymentIntentId);
+    
     const ziinaResponse = await fetch(`https://api-v2.ziina.com/api/payment_intent/${paymentIntentId}`, {
       method: "GET",
       headers: {
@@ -54,6 +59,7 @@ serve(async (req) => {
     });
 
     console.log('Ziina API response status:', ziinaResponse.status);
+    console.log('Ziina API response headers:', Object.fromEntries(ziinaResponse.headers.entries()));
 
     if (!ziinaResponse.ok) {
       const errorText = await ziinaResponse.text();
@@ -94,6 +100,7 @@ serve(async (req) => {
         // Get user from auth header for authenticated users
         const authHeader = req.headers.get("Authorization");
         if (!authHeader) {
+          console.error('Missing authorization header for authenticated user');
           return new Response(JSON.stringify({ 
             success: false,
             error: { message: 'Authorization header missing', details: 'Authentication required for user checkout' }
@@ -338,6 +345,9 @@ serve(async (req) => {
         product_details: productSummary
       };
 
+      console.log('=== PAYMENT RECORD TO INSERT ===');
+      console.log('Payment record:', JSON.stringify(paymentRecord, null, 2));
+
       const { error: paymentRecordError } = await supabaseService
         .from('successful_payments')
         .insert(paymentRecord);
@@ -381,6 +391,8 @@ serve(async (req) => {
         paymentMethod: 'ziina',
         cartCleared: !isGuest
       };
+
+      console.log('Success response:', JSON.stringify(successResponse, null, 2));
 
       return new Response(JSON.stringify(successResponse), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

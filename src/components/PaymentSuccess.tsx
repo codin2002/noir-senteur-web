@@ -24,28 +24,35 @@ const PaymentSuccess = () => {
       if (hasVerified.current) return;
       hasVerified.current = true;
 
+      // Get all URL parameters for debugging
+      const allParams = Object.fromEntries(searchParams.entries());
+      console.log('=== PAYMENT SUCCESS PAGE ===');
+      console.log('All URL parameters:', allParams);
+      console.log('Current full URL:', window.location.href);
+      console.log('Current pathname:', window.location.pathname);
+      console.log('Current search:', window.location.search);
+      
       // Check for different possible payment parameter names
       const paymentIntentId = searchParams.get('payment_intent_id') || 
                              searchParams.get('payment_intent') || 
-                             searchParams.get('session_id');
+                             searchParams.get('session_id') ||
+                             searchParams.get('id');
       
-      console.log('=== PAYMENT SUCCESS PAGE ===');
-      console.log('Payment verification - URL params:', Object.fromEntries(searchParams.entries()));
       console.log('Payment Intent ID found:', paymentIntentId);
-      console.log('Current URL:', window.location.href);
 
       if (!paymentIntentId) {
         console.error('No payment information found in URL parameters');
+        console.error('Available parameters:', Object.keys(allParams));
         setError('No payment information found. This might be due to an incomplete payment process.');
         setIsLoading(false);
         return;
       }
 
       try {
-        console.log('Verifying payment with ID:', paymentIntentId);
+        console.log('Starting payment verification with ID:', paymentIntentId);
         const result = await verifyPayment(paymentIntentId);
         
-        console.log('Verification result:', result);
+        console.log('Verification result received:', result);
         
         if (result && result.success) {
           setOrderDetails(result);
