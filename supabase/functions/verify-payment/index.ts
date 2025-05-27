@@ -148,13 +148,15 @@ serve(async (req) => {
 
     console.log('=== STEP 4: CREATING ORDER ===');
 
-    // Calculate total amount and prepare order items
-    let totalAmount = 0;
+    // FIXED: Calculate total amount with proper shipping logic
+    let subtotal = 0;
+    let totalQuantity = 0;
     const orderItems = orderCartItems.map(item => {
       const perfume = item.perfume || item;
       const price = perfume.price_value || 1;
       const quantity = item.quantity || 1;
-      totalAmount += price * quantity;
+      subtotal += price * quantity;
+      totalQuantity += quantity;
       
       return {
         perfume_id: perfume.id,
@@ -163,10 +165,14 @@ serve(async (req) => {
       };
     });
 
-    const shipping = 1;
-    totalAmount += shipping;
+    // FIXED: Apply correct shipping logic - free shipping if 2+ items, otherwise 1 AED
+    const shippingCost = subtotal > 0 && totalQuantity < 2 ? 1 : 0;
+    const totalAmount = subtotal + shippingCost;
 
-    console.log('Total amount calculated:', totalAmount);
+    console.log('Subtotal calculated:', subtotal);
+    console.log('Total quantity:', totalQuantity);
+    console.log('Shipping cost applied:', shippingCost);
+    console.log('Final total amount:', totalAmount);
     console.log('Order items count:', orderItems.length);
 
     // Extract customer information from delivery address or user profile
@@ -242,7 +248,7 @@ serve(async (req) => {
       .insert({
         payment_id: paymentIntentId,
         order_id: orderId,
-        amount: totalAmount, // FIXED: Using calculated total amount
+        amount: totalAmount, // FIXED: Using correctly calculated total amount
         currency: 'AED',
         payment_method: 'ziina',
         payment_status: 'completed',
