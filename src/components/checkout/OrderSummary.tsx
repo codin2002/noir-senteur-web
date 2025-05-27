@@ -12,7 +12,10 @@ interface OrderSummaryProps {
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, total }) => {
   const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
-  const shipping = 1;
+  const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  
+  // Free shipping if 2 or more items, otherwise apply shipping cost
+  const shipping = totalQuantity >= 2 ? 0 : 1;
 
   return (
     <div className="bg-darker/80 border border-gold/20 rounded-xl p-6 backdrop-blur-sm">
@@ -55,8 +58,20 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
             <Truck className="w-4 h-4 text-muted-foreground" />
             <span className="text-muted-foreground">Shipping</span>
           </div>
-          <span className="text-white font-medium">{currencySymbol}{shipping.toFixed(2)}</span>
+          <span className="text-white font-medium">
+            {shipping > 0 ? (
+              `${currencySymbol}${shipping.toFixed(2)}`
+            ) : (
+              <span className="text-green-400">Free</span>
+            )}
+          </span>
         </div>
+        
+        {totalQuantity >= 2 && (
+          <div className="text-xs text-green-400 text-center">
+            🎉 Free shipping on 2+ items!
+          </div>
+        )}
         
         <Separator className="bg-gold/20" />
         

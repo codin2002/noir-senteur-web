@@ -21,8 +21,15 @@ const CartSummary: React.FC<CartSummaryProps> = ({
     );
   };
 
+  const getTotalQuantity = () => {
+    return cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  };
+
   const subtotal = calculateSubtotal();
-  const shippingCost = subtotal > 0 ? PRICING.SHIPPING_COST : 0;
+  const totalQuantity = getTotalQuantity();
+  
+  // Free shipping if 2 or more items, otherwise apply shipping cost
+  const shippingCost = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
   const total = subtotal + shippingCost;
 
   return (
@@ -36,8 +43,20 @@ const CartSummary: React.FC<CartSummaryProps> = ({
       
       <div className="flex justify-between text-sm text-muted-foreground">
         <span>Shipping</span>
-        <span>{currencySymbol}{shippingCost.toFixed(2)}</span>
+        <span>
+          {shippingCost > 0 ? (
+            `${currencySymbol}${shippingCost.toFixed(2)}`
+          ) : (
+            <span className="text-green-400">Free</span>
+          )}
+        </span>
       </div>
+      
+      {totalQuantity >= 2 && (
+        <div className="text-xs text-green-400 text-center">
+          🎉 Free shipping on 2+ items!
+        </div>
+      )}
       
       <div className="border-t border-gold/20 pt-4 flex justify-between font-medium">
         <span>Total</span>
