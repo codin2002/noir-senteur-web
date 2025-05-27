@@ -18,7 +18,7 @@ import {
 
 export const usePerfumeDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const [perfume, setPerfume] = useState<Perfume | null>(null);
   const [perfumeImages, setPerfumeImages] = useState<PerfumeImage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,7 @@ export const usePerfumeDetail = () => {
 
   console.log('usePerfumeDetail - ID from params:', id);
   console.log('usePerfumeDetail - User:', user);
+  console.log('usePerfumeDetail - Auth loading:', authLoading);
 
   const loadPerfume = async () => {
     if (!id) {
@@ -47,7 +48,7 @@ export const usePerfumeDetail = () => {
   };
 
   const loadClassificationData = async () => {
-    if (!id) return;
+    if (!id || authLoading) return;
     
     setIsLoadingClassification(true);
     const data = await fetchClassificationData(id);
@@ -67,22 +68,22 @@ export const usePerfumeDetail = () => {
   };
 
   useEffect(() => {
-    console.log('Effect triggered - ID:', id, 'User:', user?.id);
+    console.log('Effect triggered - ID:', id, 'User:', user?.id, 'Auth loading:', authLoading);
     
     if (id) {
       loadPerfume();
       loadPerfumeImages();
-      if (user) {
+      if (user && !authLoading) {
         loadWishlistStatus();
       }
     }
-  }, [id, user]);
+  }, [id, user, authLoading]);
 
   useEffect(() => {
-    if (id) {
+    if (id && !authLoading) {
       loadClassificationData();
     }
-  }, [id]);
+  }, [id, user, authLoading]);
 
   useEffect(() => {
     document.title = perfume ? `${perfume.name} | Senteur Fragrances` : "Perfume Details | Senteur Fragrances";
