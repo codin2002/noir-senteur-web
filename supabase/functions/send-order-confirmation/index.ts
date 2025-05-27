@@ -303,7 +303,7 @@ serve(async (req) => {
               </ul>
               <p style="margin-top: 20px;"><strong>Questions? Contact us:</strong></p>
               <p style="margin: 5px 0; color: #666;">📞 <strong>Phone:</strong> +971 50 963 5636</p>
-              <p style="margin: 5px 0; color: #666;">✉️ <strong>Email:</strong> senteur.ae@gmail.com</p>
+              <p style="margin: 5px 0; color: #666;">✉️ <strong>Email:</strong> team@senteurfragrances.com</p>
             </div>
 
             <!-- Footer -->
@@ -419,7 +419,7 @@ serve(async (req) => {
               <div style="background-color: white; padding: 15px; border-radius: 8px; margin-top: 15px;">
                 <p style="margin: 0; color: #333;"><strong>Support Contact:</strong></p>
                 <p style="margin: 5px 0; color: #333;">📞 +971 50 963 5636</p>
-                <p style="margin: 5px 0; color: #333;">✉️ senteur.ae@gmail.com</p>
+                <p style="margin: 5px 0; color: #333;">✉️ team@senteurfragrances.com</p>
               </div>
             </div>
 
@@ -435,9 +435,9 @@ serve(async (req) => {
     console.log('=== STEP 7: SENDING CUSTOMER EMAIL ===');
     console.log('Sending customer email to:', customerEmail);
 
-    // Send email to customer - FIXED: Using verified email address as sender
+    // Send email to customer - UPDATED: Using verified domain
     const customerEmailResult = await resend.emails.send({
-      from: 'Senteur Fragrances <senteur.ae@gmail.com>',  // FIXED: Using your verified email
+      from: 'Senteur Fragrances <team@senteurfragrances.com>',  // UPDATED: Using verified domain
       to: [customerEmail],
       subject: `Thank You for Your Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: customerEmailHtml,
@@ -456,7 +456,7 @@ serve(async (req) => {
     console.log('Sending delivery email to:', deliveryTeamEmail);
 
     const deliveryEmailResult = await resend.emails.send({
-      from: 'Senteur Fragrances <senteur.ae@gmail.com>',  // FIXED: Using your verified email
+      from: 'Senteur Fragrances <team@senteurfragrances.com>',  // UPDATED: Using verified domain
       to: [deliveryTeamEmail],
       subject: `🚚 New Delivery Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: deliveryEmailHtml,
