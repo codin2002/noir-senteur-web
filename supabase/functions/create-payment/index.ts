@@ -17,11 +17,12 @@ serve(async (req) => {
     console.log('=== CREATE PAYMENT FUNCTION CALLED ===');
     console.log('Is guest checkout:', isGuest);
     console.log('User ID:', userId);
-    console.log('Received cart items:', JSON.stringify(cartItems, null, 2));
+    console.log('Cart items count:', cartItems?.length || 0);
 
     // Get Ziina API key from environment
     const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
     if (!ziinaApiKey) {
+      console.error('Ziina API key not configured');
       return new Response(JSON.stringify({ 
         success: false,
         error: "Ziina API key not configured" 
@@ -33,6 +34,7 @@ serve(async (req) => {
 
     // Validate cart items
     if (!cartItems || cartItems.length === 0) {
+      console.error('No cart items provided');
       return new Response(JSON.stringify({ 
         success: false,
         error: "No cart items provided" 
@@ -42,19 +44,12 @@ serve(async (req) => {
       });
     }
 
-    // Process cart items based on checkout type
-    if (isGuest) {
-      console.log('Processing guest checkout');
-    } else {
-      console.log('Processing authenticated user checkout');
-    }
-
     // Calculate total amount
     let subtotal = 0;
     for (const item of cartItems) {
       const price = item.perfume?.price_value || 0;
       const quantity = item.quantity || 1;
-      console.log(`Item price: ${price}, quantity: ${quantity}`);
+      console.log(`Item: ${item.perfume?.name}, price: ${price}, quantity: ${quantity}`);
       subtotal += price * quantity;
     }
 
@@ -73,7 +68,7 @@ serve(async (req) => {
     // Set expiry to 15 minutes from now
     const expiryTime = Date.now() + (15 * 60 * 1000);
 
-    // Create Ziina payment
+    // FIXED: Use correct Ziina parameter format for success_url
     const ziinaPayload = {
       amount: amountInFils,
       currency_code: "AED",
@@ -106,7 +101,7 @@ serve(async (req) => {
       console.error('Ziina API error:', errorText);
       return new Response(JSON.stringify({ 
         success: false,
-        error: `Ziina API error: ${ziinaResponse.status}` 
+        error: `Ziina API error: ${ziinaResponse.status} - ${errorText}` 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,

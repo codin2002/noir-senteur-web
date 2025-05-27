@@ -29,21 +29,16 @@ const PaymentSuccess = () => {
       console.log('=== PAYMENT SUCCESS PAGE ===');
       console.log('All URL parameters:', allParams);
       console.log('Current full URL:', window.location.href);
-      console.log('Current pathname:', window.location.pathname);
-      console.log('Current search:', window.location.search);
       
-      // Check for different possible payment parameter names
-      const paymentIntentId = searchParams.get('payment_intent_id') || 
-                             searchParams.get('payment_intent') || 
-                             searchParams.get('session_id') ||
-                             searchParams.get('id');
+      // FIXED: Look for the correct parameter name as per Ziina docs
+      const paymentIntentId = searchParams.get('payment_intent_id');
       
       console.log('Payment Intent ID found:', paymentIntentId);
 
       if (!paymentIntentId) {
-        console.error('No payment information found in URL parameters');
+        console.error('No payment_intent_id found in URL parameters');
         console.error('Available parameters:', Object.keys(allParams));
-        setError('No payment information found. This might be due to an incomplete payment process.');
+        setError('Payment verification failed: Missing payment ID. Please contact support if you were charged.');
         setIsLoading(false);
         return;
       }
@@ -59,11 +54,11 @@ const PaymentSuccess = () => {
           console.log('Payment verification successful:', result);
         } else {
           console.error('Payment verification failed:', result);
-          setError(result?.message || 'Payment verification failed');
+          setError(result?.message || 'Payment verification failed. Please contact support if you were charged.');
         }
       } catch (error: any) {
         console.error('Payment verification error:', error);
-        setError(error.message || 'Failed to verify payment');
+        setError(error.message || 'Failed to verify payment. Please contact support if you were charged.');
       } finally {
         setIsLoading(false);
       }
@@ -105,16 +100,16 @@ const PaymentSuccess = () => {
         <div className="flex-1 flex items-center justify-center px-6">
           <div className="text-center max-w-md">
             <AlertCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
-            <h2 className="text-2xl font-serif mb-4">Payment Verification Failed</h2>
+            <h2 className="text-2xl font-serif mb-4">Payment Verification Issue</h2>
             <p className="text-muted-foreground mb-6">{error}</p>
             
             <div className="bg-darker/50 border border-red-500/20 rounded-lg p-4 mb-6 text-left">
-              <h3 className="text-lg font-semibold mb-2 text-red-400">What happened?</h3>
+              <h3 className="text-lg font-semibold mb-2 text-red-400">What to do:</h3>
               <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Your payment may have been processed successfully</li>
-                <li>• There was an issue verifying the payment status</li>
-                <li>• You can check your email for confirmation</li>
-                <li>• Contact support if you were charged but don't see your order</li>
+                <li>• Check your email for a payment confirmation</li>
+                <li>• Contact our support team if you were charged</li>
+                <li>• Try placing your order again if needed</li>
+                <li>• Screenshot this page for reference</li>
               </ul>
             </div>
 
@@ -190,7 +185,6 @@ const PaymentSuccess = () => {
               </Button>
             </Link>
             
-            {/* Only show "View Orders" button for authenticated users */}
             {user && (
               <Link to="/profile?tab=history">
                 <Button className="bg-gold text-darker hover:bg-gold/90">
