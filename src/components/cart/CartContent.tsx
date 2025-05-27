@@ -9,6 +9,7 @@ import CartSummary from './CartSummary';
 import CartEmpty from './CartEmpty';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
+import { PRICING } from '@/utils/constants';
 
 interface CartContentProps {
   cartItems: CartItemType[];
@@ -72,8 +73,11 @@ const CartContent: React.FC<CartContentProps> = ({
 
   const calculateTotal = () => {
     const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
-    const shipping = 1;
-    return subtotal + shipping;
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Free shipping if 2 or more items, otherwise apply shipping cost
+    const shippingCost = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
+    return subtotal + shippingCost;
   };
 
   if (isLoading) {

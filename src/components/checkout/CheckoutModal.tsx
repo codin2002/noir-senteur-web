@@ -7,6 +7,7 @@ import AddressSelection from './AddressSelection';
 import OrderSummary from './OrderSummary';
 import { useCheckout } from '@/hooks/useCheckout';
 import { toast } from 'sonner';
+import { PRICING } from '@/utils/constants';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -24,6 +25,15 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [selectedAddress, setSelectedAddress] = useState('');
   const [isAddressValid, setIsAddressValid] = useState(false);
   const { processPayment, isLoading } = useCheckout();
+
+  const calculateTotal = () => {
+    const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
+    const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    
+    // Free shipping if 2 or more items, otherwise apply shipping cost
+    const shippingCost = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
+    return subtotal + shippingCost;
+  };
 
   const handleCheckout = async () => {
     if (!selectedAddress.trim()) {
@@ -58,7 +68,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <div>
             <OrderSummary 
               cartItems={cartItems} 
-              total={total}
+              total={calculateTotal()}
               currencySymbol="AED "
             />
             

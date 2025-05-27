@@ -3,6 +3,7 @@ import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import { CartItemType } from '@/components/cart/CartItem';
 import { Package2, Truck } from 'lucide-react';
+import { PRICING } from '@/utils/constants';
 
 interface OrderSummaryProps {
   cartItems: CartItemType[];
@@ -15,7 +16,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
   // Free shipping if 2 or more items, otherwise apply shipping cost
-  const shipping = totalQuantity >= 2 ? 0 : 1;
+  const shipping = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
 
   return (
     <div className="bg-darker/80 border border-gold/20 rounded-xl p-6 backdrop-blur-sm">
