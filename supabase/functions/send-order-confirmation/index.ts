@@ -8,8 +8,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY_REAL"));
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -17,7 +15,18 @@ serve(async (req) => {
 
   try {
     const { orderId } = await req.json();
+    console.log('=== STARTING EMAIL CONFIRMATION PROCESS ===');
     console.log('Processing order confirmation for order ID:', orderId);
+
+    // Initialize Resend with API key
+    const resendApiKey = Deno.env.get("RESEND_API_KEY_REAL");
+    console.log('Resend API key configured:', !!resendApiKey);
+    
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY_REAL not configured');
+    }
+    
+    const resend = new Resend(resendApiKey);
 
     // Create Supabase client using service role key
     const supabaseService = createClient(
@@ -26,6 +35,7 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
+    console.log('=== STEP 1: FETCHING PAYMENT DETAILS ===');
     // Get payment details first
     const { data: payment, error: paymentError } = await supabaseService
       .from('successful_payments')
@@ -34,16 +44,27 @@ serve(async (req) => {
       .eq('email_sent', false)
       .single();
 
-    if (paymentError || !payment) {
-      console.error('Payment not found or email already sent:', paymentError);
+    if (paymentError) {
+      console.error('Payment query error:', paymentError);
+      throw new Error(`Payment not found: ${paymentError.message}`);
+    }
+
+    if (!payment) {
+      console.error('No payment found or email already sent for order:', orderId);
       return new Response(JSON.stringify({ error: 'Payment not found or email already sent' }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 404,
       });
     }
 
-    console.log('Payment found:', payment);
+    console.log('Payment found:', {
+      id: payment.id,
+      order_id: payment.order_id,
+      customer_email: payment.customer_email,
+      amount: payment.amount
+    });
 
+    console.log('=== STEP 2: FETCHING ORDER DETAILS ===');
     // Get order details
     const { data: order, error: orderError } = await supabaseService
       .from('orders')
@@ -51,54 +72,85 @@ serve(async (req) => {
       .eq('id', orderId)
       .single();
 
-    if (orderError || !order) {
-      console.error('Order not found:', orderError);
-      return new Response(JSON.stringify({ error: 'Order not found' }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
-      });
+    if (orderError) {
+      console.error('Order query error:', orderError);
+      throw new Error(`Order not found: ${orderError.message}`);
     }
 
-    console.log('Order found:', order);
+    console.log('Order found:', {
+      id: order.id,
+      total: order.total,
+      status: order.status,
+      guest_name: order.guest_name
+    });
 
+    console.log('=== STEP 3: FETCHING ORDER ITEMS WITH PERFUMES ===');
     // Get order items with perfume details
     const { data: orderItems, error: itemsError } = await supabaseService
       .from('order_items')
       .select(`
-        *,
-        perfumes(name, price_value, image)
+        id,
+        quantity,
+        price,
+        perfume_id,
+        perfumes!inner(
+          id,
+          name,
+          price_value,
+          image
+        )
       `)
       .eq('order_id', orderId);
 
     if (itemsError) {
-      console.error('Error fetching order items:', itemsError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch order items' }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      });
+      console.error('Order items query error:', itemsError);
+      throw new Error(`Failed to fetch order items: ${itemsError.message}`);
     }
 
-    console.log('Order items found:', orderItems);
+    console.log('Order items found:', orderItems?.length || 0);
+    console.log('Order items details:', orderItems?.map(item => ({
+      perfume_name: item.perfumes?.name,
+      quantity: item.quantity,
+      price: item.price
+    })));
 
     if (!orderItems || orderItems.length === 0) {
       console.error('No order items found for order:', orderId);
-      return new Response(JSON.stringify({ error: 'No order items found' }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 404,
-      });
+      throw new Error('No order items found');
     }
 
+    console.log('=== STEP 4: GETTING CUSTOMER DETAILS ===');
     // Get user profile for additional details if user exists
     let customerPhone = 'Not provided';
+    let customerName = payment.customer_name || order.guest_name || 'Guest Customer';
+    let customerEmail = payment.customer_email;
+
     if (payment.user_id) {
-      const { data: profile } = await supabaseService
+      console.log('Fetching user profile for user_id:', payment.user_id);
+      const { data: profile, error: profileError } = await supabaseService
         .from('profiles')
-        .select('phone')
+        .select('full_name, phone')
         .eq('id', payment.user_id)
         .single();
-      customerPhone = profile?.phone || 'Not provided';
+      
+      if (!profileError && profile) {
+        customerName = profile.full_name || customerName;
+        customerPhone = profile.phone || customerPhone;
+        console.log('Profile found:', { full_name: profile.full_name, phone: profile.phone });
+      } else {
+        console.log('No profile found or error:', profileError);
+      }
+
+      // Get user email from auth if not in payment
+      if (!customerEmail) {
+        const { data: { user }, error: userError } = await supabaseService.auth.admin.getUserById(payment.user_id);
+        if (!userError && user) {
+          customerEmail = user.email || 'user@example.com';
+        }
+      }
     } else {
       // For guest orders, try to extract phone from delivery address
+      console.log('Processing guest order, extracting details from delivery address');
       const addressParts = payment.delivery_address?.split('|') || [];
       for (const part of addressParts) {
         if (part.includes('Phone:')) {
@@ -108,34 +160,47 @@ serve(async (req) => {
       }
     }
 
+    console.log('Customer details:', { customerName, customerEmail, customerPhone });
+
+    console.log('=== STEP 5: CALCULATING TOTALS AND FORMATTING PRODUCT DETAILS ===');
     // Calculate totals
-    const subtotal = orderItems.reduce((sum: number, item: any) => 
+    const subtotal = orderItems.reduce((sum, item) => 
       sum + (item.price * item.quantity), 0
     );
     const shipping = 1;
     const total = subtotal + shipping;
 
+    console.log('Order totals:', { subtotal, shipping, total });
+
     // Format order items for email
-    const orderItemsHtml = orderItems.map((item: any) => `
-      <tr style="border-bottom: 1px solid #eee;">
-        <td style="padding: 12px; text-align: left;">
-          <div style="display: flex; align-items: center;">
-            <img src="${item.perfumes?.image || '/placeholder.svg'}" alt="${item.perfumes?.name || 'Product'}" 
-                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
-            <span>${item.perfumes?.name || 'Unknown Product'} (Qty: ${item.quantity})</span>
-          </div>
-        </td>
-        <td style="padding: 12px; text-align: center;">${item.quantity}</td>
-        <td style="padding: 12px; text-align: right;">AED ${item.price.toFixed(2)}</td>
-        <td style="padding: 12px; text-align: right;">AED ${(item.price * item.quantity).toFixed(2)}</td>
-      </tr>
-    `).join('');
+    const orderItemsHtml = orderItems.map((item) => {
+      const perfumeName = item.perfumes?.name || 'Unknown Product';
+      const imageUrl = item.perfumes?.image || '/placeholder.svg';
+      
+      return `
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 12px; text-align: left;">
+            <div style="display: flex; align-items: center;">
+              <img src="${imageUrl}" alt="${perfumeName}" 
+                   style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
+              <span>${perfumeName}</span>
+            </div>
+          </td>
+          <td style="padding: 12px; text-align: center;">${item.quantity}</td>
+          <td style="padding: 12px; text-align: right;">AED ${item.price.toFixed(2)}</td>
+          <td style="padding: 12px; text-align: right;">AED ${(item.price * item.quantity).toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
 
     // Create product details string for database
-    const productDetails = orderItems.map((item: any) => 
-      `${item.perfumes?.name || 'Unknown Product'} (Qty: ${item.quantity})`
+    const productDetails = orderItems.map((item) => 
+      `${item.perfumes?.name || 'Unknown Product'} (Qty: ${item.quantity}, Price: AED ${item.price})`
     ).join(', ');
 
+    console.log('Product details for database:', productDetails);
+
+    console.log('=== STEP 6: PREPARING EMAIL TEMPLATES ===');
     // Customer thank you email
     const customerEmailHtml = `
       <!DOCTYPE html>
@@ -165,10 +230,10 @@ serve(async (req) => {
                 <div>
                   <p style="margin: 5px 0;"><strong>Order ID:</strong> #${payment.order_id.substring(0, 8)}</p>
                   <p style="margin: 5px 0;"><strong>Date:</strong> ${new Date(payment.created_at).toLocaleDateString()}</p>
-                  <p style="margin: 5px 0;"><strong>Customer:</strong> ${payment.customer_name || 'Guest'}</p>
+                  <p style="margin: 5px 0;"><strong>Customer:</strong> ${customerName}</p>
                 </div>
                 <div>
-                  <p style="margin: 5px 0;"><strong>Email:</strong> ${payment.customer_email}</p>
+                  <p style="margin: 5px 0;"><strong>Email:</strong> ${customerEmail}</p>
                   <p style="margin: 5px 0;"><strong>Phone:</strong> ${customerPhone}</p>
                   <p style="margin: 5px 0;"><strong>Total:</strong> <span style="color: #d4af37; font-weight: bold;">AED ${total.toFixed(2)}</span></p>
                 </div>
@@ -247,7 +312,26 @@ serve(async (req) => {
       </html>
     `;
 
-    // Delivery team email
+    // Delivery team email with simplified item formatting
+    const deliveryItemsHtml = orderItems.map((item) => {
+      const perfumeName = item.perfumes?.name || 'Unknown Product';
+      const imageUrl = item.perfumes?.image || '/placeholder.svg';
+      
+      return `
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 15px; text-align: left;">
+            <div style="display: flex; align-items: center;">
+              <img src="${imageUrl}" alt="${perfumeName}" 
+                   style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 10px;">
+              <span style="font-weight: 500;">${perfumeName}</span>
+            </div>
+          </td>
+          <td style="padding: 15px; text-align: center; font-weight: bold; color: #dc3545; font-size: 16px;">${item.quantity}</td>
+          <td style="padding: 15px; text-align: right; font-weight: 500;">AED ${item.price.toFixed(2)}</td>
+        </tr>
+      `;
+    }).join('');
+
     const deliveryEmailHtml = `
       <!DOCTYPE html>
       <html>
@@ -282,9 +366,9 @@ serve(async (req) => {
             <div style="background-color: #e8f4fd; padding: 25px 20px;">
               <h3 style="margin-top: 0; color: #333; font-size: 18px;">Customer Information</h3>
               <div style="background-color: white; padding: 15px; border-radius: 8px; border-left: 4px solid #007bff;">
-                <p style="margin: 5px 0;"><strong>Name:</strong> ${payment.customer_name || 'Guest'}</p>
+                <p style="margin: 5px 0;"><strong>Name:</strong> ${customerName}</p>
                 <p style="margin: 5px 0;"><strong>Phone:</strong> <a href="tel:${customerPhone}" style="color: #007bff; text-decoration: none;">${customerPhone}</a></p>
-                <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${payment.customer_email}" style="color: #007bff; text-decoration: none;">${payment.customer_email}</a></p>
+                <p style="margin: 5px 0;"><strong>Email:</strong> <a href="mailto:${customerEmail}" style="color: #007bff; text-decoration: none;">${customerEmail}</a></p>
               </div>
             </div>
 
@@ -308,19 +392,7 @@ serve(async (req) => {
                   </tr>
                 </thead>
                 <tbody>
-                  ${orderItems.map((item: any) => `
-                    <tr style="border-bottom: 1px solid #eee;">
-                      <td style="padding: 15px; text-align: left;">
-                        <div style="display: flex; align-items: center;">
-                          <img src="${item.perfumes?.image || '/placeholder.svg'}" alt="${item.perfumes?.name || 'Product'}" 
-                               style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 10px;">
-                          <span style="font-weight: 500;">${item.perfumes?.name || 'Unknown Product'} (Qty: ${item.quantity})</span>
-                        </div>
-                      </td>
-                      <td style="padding: 15px; text-align: center; font-weight: bold; color: #dc3545; font-size: 16px;">${item.quantity}</td>
-                      <td style="padding: 15px; text-align: right; font-weight: 500;">AED ${item.price.toFixed(2)}</td>
-                    </tr>
-                  `).join('')}
+                  ${deliveryItemsHtml}
                   <tr style="background-color: #f9f9f9; border-top: 2px solid #dc3545;">
                     <td style="padding: 15px; text-align: right; font-weight: bold;" colspan="2">Total Amount:</td>
                     <td style="padding: 15px; text-align: right; font-weight: bold; color: #dc3545; font-size: 18px;">AED ${total.toFixed(2)}</td>
@@ -356,18 +428,25 @@ serve(async (req) => {
       </html>
     `;
 
-    console.log('Sending customer email to:', payment.customer_email);
+    console.log('=== STEP 7: SENDING CUSTOMER EMAIL ===');
+    console.log('Sending customer email to:', customerEmail);
 
     // Send email to customer
     const customerEmailResult = await resend.emails.send({
       from: 'Senteur Fragrances <onboarding@resend.dev>',
-      to: [payment.customer_email],
+      to: [customerEmail],
       subject: `Thank You for Your Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: customerEmailHtml,
     });
 
     console.log('Customer email result:', customerEmailResult);
 
+    if (customerEmailResult.error) {
+      console.error('Customer email failed:', customerEmailResult.error);
+      throw new Error(`Customer email failed: ${customerEmailResult.error.message}`);
+    }
+
+    console.log('=== STEP 8: SENDING DELIVERY TEAM EMAIL ===');
     // Send email to delivery team
     const deliveryTeamEmail = "ashrafshamma09@gmail.com";
     console.log('Sending delivery email to:', deliveryTeamEmail);
@@ -381,6 +460,12 @@ serve(async (req) => {
 
     console.log('Delivery email result:', deliveryEmailResult);
 
+    if (deliveryEmailResult.error) {
+      console.error('Delivery email failed:', deliveryEmailResult.error);
+      throw new Error(`Delivery email failed: ${deliveryEmailResult.error.message}`);
+    }
+
+    console.log('=== STEP 9: UPDATING PAYMENT RECORD ===');
     // Update the payment record with product details and mark email as sent
     const { error: updateError } = await supabaseService
       .from('successful_payments')
@@ -397,21 +482,33 @@ serve(async (req) => {
     }
 
     console.log('Payment record updated successfully');
+    console.log('=== EMAIL CONFIRMATION PROCESS COMPLETED SUCCESSFULLY ===');
 
     return new Response(JSON.stringify({ 
       success: true, 
       message: 'Order confirmation emails sent successfully',
       customerEmail: customerEmailResult,
-      deliveryTeamNotified: true,
-      productDetails: productDetails
+      deliveryEmail: deliveryEmailResult,
+      productDetails: productDetails,
+      orderTotal: total,
+      itemCount: orderItems.length
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
 
   } catch (error: any) {
-    console.error('Error sending order confirmation emails:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('=== EMAIL CONFIRMATION ERROR ===');
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: 'Check function logs for more information'
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
