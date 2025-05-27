@@ -19,15 +19,16 @@ export async function recordSuccessfulPayment(
     return `${perfume.name} (Qty: ${item.quantity || 1})`;
   }).join(', ');
 
+  console.log('Recording payment with amount:', orderCalculation.totalAmount);
   console.log('Product details for storage:', productDetails);
 
-  // Record successful payment with correct payment_id and product details
+  // Record successful payment with the exact same amount as the order
   const { error: paymentError } = await supabaseService
     .from('successful_payments')
     .insert({
       payment_id: paymentIntentId,
       order_id: orderId,
-      amount: orderCalculation.totalAmount,
+      amount: orderCalculation.totalAmount, // Must match order total
       currency: 'AED',
       payment_method: 'ziina',
       payment_status: 'completed',

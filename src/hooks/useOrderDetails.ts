@@ -56,25 +56,25 @@ export const useOrderDetails = () => {
       
       console.log('Order details found:', order);
       
-      // FIXED: Type cast the items properly and ensure calculations are correct
+      // Type cast the items properly and ensure calculations are correct
       const items = Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : [];
       
       // Process items to ensure accurate data
       const processedItems = items.map(item => ({
         ...item,
         // Ensure price and quantity are properly set from the order_items table
-        price: item.price || 0,
-        quantity: item.quantity || 1
+        price: Number(item.price) || 0,
+        quantity: Number(item.quantity) || 1
       }));
       
       const orderWithTypedItems = {
         ...order,
         items: processedItems,
-        // FIXED: Use the actual order total from database
-        total: order.total || 0
+        // Use the actual order total from database (includes shipping)
+        total: Number(order.total) || 0
       };
       
-      console.log('Processed order details with accurate calculations:', orderWithTypedItems);
+      console.log('Processed order details:', orderWithTypedItems);
       setOrderDetails(orderWithTypedItems);
     } catch (error: any) {
       console.error('Error fetching order details:', error);
