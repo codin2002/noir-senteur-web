@@ -44,7 +44,24 @@ const AuthCallback = () => {
         
         // Check if there was a previous location the user was trying to access
         const storedPath = localStorage.getItem('auth_redirect_path');
-        const redirectTo = storedPath || '/';
+        
+        // Check if user was in the middle of checkout
+        const isInCheckoutFlow = localStorage.getItem('user_in_checkout_flow') === 'true';
+        const hasCheckoutData = localStorage.getItem('checkout_delivery_address') || 
+                               localStorage.getItem('checkout_is_guest') === 'true';
+        
+        let redirectTo = '/';
+        
+        if (isInCheckoutFlow || hasCheckoutData) {
+          // If user was in checkout flow, redirect back to cart
+          redirectTo = '/cart';
+          console.log('User was in checkout flow, redirecting to cart');
+          // Clean up the checkout flow flag
+          localStorage.removeItem('user_in_checkout_flow');
+        } else if (storedPath) {
+          // If there was a stored path, use that
+          redirectTo = storedPath;
+        }
         
         if (storedPath) {
           localStorage.removeItem('auth_redirect_path');

@@ -16,6 +16,12 @@ const GuestCheckoutActions: React.FC<GuestCheckoutActionsProps> = ({
   isLoading,
   isCheckoutDisabled
 }) => {
+  const handleSignInClick = () => {
+    // Store that user is in checkout flow before redirecting to sign in
+    localStorage.setItem('user_in_checkout_flow', 'true');
+    onSwitchToSignIn();
+  };
+
   return (
     <div className="space-y-4 pt-6 border-t border-gold/20">
       <Button
@@ -46,7 +52,7 @@ const GuestCheckoutActions: React.FC<GuestCheckoutActionsProps> = ({
       </div>
       
       <Button
-        onClick={onSwitchToSignIn}
+        onClick={handleSignInClick}
         variant="outline"
         className="w-full border-gold/40 text-gold hover:bg-gold/10 hover:border-gold transition-all duration-200"
       >
