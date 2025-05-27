@@ -17,7 +17,7 @@ const PhoneNumberField: React.FC<PhoneNumberFieldProps> = ({
   return (
     <div>
       <Label htmlFor="phone_number" className="text-base mb-3 block">
-        Phone Number
+        Phone Number *
       </Label>
       {isLoading ? (
         <div className="text-sm text-muted-foreground">Loading phone number...</div>

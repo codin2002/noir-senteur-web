@@ -1,115 +1,80 @@
 
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { CartItemType } from '@/components/cart/CartItem';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import AddressSelection from './AddressSelection';
 import OrderSummary from './OrderSummary';
-import CheckoutActions from './CheckoutActions';
-import GuestCheckoutForm from './GuestCheckoutForm';
 import { useCheckout } from '@/hooks/useCheckout';
-import { useAuth } from '@/context/AuthContext';
+import { toast } from 'sonner';
 
 interface CheckoutModalProps {
   isOpen: boolean;
   onClose: () => void;
-  cartItems: CartItemType[];
-  userAddress: string;
-  onConfirmCheckout: (addressType: 'home', deliveryAddress: string) => Promise<void>;
-  currencySymbol: string;
-}
-
-interface GuestDetails {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  buildingName: string;
-  floorNumber: string;
-  roomNumber: string;
-  area: string;
-  landmark: string;
-  emirate: string;
+  cartItems: any[];
+  total: number;
 }
 
 const CheckoutModal: React.FC<CheckoutModalProps> = ({
   isOpen,
   onClose,
   cartItems,
-  userAddress,
-  onConfirmCheckout,
-  currencySymbol
+  total
 }) => {
-  const [deliveryAddress, setDeliveryAddress] = useState(userAddress || '');
-  const [showUserCheckout, setShowUserCheckout] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState('');
+  const [isAddressValid, setIsAddressValid] = useState(false);
   const { processPayment, isLoading } = useCheckout();
-  const { user, signInWithGoogle } = useAuth();
-
-  const handleAddressChange = (address: string) => {
-    setDeliveryAddress(address);
-  };
 
   const handleCheckout = async () => {
-    await processPayment(cartItems, deliveryAddress);
-  };
-
-  const handleGuestCheckout = async (guestDetails: GuestDetails) => {
-    // Format the guest address for payment processing
-    const addressParts = [
-      guestDetails.buildingName,
-      guestDetails.floorNumber,
-      guestDetails.roomNumber,
-      guestDetails.area,
-      guestDetails.landmark,
-      guestDetails.emirate
-    ].filter(Boolean);
-    
-    const guestAddress = `${addressParts.join(', ')} | Contact: ${guestDetails.name} | Email: ${guestDetails.email} | Phone: ${guestDetails.phoneNumber}`;
-    
-    await processPayment(cartItems, guestAddress);
-  };
-
-  const handleSignInWithGoogle = async () => {
-    try {
-      await signInWithGoogle();
-      setShowUserCheckout(true);
-    } catch (error) {
-      console.error('Google sign-in failed:', error);
+    if (!selectedAddress.trim()) {
+      toast.error('Please provide your delivery address');
+      return;
     }
+
+    if (!isAddressValid) {
+      toast.error('Please provide your phone number');
+      return;
+    }
+
+    await processPayment(cartItems, selectedAddress);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-darker border-gold/20">
         <DialogHeader>
-          <DialogTitle className="text-gold">Complete Your Order</DialogTitle>
-          <DialogDescription className="text-muted-foreground">
-            {(user || showUserCheckout) ? "Review your order details and provide delivery information." : "Choose how you'd like to checkout"}
-          </DialogDescription>
+          <DialogTitle className="text-gold text-xl font-serif">Complete Your Order</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6 pb-4">
-          <OrderSummary cartItems={cartItems} currencySymbol={currencySymbol} />
-
-          {(user || showUserCheckout) ? (
-            <>
-              <AddressSelection
-                onAddressChange={handleAddressChange}
-                selectedAddress={deliveryAddress}
-              />
-
-              <CheckoutActions
-                onCancel={onClose}
-                onCheckout={handleCheckout}
-                isProcessing={isLoading}
-                isCheckoutDisabled={!deliveryAddress.trim()}
-              />
-            </>
-          ) : (
-            <GuestCheckoutForm
-              onGuestCheckout={handleGuestCheckout}
-              onSwitchToSignIn={handleSignInWithGoogle}
-              isLoading={isLoading}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <AddressSelection 
+              onAddressChange={setSelectedAddress}
+              selectedAddress={selectedAddress}
+              onValidationChange={setIsAddressValid}
             />
-          )}
+          </div>
+          
+          <div>
+            <OrderSummary cartItems={cartItems} total={total} />
+            
+            <div className="mt-6">
+              <Button
+                onClick={handleCheckout}
+                disabled={isLoading || !selectedAddress.trim() || !isAddressValid}
+                className="w-full bg-gold text-dark hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Proceed to Payment'
+                )}
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

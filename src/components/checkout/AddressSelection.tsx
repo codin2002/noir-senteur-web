@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
@@ -10,6 +9,7 @@ import AddressPreview from './AddressPreview';
 interface AddressSelectionProps {
   onAddressChange: (address: string) => void;
   selectedAddress: string;
+  onValidationChange?: (isValid: boolean) => void;
 }
 
 interface AddressComponents {
@@ -23,7 +23,8 @@ interface AddressComponents {
 
 const AddressSelection: React.FC<AddressSelectionProps> = ({ 
   onAddressChange, 
-  selectedAddress 
+  selectedAddress,
+  onValidationChange
 }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [customerName, setCustomerName] = useState('');
@@ -129,12 +130,18 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     }
     
     onAddressChange(addressWithDetails);
+    
+    // Validate that phone number is provided
+    const isValid = phone.trim().length > 0;
+    if (onValidationChange) {
+      onValidationChange(isValid);
+    }
   };
 
   // Update selected address when components, phone, or name change
   useEffect(() => {
     updateSelectedAddress(addressComponents, phoneNumber, customerName);
-  }, [addressComponents, phoneNumber, customerName, onAddressChange]);
+  }, [addressComponents, phoneNumber, customerName, onAddressChange, onValidationChange]);
 
   const handleAddressComponentChange = (component: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const newComponents = { ...addressComponents, [component]: e.target.value };
