@@ -393,6 +393,7 @@ export type Database = {
           payment_id: string
           payment_method: string
           payment_status: string
+          product_details: string | null
           updated_at: string
           user_id: string | null
           ziina_response: Json | null
@@ -411,6 +412,7 @@ export type Database = {
           payment_id: string
           payment_method?: string
           payment_status?: string
+          product_details?: string | null
           updated_at?: string
           user_id?: string | null
           ziina_response?: Json | null
@@ -429,6 +431,7 @@ export type Database = {
           payment_id?: string
           payment_method?: string
           payment_status?: string
+          product_details?: string | null
           updated_at?: string
           user_id?: string | null
           ziina_response?: Json | null
