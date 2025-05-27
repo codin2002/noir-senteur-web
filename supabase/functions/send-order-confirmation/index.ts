@@ -435,9 +435,9 @@ serve(async (req) => {
     console.log('=== STEP 7: SENDING CUSTOMER EMAIL ===');
     console.log('Sending customer email to:', customerEmail);
 
-    // Send email to customer
+    // Send email to customer - FIXED: Using verified email address as sender
     const customerEmailResult = await resend.emails.send({
-      from: 'Senteur Fragrances <onboarding@resend.dev>',
+      from: 'Senteur Fragrances <senteur.ae@gmail.com>',  // FIXED: Using your verified email
       to: [customerEmail],
       subject: `Thank You for Your Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: customerEmailHtml,
@@ -456,7 +456,7 @@ serve(async (req) => {
     console.log('Sending delivery email to:', deliveryTeamEmail);
 
     const deliveryEmailResult = await resend.emails.send({
-      from: 'Senteur Fragrances <onboarding@resend.dev>',
+      from: 'Senteur Fragrances <senteur.ae@gmail.com>',  // FIXED: Using your verified email
       to: [deliveryTeamEmail],
       subject: `🚚 New Delivery Order #${payment.order_id.substring(0, 8)} - Senteur Fragrances`,
       html: deliveryEmailHtml,
