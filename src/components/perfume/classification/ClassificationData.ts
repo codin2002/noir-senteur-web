@@ -33,10 +33,12 @@ export const transformTypeData = (data: PerfumeClassificationData): Classificati
 ];
 
 export const transformOccasionData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
-  { name: 'Casual', value: data.occasion_casual, fullMark: 100 },
-  { name: 'Formal', value: data.occasion_formal, fullMark: 100 },
+  { name: 'Daily', value: data.occasion_casual, fullMark: 100 },
+  { name: 'Sport', value: data.occasion_formal, fullMark: 100 },
+  { name: 'Leisure', value: data.occasion_evening, fullMark: 100 },
+  { name: 'Night Out', value: data.occasion_special, fullMark: 100 },
+  { name: 'Business', value: Math.round((data.occasion_formal + data.occasion_casual) / 2), fullMark: 100 },
   { name: 'Evening', value: data.occasion_evening, fullMark: 100 },
-  { name: 'Special', value: data.occasion_special, fullMark: 100 },
 ];
 
 export const transformSeasonData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
