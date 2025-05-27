@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -201,7 +202,8 @@ serve(async (req) => {
         orderCartItems = cartData.map((item: any) => ({
           perfume_id: item.perfume_id,
           quantity: item.quantity,
-          price: item.perfume.price_value
+          price: item.perfume.price_value,
+          name: item.perfume.name
         }));
       } else {
         // For guest checkout, use cart items from the request
@@ -222,7 +224,8 @@ serve(async (req) => {
         orderCartItems = cartItems.map((item: any) => ({
           perfume_id: item.perfume.id,
           quantity: item.quantity,
-          price: item.perfume.price_value
+          price: item.perfume.price_value,
+          name: item.perfume.name
         }));
       }
 
@@ -238,11 +241,15 @@ serve(async (req) => {
       let orderId;
 
       if (!isGuest && user) {
-        // Authenticated user order - use new function signature
+        // Authenticated user order
         console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR USER ===');
         
         const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
-          cart_items: orderCartItems,
+          cart_items: orderCartItems.map(item => ({
+            perfume_id: item.perfume_id,
+            quantity: item.quantity,
+            price: item.price
+          })),
           order_total: totalAmount,
           user_uuid: user.id
         });
@@ -261,7 +268,7 @@ serve(async (req) => {
 
         orderId = orderIdResult;
       } else {
-        // Guest order - use new function signature
+        // Guest order
         console.log('=== CALLING CREATE_ORDER_WITH_ITEMS PROCEDURE FOR GUEST ===');
         
         // Parse guest details from delivery address
@@ -274,7 +281,11 @@ serve(async (req) => {
         console.log('Guest details parsed:', { guestName, guestEmail, guestPhone, actualAddress });
 
         const { data: orderIdResult, error: orderError } = await supabaseService.rpc('create_order_with_items', {
-          cart_items: orderCartItems,
+          cart_items: orderCartItems.map(item => ({
+            perfume_id: item.perfume_id,
+            quantity: item.quantity,
+            price: item.price
+          })),
           order_total: totalAmount,
           user_uuid: null,
           guest_name: guestName,
@@ -301,10 +312,16 @@ serve(async (req) => {
       console.log('=== ORDER CREATED SUCCESSFULLY ===');
       console.log('Order ID:', orderId);
 
-      // Record successful payment with the complete delivery address
-      console.log('=== RECORDING SUCCESSFUL PAYMENT ===');
+      // Record successful payment with product details
+      console.log('=== RECORDING SUCCESSFUL PAYMENT WITH PRODUCT DETAILS ===');
+      
+      // Create product summary for successful_payments table
+      const productSummary = orderCartItems.map(item => 
+        `${item.name} (Qty: ${item.quantity})`
+      ).join(', ');
+      
       const paymentRecord = {
-        user_id: user?.id || null, // Allow null for guest users
+        user_id: user?.id || null,
         order_id: orderId,
         payment_id: paymentIntentId,
         payment_method: 'ziina',
@@ -317,7 +334,8 @@ serve(async (req) => {
             deliveryAddress.split('Contact: ')[1]?.split(' |')[0] : 'Guest'),
         delivery_address: deliveryAddress || 'No address provided',
         payment_status: 'completed',
-        ziina_response: paymentData
+        ziina_response: paymentData,
+        product_details: productSummary
       };
 
       const { error: paymentRecordError } = await supabaseService
@@ -329,7 +347,7 @@ serve(async (req) => {
         console.error('Error details:', JSON.stringify(paymentRecordError, null, 2));
         // Don't fail the whole process if payment recording fails
       } else {
-        console.log('=== PAYMENT RECORDED SUCCESSFULLY ===');
+        console.log('=== PAYMENT RECORDED SUCCESSFULLY WITH PRODUCT DETAILS ===');
       }
 
       // Send order confirmation emails
