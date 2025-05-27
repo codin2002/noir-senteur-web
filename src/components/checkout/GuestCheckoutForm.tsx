@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
+import PersonalInfoSection from './PersonalInfoSection';
+import AddressInfoSection from './AddressInfoSection';
+import GuestCheckoutActions from './GuestCheckoutActions';
 
 interface GuestDetails {
   name: string;
@@ -39,15 +39,21 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({
     emirate: ''
   });
 
-  const handleInputChange = (field: keyof GuestDetails) => (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePersonalInfoUpdate = (field: keyof Pick<GuestDetails, 'name' | 'email' | 'phoneNumber'>, value: string) => {
     setGuestDetails(prev => ({
       ...prev,
-      [field]: e.target.value
+      [field]: value
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAddressInfoUpdate = (field: keyof Pick<GuestDetails, 'buildingName' | 'floorNumber' | 'roomNumber' | 'area' | 'landmark' | 'emirate'>, value: string) => {
+    setGuestDetails(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleSubmit = () => {
     onGuestCheckout(guestDetails);
   };
 
@@ -67,150 +73,35 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({
         <p className="text-sm text-white/70">Complete your order without creating an account</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Personal Details */}
-        <div className="space-y-4">
-          <h4 className="font-medium text-white">Personal Information</h4>
-          
-          <div>
-            <Label htmlFor="guest_name" className="text-sm">Full Name *</Label>
-            <Input
-              id="guest_name"
-              value={guestDetails.name}
-              onChange={handleInputChange('name')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="Enter your full name"
-              required
-            />
-          </div>
+      <div className="space-y-4">
+        <PersonalInfoSection
+          personalInfo={{
+            name: guestDetails.name,
+            email: guestDetails.email,
+            phoneNumber: guestDetails.phoneNumber
+          }}
+          onUpdate={handlePersonalInfoUpdate}
+        />
 
-          <div>
-            <Label htmlFor="guest_email" className="text-sm">Email Address *</Label>
-            <Input
-              id="guest_email"
-              type="email"
-              value={guestDetails.email}
-              onChange={handleInputChange('email')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="your.email@example.com"
-              required
-            />
-          </div>
+        <AddressInfoSection
+          addressInfo={{
+            buildingName: guestDetails.buildingName,
+            floorNumber: guestDetails.floorNumber,
+            roomNumber: guestDetails.roomNumber,
+            area: guestDetails.area,
+            landmark: guestDetails.landmark,
+            emirate: guestDetails.emirate
+          }}
+          onUpdate={handleAddressInfoUpdate}
+        />
 
-          <div>
-            <Label htmlFor="guest_phone" className="text-sm">Phone Number *</Label>
-            <Input
-              id="guest_phone"
-              value={guestDetails.phoneNumber}
-              onChange={handleInputChange('phoneNumber')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="+971 50 XXX XXXX"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Address Details */}
-        <div className="space-y-4">
-          <h4 className="font-medium text-white">Delivery Address</h4>
-          
-          <div>
-            <Label htmlFor="guest_building" className="text-sm">Building Name *</Label>
-            <Input
-              id="guest_building"
-              value={guestDetails.buildingName}
-              onChange={handleInputChange('buildingName')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="e.g., La vista 1"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guest_floor" className="text-sm">Floor Number</Label>
-            <Input
-              id="guest_floor"
-              value={guestDetails.floorNumber}
-              onChange={handleInputChange('floorNumber')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="e.g., 6"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guest_room" className="text-sm">Room/Office Number</Label>
-            <Input
-              id="guest_room"
-              value={guestDetails.roomNumber}
-              onChange={handleInputChange('roomNumber')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="e.g., 911"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guest_area" className="text-sm">Area/Locality *</Label>
-            <Input
-              id="guest_area"
-              value={guestDetails.area}
-              onChange={handleInputChange('area')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="e.g., Nad Hessa"
-              required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guest_landmark" className="text-sm">Landmark (Optional)</Label>
-            <Input
-              id="guest_landmark"
-              value={guestDetails.landmark}
-              onChange={handleInputChange('landmark')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="e.g., Near SIT"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guest_emirate" className="text-sm">Emirate *</Label>
-            <Input
-              id="guest_emirate"
-              value={guestDetails.emirate}
-              onChange={handleInputChange('emirate')}
-              className="border-gold/30 focus:border-gold"
-              placeholder="e.g., Dubai, Abu Dhabi, Sharjah"
-              required
-            />
-          </div>
-        </div>
-
-        {/* Buttons - Fixed positioning */}
-        <div className="space-y-3 pt-4 border-t border-gold/20">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onSwitchToSignIn}
-              className="flex-1 border-gold/30 hover:bg-gold/10 order-2 sm:order-1"
-              disabled={isLoading}
-            >
-              Sign In with Google
-            </Button>
-            
-            <Button
-              type="submit"
-              disabled={!isFormValid() || isLoading}
-              className="flex-1 bg-gold text-darker hover:bg-gold/80 order-1 sm:order-2"
-            >
-              {isLoading ? 'Processing...' : 'Continue as Guest'}
-            </Button>
-          </div>
-          
-          <p className="text-xs text-center text-white/70">
-            Already have an account? Use the Sign In button above
-          </p>
-        </div>
-      </form>
+        <GuestCheckoutActions
+          onSwitchToSignIn={onSwitchToSignIn}
+          onSubmit={handleSubmit}
+          isFormValid={isFormValid()}
+          isLoading={isLoading}
+        />
+      </div>
     </div>
   );
 };
