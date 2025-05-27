@@ -1,49 +1,45 @@
 
-import React from 'react';
-import OrderCard from './OrderCard';
+import React, { useEffect } from 'react';
+import { useOrders } from '@/hooks/useOrders';
+import { useAuth } from '@/context/AuthContext';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import EmptyPurchaseHistory from './EmptyPurchaseHistory';
-import { Perfume } from '@/types/perfume';
+import OrderHistoryTable from './OrderHistoryTable';
 
-interface OrderItemType {
-  id: string;
-  order_id: string;
-  perfume_id: string;
-  quantity: number;
-  price: number;
-  perfume: Perfume;
-}
+const PurchaseHistory = () => {
+  const { user } = useAuth();
+  const { orders, isLoading, fetchOrders, formatDate } = useOrders();
 
-interface Order {
-  id: string;
-  created_at: string;
-  status: string;
-  total: number;
-  items: OrderItemType[];
-}
+  useEffect(() => {
+    if (user) {
+      fetchOrders();
+    }
+  }, [user]);
 
-interface PurchaseHistoryProps {
-  orders: Order[];
-  formatDate: (dateString: string) => string;
-}
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
-const PurchaseHistory: React.FC<PurchaseHistoryProps> = ({ orders, formatDate }) => {
-  if (orders.length === 0) {
+  if (!orders || orders.length === 0) {
     return <EmptyPurchaseHistory />;
   }
 
   return (
-    <div className="space-y-8">
-      {orders.map((order) => (
-        <OrderCard
-          key={order.id}
-          id={order.id}
-          createdAt={order.created_at}
-          status={order.status}
-          total={order.total}
-          items={order.items}
-          formatDate={formatDate}
-        />
-      ))}
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-2xl font-serif text-gold mb-2">Purchase History</h2>
+        <p className="text-muted-foreground">
+          View and track all your previous orders
+        </p>
+      </div>
+
+      <div className="bg-darker border border-gold/20 rounded-lg overflow-hidden">
+        <OrderHistoryTable orders={orders} formatDate={formatDate} />
+      </div>
     </div>
   );
 };
