@@ -367,7 +367,7 @@ const Auth = () => {
                       <FcGoogle className="w-8 h-8" />
                     </div>
                     <h3 className="text-2xl font-serif text-gold mb-3">Sign In with Google</h3>
-                    <p className="text-white/60 leading-relaxed">Continue with your Google account for faster checkout and order tracking</p>
+                    <p className="text-white/60 leading-relaxed">Continue with your Google account for faster checkout and to stay connected and informed</p>
                   </div>
 
                   <div className="space-y-8 flex-1 flex flex-col justify-center">
@@ -381,29 +381,6 @@ const Auth = () => {
                         <FcGoogle className="mr-3 h-6 w-6" />
                         Continue with Google
                       </Button>
-
-                      <div className="space-y-4 text-center">
-                        <div className="flex items-center justify-center space-x-4">
-                          <div className="w-8 h-px bg-gold/30"></div>
-                          <span className="text-sm text-white/50">Benefits</span>
-                          <div className="w-8 h-px bg-gold/30"></div>
-                        </div>
-                        
-                        <div className="space-y-3 text-sm text-white/60">
-                          <div className="flex items-center justify-center space-x-2">
-                            <div className="w-1 h-1 bg-gold rounded-full"></div>
-                            <span>Faster checkout process</span>
-                          </div>
-                          <div className="flex items-center justify-center space-x-2">
-                            <div className="w-1 h-1 bg-gold rounded-full"></div>
-                            <span>Order history & tracking</span>
-                          </div>
-                          <div className="flex items-center justify-center space-x-2">
-                            <div className="w-1 h-1 bg-gold rounded-full"></div>
-                            <span>Personalized recommendations</span>
-                          </div>
-                        </div>
-                      </div>
                     </div>
 
                     <div className="text-center pt-6">
