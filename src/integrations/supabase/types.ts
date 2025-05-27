@@ -128,10 +128,10 @@ export type Database = {
       }
       perfume_classifications: {
         Row: {
+          audience_classic: string
           audience_feminine: number
           audience_masculine: number
-          audience_unisex: number
-          created_at: string
+          classic: number
           id: string
           occasion_casual: number
           occasion_evening: number
@@ -149,10 +149,10 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          audience_classic?: string
           audience_feminine?: number
           audience_masculine?: number
-          audience_unisex?: number
-          created_at?: string
+          classic?: number
           id?: string
           occasion_casual?: number
           occasion_evening?: number
@@ -170,10 +170,10 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          audience_classic?: string
           audience_feminine?: number
           audience_masculine?: number
-          audience_unisex?: number
-          created_at?: string
+          classic?: number
           id?: string
           occasion_casual?: number
           occasion_evening?: number
