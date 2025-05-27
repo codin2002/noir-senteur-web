@@ -296,7 +296,7 @@ serve(async (req) => {
             <div style="background-color: #fff3cd; padding: 25px 20px; border-left: 4px solid #d4af37;">
               <h3 style="margin-top: 0; color: #333; font-size: 18px;">What's Next?</h3>
               <ul style="margin: 10px 0; padding-left: 20px; color: #666;">
-                <li>Your order will be delivered within 2-3 business days</li>
+                <li>Your order will be delivered within 2-4 business days</li>
                 <li>You'll receive a confirmation call before delivery</li>
                 <li>Have your payment confirmation ready</li>
                 <li>Ensure someone is available at the delivery address</li>
@@ -409,7 +409,7 @@ serve(async (req) => {
             <div style="background-color: #d4edda; padding: 25px 20px; border-left: 4px solid #28a745;">
               <h3 style="margin-top: 0; color: #155724; font-size: 18px;">📋 Delivery Instructions</h3>
               <ul style="margin: 10px 0; padding-left: 20px; color: #155724;">
-                <li><strong>Delivery Window:</strong> 2-3 business days</li>
+                <li><strong>Delivery Window:</strong> 2-4 business days</li>
                 <li><strong>Contact customer before delivery</strong></li>
                 <li><strong>Verify order details with customer</strong></li>
                 <li><strong>Collect payment confirmation if needed</strong></li>
