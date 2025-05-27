@@ -57,13 +57,13 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({
     onGuestCheckout(guestDetails);
   };
 
-  const isFormValid = () => {
-    return guestDetails.name.trim() && 
+  const isFormValid = (): boolean => {
+    return !!(guestDetails.name.trim() && 
            guestDetails.email.trim() && 
            guestDetails.phoneNumber.trim() &&
            guestDetails.buildingName.trim() &&
            guestDetails.area.trim() &&
-           guestDetails.emirate.trim();
+           guestDetails.emirate.trim());
   };
 
   return (
