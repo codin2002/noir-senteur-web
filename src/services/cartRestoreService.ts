@@ -39,10 +39,18 @@ export const cartRestoreService = {
           sonnerToast.success('Cart restored', {
             description: `${newItems.length} new item(s) restored to your cart`
           });
+        } else if (existingItems && existingItems.length > 0) {
+          // If no new items but existing items found, still show a message
+          sonnerToast.success('Cart loaded', {
+            description: `${existingItems.length} item(s) in your cart`
+          });
         }
         
         // Clear localStorage after processing
         localStorage.removeItem('cartItems');
+        
+        // Trigger cart update event to refresh UI
+        window.dispatchEvent(new Event('cartUpdated'));
       }
     } catch (error) {
       console.error('Error restoring cart:', error);

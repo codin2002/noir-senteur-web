@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { toast as sonnerToast } from "sonner";
+import { cartRestoreService } from '@/services/cartRestoreService';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -58,6 +59,9 @@ const AuthCallback = () => {
           console.log('User was in checkout flow, redirecting to cart');
           // Clean up the checkout flow flag
           localStorage.removeItem('user_in_checkout_flow');
+          
+          // Restore cart items from localStorage if they exist
+          await cartRestoreService.restoreCartFromLocalStorage(data.session.user.id);
         } else if (storedPath) {
           // If there was a stored path, use that
           redirectTo = storedPath;
