@@ -7,6 +7,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import PerfumeDetailContent from '@/components/perfume/PerfumeDetailContent';
+import DebugPerfumeData from '@/components/DebugPerfumeData';
 import { usePerfumeDetail } from '@/hooks/usePerfumeDetail';
 
 const PerfumeDetail = () => {
@@ -24,6 +25,8 @@ const PerfumeDetail = () => {
     refreshAnalytics
   } = usePerfumeDetail();
 
+  console.log('PerfumeDetail render - Perfume:', perfume, 'Loading:', loading);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-dark text-white flex flex-col">
@@ -32,6 +35,7 @@ const PerfumeDetail = () => {
           <LoadingSpinner />
         </div>
         <Footer />
+        <DebugPerfumeData />
       </div>
     );
   }
@@ -43,6 +47,7 @@ const PerfumeDetail = () => {
         <div className="flex-1 pt-24 pb-12 px-6 flex items-center justify-center">
           <div className="text-center">
             <h1 className="text-2xl font-serif mb-4">Perfume Not Found</h1>
+            <p className="text-gray-400 mb-4">The perfume you're looking for doesn't exist or has been removed.</p>
             <Button onClick={() => navigate('/')} className="bg-gold text-darker hover:bg-gold/80">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Go Back
@@ -50,6 +55,7 @@ const PerfumeDetail = () => {
           </div>
         </div>
         <Footer />
+        <DebugPerfumeData />
       </div>
     );
   }
@@ -81,6 +87,7 @@ const PerfumeDetail = () => {
         />
       </div>
       <Footer />
+      <DebugPerfumeData />
     </div>
   );
 };
