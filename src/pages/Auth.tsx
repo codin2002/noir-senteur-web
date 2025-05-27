@@ -193,8 +193,8 @@ const Auth = () => {
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 relative">
               {/* Guest Checkout Box */}
-              <div className="group">
-                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl">
+              <div className="group min-h-[600px] flex">
+                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl w-full">
                   <div className="text-center pb-8 mb-8 border-b border-gold/20">
                     <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
                       <div className="w-8 h-8 bg-gold rounded-full"></div>
@@ -360,8 +360,8 @@ const Auth = () => {
               </div>
 
               {/* Sign In with Google Box */}
-              <div className="group">
-                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl h-full flex flex-col justify-center">
+              <div className="group min-h-[600px] flex">
+                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl h-full flex flex-col justify-center w-full">
                   <div className="text-center pb-8 mb-8 border-b border-gold/20">
                     <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
                       <FcGoogle className="w-8 h-8" />
