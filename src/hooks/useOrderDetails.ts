@@ -55,7 +55,14 @@ export const useOrderDetails = () => {
       }
       
       console.log('Order details found:', order);
-      setOrderDetails(order);
+      
+      // Type cast the items properly
+      const orderWithTypedItems = {
+        ...order,
+        items: Array.isArray(order.items) ? order.items as OrderItem[] : []
+      };
+      
+      setOrderDetails(orderWithTypedItems);
     } catch (error: any) {
       console.error('Error fetching order details:', error);
       toast.error('Failed to load order details', {

@@ -15,11 +15,9 @@ import { useLocation } from 'react-router-dom';
 const Profile = () => {
   const { 
     user, 
-    orders, 
     isLoading, 
     formData, 
     updateProfile, 
-    formatDate, 
     handleSignOut,
     handleChange
   } = useProfile();
@@ -65,10 +63,7 @@ const Profile = () => {
           ) : (
             <ProfileTabs>
               <TabsContent value="history" className="mt-0" id="history">
-                <PurchaseHistory 
-                  orders={orders} 
-                  formatDate={formatDate} 
-                />
+                <PurchaseHistory />
               </TabsContent>
               
               <TabsContent value="account" id="account">
