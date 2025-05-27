@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -12,119 +13,122 @@ serve(async (req) => {
   }
 
   try {
+    console.log("=== CREATE PAYMENT FUNCTION CALLED ===");
+    
     const { cartItems, deliveryAddress, isGuest, userId } = await req.json();
     
-    console.log('=== CREATE PAYMENT FUNCTION CALLED ===');
-    console.log('Is guest checkout:', isGuest);
-    console.log('User ID:', userId);
-    console.log('Cart items count:', cartItems?.length || 0);
+    console.log("Is guest checkout:", isGuest);
+    console.log("User ID:", userId);
+    console.log("Cart items count:", cartItems?.length || 0);
 
-    // Get Ziina API key from environment
-    const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
-    if (!ziinaApiKey) {
-      console.error('Ziina API key not configured');
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: "Ziina API key not configured" 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
+    // Create Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
+    );
+
+    let itemsToProcess = cartItems || [];
+
+    // For authenticated users, get cart from database
+    if (!isGuest && userId) {
+      const { data: dbCartItems, error } = await supabaseClient.rpc('get_cart_with_perfumes', {
+        user_uuid: userId
       });
+      
+      if (error) {
+        console.error('Error fetching cart from database:', error);
+        throw new Error('Failed to fetch cart items');
+      }
+      
+      if (dbCartItems && dbCartItems.length > 0) {
+        itemsToProcess = dbCartItems;
+      }
     }
 
-    // Validate cart items
-    if (!cartItems || cartItems.length === 0) {
-      console.error('No cart items provided');
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: "No cart items provided" 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 400,
-      });
+    if (!itemsToProcess || itemsToProcess.length === 0) {
+      throw new Error('No items in cart');
     }
 
-    // Calculate total amount
+    // Calculate totals with correct shipping logic
     let subtotal = 0;
-    for (const item of cartItems) {
-      const price = item.perfume?.price_value || 0;
-      const quantity = item.quantity || 1;
-      console.log(`Item: ${item.perfume?.name}, price: ${price}, quantity: ${quantity}`);
-      subtotal += price * quantity;
-    }
-
-    const shipping = 1; // AED 1 shipping
-    const total = subtotal + shipping;
+    let totalQuantity = 0;
     
-    console.log(`Calculated subtotal: ${subtotal}, shipping: ${shipping}, total: ${total}`);
+    itemsToProcess.forEach(item => {
+      const perfume = item.perfume || item;
+      const price = perfume.price_value || 1;
+      const quantity = item.quantity || 1;
+      
+      console.log(`Item: ${perfume.name}, price: ${price}, quantity: ${quantity}`);
+      
+      subtotal += price * quantity;
+      totalQuantity += quantity;
+    });
+
+    // Apply correct shipping logic - free shipping if 2+ items, otherwise 1 AED
+    const shipping = subtotal > 0 && totalQuantity < 2 ? 1 : 0;
+    const total = subtotal + shipping;
+
+    console.log("Calculated subtotal:", subtotal, "shipping:", shipping, "total:", total);
 
     // Convert to fils (1 AED = 100 fils)
     const amountInFils = Math.round(total * 100);
 
-    // Create payment message
-    const itemCount = cartItems.length;
-    const paymentMessage = `Senteur Fragrances Order - ${itemCount} item(s)${isGuest ? ' (Guest)' : ''}`;
+    if (!deliveryAddress?.trim()) {
+      throw new Error('Delivery address is required');
+    }
 
-    // Set expiry to 15 minutes from now
-    const expiryTime = Date.now() + (15 * 60 * 1000);
-
-    // FIXED: Use correct Ziina parameter format for success_url
+    // Create Ziina payment
     const ziinaPayload = {
       amount: amountInFils,
       currency_code: "AED",
-      message: paymentMessage,
+      message: `Senteur Fragrances Order - ${itemsToProcess.length} item(s)`,
       success_url: `https://senteurfragrances.com/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
-      cancel_url: "https://senteurfragrances.com/cart?payment=cancelled",
-      failure_url: "https://senteurfragrances.com/payment-failed",
-      expiry: expiryTime.toString(),
+      cancel_url: `https://senteurfragrances.com/cart?payment=cancelled`,
+      failure_url: `https://senteurfragrances.com/payment-failed`,
+      expiry: (Date.now() + 15 * 60 * 1000).toString(), // 15 minutes from now
       test: false,
       transaction_source: "directApi",
       allow_tips: false
     };
 
-    console.log('Creating Ziina payment with payload:', JSON.stringify(ziinaPayload, null, 2));
+    console.log("Creating Ziina payment with payload:", ziinaPayload);
 
-    const ziinaResponse = await fetch("https://api-v2.ziina.com/api/payment_intent", {
+    const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${ziinaApiKey}`,
+        "Authorization": `Bearer ${Deno.env.get("ZIINA_API_KEY")}`,
         "Content-Type": "application/json",
-        "Accept": "application/json",
       },
       body: JSON.stringify(ziinaPayload),
     });
 
-    console.log('Ziina API response status:', ziinaResponse.status);
+    console.log("Ziina API response status:", ziinaResponse.status);
 
     if (!ziinaResponse.ok) {
-      const errorText = await ziinaResponse.text();
-      console.error('Ziina API error:', errorText);
-      return new Response(JSON.stringify({ 
-        success: false,
-        error: `Ziina API error: ${ziinaResponse.status} - ${errorText}` 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
-      });
+      const errorData = await ziinaResponse.text();
+      console.error("Ziina API error:", errorData);
+      throw new Error(`Ziina API error: ${ziinaResponse.status}`);
     }
 
-    const paymentData = await ziinaResponse.json();
-    console.log('Ziina payment created successfully:', JSON.stringify(paymentData, null, 2));
+    const ziinaData = await ziinaResponse.json();
+    console.log("Ziina payment created successfully:", ziinaData);
 
     return new Response(JSON.stringify({
       success: true,
-      payment_url: paymentData.redirect_url,
-      payment_intent_id: paymentData.id
+      payment_url: ziinaData.redirect_url,
+      payment_intent_id: ziinaData.id
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
     });
 
   } catch (error: any) {
-    console.error('Payment creation error:', error);
-    return new Response(JSON.stringify({ 
+    console.error("Payment creation error:", error);
+    return new Response(JSON.stringify({
       success: false,
-      error: error.message || "Payment creation failed" 
+      error: {
+        message: error.message || "Payment creation failed"
+      }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
