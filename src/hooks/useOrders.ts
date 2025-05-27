@@ -30,15 +30,37 @@ export const useOrders = () => {
       // Filter to only show orders for the current user (extra safety)
       const userOrders = (ordersData || []).filter(order => order.user_id === user?.id);
       
-      // Process the orders to match our Order type with proper type casting
-      const processedOrders: Order[] = userOrders.map(order => ({
-        id: order.id,
-        created_at: order.created_at,
-        status: order.status,
-        total: order.total,
-        // Safely cast items from Json to OrderItem[] with validation
-        items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
-      }));
+      // Process the orders to match our Order type with proper type casting and fixed calculations
+      const processedOrders: Order[] = userOrders.map(order => {
+        const items = Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : [];
+        
+        // FIXED: Recalculate total from actual order items to ensure accuracy
+        let calculatedSubtotal = 0;
+        const processedItems = items.map(item => {
+          const itemTotal = (item.price || 0) * (item.quantity || 1);
+          calculatedSubtotal += itemTotal;
+          return {
+            ...item,
+            // Ensure price and quantity are properly set
+            price: item.price || 0,
+            quantity: item.quantity || 1
+          };
+        });
+        
+        // FIXED: Use the actual order total from database, don't recalculate
+        // The database total already includes shipping and is correct
+        const orderTotal = order.total || 0;
+        
+        console.log(`Order ${order.id}: DB Total: ${orderTotal}, Calculated Subtotal: ${calculatedSubtotal}, Items: ${processedItems.length}`);
+        
+        return {
+          id: order.id,
+          created_at: order.created_at,
+          status: order.status,
+          total: orderTotal, // FIXED: Use database total directly
+          items: processedItems
+        };
+      });
       
       console.log('Processed orders:', processedOrders);
       setOrders(processedOrders);

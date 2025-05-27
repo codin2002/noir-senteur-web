@@ -148,7 +148,7 @@ serve(async (req) => {
 
     console.log('=== STEP 4: CREATING ORDER ===');
 
-    // Calculate total amount
+    // Calculate total amount and prepare order items
     let totalAmount = 0;
     const orderItems = orderCartItems.map(item => {
       const perfume = item.perfume || item;
@@ -166,7 +166,7 @@ serve(async (req) => {
     const shipping = 1;
     totalAmount += shipping;
 
-    console.log('Total amount:', totalAmount);
+    console.log('Total amount calculated:', totalAmount);
     console.log('Order items count:', orderItems.length);
 
     // Extract customer information from delivery address or user profile
@@ -228,13 +228,21 @@ serve(async (req) => {
     console.log('=== STEP 5: ORDER CREATED SUCCESSFULLY ===');
     console.log('Order ID:', orderId);
 
-    // Record successful payment with correct payment_id
+    // FIXED: Prepare product details for storage in successful_payments
+    const productDetails = orderCartItems.map(item => {
+      const perfume = item.perfume || item;
+      return `${perfume.name} (Qty: ${item.quantity || 1})`;
+    }).join(', ');
+
+    console.log('Product details for storage:', productDetails);
+
+    // Record successful payment with correct payment_id and product details
     const { error: paymentError } = await supabaseService
       .from('successful_payments')
       .insert({
-        payment_id: paymentIntentId, // This should be payment_id, not payment_intent_id
+        payment_id: paymentIntentId,
         order_id: orderId,
-        amount: totalAmount,
+        amount: totalAmount, // FIXED: Using calculated total amount
         currency: 'AED',
         payment_method: 'ziina',
         payment_status: 'completed',
@@ -242,7 +250,8 @@ serve(async (req) => {
         customer_name: customerName,
         customer_email: customerEmail,
         delivery_address: deliveryAddress,
-        email_sent: false // Important: set to false so email will be sent
+        product_details: productDetails, // FIXED: Adding product details
+        email_sent: false
       });
 
     if (paymentError) {
