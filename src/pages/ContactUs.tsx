@@ -26,10 +26,10 @@ const ContactUs = () => {
                 <Mail className="w-8 h-8 text-gold mx-auto mb-4" />
                 <h3 className="text-lg font-serif text-gold mb-2">Email</h3>
                 <a 
-                  href="mailto:senteur.ae@gmail.com" 
+                  href="mailto:team@senteurfragrances.com" 
                   className="text-white/80 hover:text-gold transition-colors"
                 >
-                  senteur.ae@gmail.com
+                  team@senteurfragrances.com
                 </a>
               </div>
 
