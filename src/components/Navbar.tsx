@@ -57,10 +57,8 @@ const Navbar = () => {
   };
   return <nav className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-12', isScrolled ? 'py-2 bg-darker bg-opacity-95 backdrop-blur-sm' : 'py-4 bg-transparent')}>
       <div className="flex items-center justify-between">
-        <Link to="/" className="flex items-center">
-          <div className="w-12 h-12 bg-gradient-to-br from-gold to-gold-light rounded-full flex items-center justify-center shadow-lg border border-gold/20">
-            <span className="text-cartier-red text-2xl font-serif font-bold">S</span>
-          </div>
+        <Link to="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
+          SENTEUR
         </Link>
 
         {/* Desktop Menu */}
