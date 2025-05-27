@@ -163,6 +163,9 @@ export const useCheckout = () => {
         localStorage.removeItem('cartItems'); // Clear guest cart
       }
       
+      // Trigger cart update event to refresh cart count
+      window.dispatchEvent(new Event('cartUpdated'));
+      
       console.log('Payment verification successful:', data);
       return data;
     } catch (error: any) {
