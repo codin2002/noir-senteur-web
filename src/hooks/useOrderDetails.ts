@@ -56,10 +56,10 @@ export const useOrderDetails = () => {
       
       console.log('Order details found:', order);
       
-      // Type cast the items properly
+      // Type cast the items properly using unknown as intermediate type
       const orderWithTypedItems = {
         ...order,
-        items: Array.isArray(order.items) ? order.items as OrderItem[] : []
+        items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
       };
       
       setOrderDetails(orderWithTypedItems);
