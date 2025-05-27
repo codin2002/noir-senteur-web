@@ -25,14 +25,14 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    // Get payment details with order and items
+    // Get payment details with order and items - fix the relationship conflict
     const { data: payment, error: paymentError } = await supabaseService
       .from('successful_payments')
       .select(`
         *,
         orders!inner(
           *,
-          order_items(
+          order_items!order_items_order_id_fkey(
             *,
             perfumes(name, price_value, image)
           )
@@ -59,6 +59,15 @@ serve(async (req) => {
         .eq('id', payment.user_id)
         .single();
       customerPhone = profile?.phone || 'Not provided';
+    } else {
+      // For guest orders, try to extract phone from delivery address
+      const addressParts = payment.delivery_address?.split('|') || [];
+      for (const part of addressParts) {
+        if (part.includes('Phone:')) {
+          customerPhone = part.replace('Phone:', '').trim();
+          break;
+        }
+      }
     }
 
     // Calculate totals
@@ -76,7 +85,7 @@ serve(async (req) => {
           <div style="display: flex; align-items: center;">
             <img src="${item.perfumes.image}" alt="${item.perfumes.name}" 
                  style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px; margin-right: 12px;">
-            <span>${item.perfumes.name}</span>
+            <span>${item.perfumes.name} (Qty: ${item.quantity})</span>
           </div>
         </td>
         <td style="padding: 12px; text-align: center;">${item.quantity}</td>
@@ -263,7 +272,7 @@ serve(async (req) => {
                         <div style="display: flex; align-items: center;">
                           <img src="${item.perfumes.image}" alt="${item.perfumes.name}" 
                                style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; margin-right: 10px;">
-                          <span style="font-weight: 500;">${item.perfumes.name}</span>
+                          <span style="font-weight: 500;">${item.perfumes.name} (Qty: ${item.quantity})</span>
                         </div>
                       </td>
                       <td style="padding: 15px; text-align: center; font-weight: bold; color: #dc3545; font-size: 16px;">${item.quantity}</td>
