@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ClassificationTabs from './classification/ClassificationTabs';
-import { PerfumeClassificationData } from './classification/ClassificationData';
+import { PerfumeClassificationData } from '@/types/perfumeDetail';
 
 interface PerfumeClassificationProps {
   classificationData: PerfumeClassificationData | null;

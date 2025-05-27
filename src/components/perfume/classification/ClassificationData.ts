@@ -12,6 +12,9 @@ export interface PerfumeClassificationData {
   type_fresh: number;
   type_oriental: number;
   type_woody: number;
+  audience_masculine: number;
+  audience_feminine: number;
+  audience_classic: number;
   occasion_daily: number;
   occasion_sport: number;
   occasion_leisure: number;
@@ -22,15 +25,12 @@ export interface PerfumeClassificationData {
   season_summer: number;
   season_fall: number;
   season_winter: number;
-  audience_feminine: number;
-  audience_masculine: number;
-  audience_classic: number;
   updated_at: string;
 }
 
 export const transformTypeData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
   { name: 'Floral', value: data.type_floral, fullMark: 100 },
-  { name: 'Chypre', value: data.type_fresh, fullMark: 100 },
+  { name: 'Fresh', value: data.type_fresh, fullMark: 100 },
   { name: 'Oriental', value: data.type_oriental, fullMark: 100 },
   { name: 'Woody', value: data.type_woody, fullMark: 100 },
 ];

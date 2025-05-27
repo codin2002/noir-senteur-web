@@ -6,9 +6,9 @@ import {
   transformTypeData, 
   transformOccasionData, 
   transformSeasonData, 
-  transformAudienceData,
-  PerfumeClassificationData
+  transformAudienceData
 } from './ClassificationData';
+import { PerfumeClassificationData } from '@/types/perfumeDetail';
 
 interface ClassificationTabsProps {
   classificationData: PerfumeClassificationData;

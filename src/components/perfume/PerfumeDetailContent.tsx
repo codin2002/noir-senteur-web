@@ -6,44 +6,7 @@ import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeInfo from '@/components/perfume/PerfumeInfo';
 import PerfumeActions from '@/components/perfume/PerfumeActions';
-
-interface PerfumeImage {
-  id: string;
-  image_url: string;
-  alt_text: string | null;
-  is_primary: boolean;
-  display_order: number;
-}
-
-interface PerfumeClassificationData {
-  id: string;
-  perfume_id: string;
-  type_floral: number;
-  type_fresh: number;
-  type_oriental: number;
-  type_woody: number;
-  audience_masculine: number;
-  audience_feminine: number;
-  audience_classic: string;
-  occasion_casual: number;
-  occasion_formal: number;
-  occasion_evening: number;
-  occasion_special: number;
-  season_spring: number;
-  season_summer: number;
-  season_fall: number;
-  season_winter: number;
-}
-
-interface Perfume {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-  price_value: number;
-  image: string;
-  notes: string;
-}
+import { PerfumeImage, PerfumeClassificationData, Perfume } from '@/types/perfumeDetail';
 
 interface PerfumeDetailContentProps {
   perfume: Perfume;
