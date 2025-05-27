@@ -228,11 +228,11 @@ serve(async (req) => {
     console.log('=== STEP 5: ORDER CREATED SUCCESSFULLY ===');
     console.log('Order ID:', orderId);
 
-    // Record successful payment
+    // Record successful payment with correct payment_id
     const { error: paymentError } = await supabaseService
       .from('successful_payments')
       .insert({
-        payment_intent_id: paymentIntentId,
+        payment_id: paymentIntentId, // This should be payment_id, not payment_intent_id
         order_id: orderId,
         amount: totalAmount,
         currency: 'AED',
@@ -241,14 +241,15 @@ serve(async (req) => {
         user_id: isGuest ? null : actualUserId,
         customer_name: customerName,
         customer_email: customerEmail,
-        delivery_address: deliveryAddress
+        delivery_address: deliveryAddress,
+        email_sent: false // Important: set to false so email will be sent
       });
 
     if (paymentError) {
       console.error('Error recording payment:', paymentError);
       // Don't fail the entire process for this
     } else {
-      console.log('Payment recorded successfully');
+      console.log('Payment recorded successfully in successful_payments table');
     }
 
     // Trigger email confirmation function
