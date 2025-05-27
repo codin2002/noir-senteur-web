@@ -22,7 +22,7 @@ export interface PerfumeClassificationData {
   season_winter: number;
   audience_feminine: number;
   audience_masculine: number;
-  audience_unisex: number;
+  audience_classic: string;
 }
 
 export const transformTypeData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
@@ -49,5 +49,4 @@ export const transformSeasonData = (data: PerfumeClassificationData): Classifica
 export const transformAudienceData = (data: PerfumeClassificationData): ClassificationDataItem[] => [
   { name: 'Feminine', value: data.audience_feminine, fullMark: 100 },
   { name: 'Masculine', value: data.audience_masculine, fullMark: 100 },
-  { name: 'Unisex', value: data.audience_unisex, fullMark: 100 },
 ];

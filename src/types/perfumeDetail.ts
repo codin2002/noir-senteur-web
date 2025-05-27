@@ -16,7 +16,7 @@ export interface PerfumeClassificationData {
   type_woody: number;
   audience_masculine: number;
   audience_feminine: number;
-  audience_unisex: number;
+  audience_classic: string;
   occasion_casual: number;
   occasion_formal: number;
   occasion_evening: number;

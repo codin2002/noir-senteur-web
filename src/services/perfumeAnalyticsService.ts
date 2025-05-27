@@ -50,7 +50,7 @@ export const createSampleClassificationData = async (perfumeId: string): Promise
         type_woody: 75,
         audience_masculine: 70,
         audience_feminine: 30,
-        audience_unisex: 60,
+        audience_classic: new Date().toISOString(),
         occasion_casual: 40,
         occasion_formal: 60,
         occasion_evening: 90,

@@ -131,7 +131,6 @@ export type Database = {
           audience_classic: string
           audience_feminine: number
           audience_masculine: number
-          classic: number
           id: string
           occasion_casual: number
           occasion_evening: number
@@ -152,7 +151,6 @@ export type Database = {
           audience_classic?: string
           audience_feminine?: number
           audience_masculine?: number
-          classic?: number
           id?: string
           occasion_casual?: number
           occasion_evening?: number
@@ -173,7 +171,6 @@ export type Database = {
           audience_classic?: string
           audience_feminine?: number
           audience_masculine?: number
-          classic?: number
           id?: string
           occasion_casual?: number
           occasion_evening?: number
