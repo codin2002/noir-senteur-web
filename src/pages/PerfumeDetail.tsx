@@ -140,8 +140,16 @@ const PerfumeDetail = () => {
     if (!id) return;
     
     console.log('Fetching classification data for perfume ID:', id);
+    console.log('ID type:', typeof id);
     setIsLoadingClassification(true);
     try {
+      // First, let's check what's in the table
+      const { data: allClassifications, error: allError } = await supabase
+        .from('perfume_classifications')
+        .select('*');
+      
+      console.log('All classifications in table:', allClassifications);
+      
       const { data, error } = await supabase
         .from('perfume_classifications')
         .select('*')
@@ -155,7 +163,10 @@ const PerfumeDetail = () => {
         return;
       }
       
-      console.log('Classification data response:', data);
+      console.log('Classification data query result:', data);
+      console.log('Query used perfume_id:', id);
+      console.log('Number of results:', data?.length || 0);
+      
       // Take the first result if any exist
       setClassificationData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
@@ -170,8 +181,16 @@ const PerfumeDetail = () => {
     if (!id) return;
     
     console.log('Fetching ratings data for perfume ID:', id);
+    console.log('ID type:', typeof id);
     setIsLoadingRatings(true);
     try {
+      // First, let's check what's in the table
+      const { data: allRatings, error: allError } = await supabase
+        .from('perfume_ratings')
+        .select('*');
+      
+      console.log('All ratings in table:', allRatings);
+      
       const { data, error } = await supabase
         .from('perfume_ratings')
         .select('*')
@@ -185,7 +204,10 @@ const PerfumeDetail = () => {
         return;
       }
       
-      console.log('Ratings data response:', data);
+      console.log('Ratings data query result:', data);
+      console.log('Query used perfume_id:', id);
+      console.log('Number of results:', data?.length || 0);
+      
       // Take the first result if any exist
       setRatingsData(data && data.length > 0 ? data[0] : null);
     } catch (error) {
