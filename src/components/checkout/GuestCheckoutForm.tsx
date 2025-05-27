@@ -96,9 +96,9 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({
         />
 
         <GuestCheckoutActions
+          onGuestCheckout={handleSubmit}
           onSwitchToSignIn={onSwitchToSignIn}
-          onSubmit={handleSubmit}
-          isFormValid={isFormValid()}
+          isCheckoutDisabled={!isFormValid()}
           isLoading={isLoading}
         />
       </div>
