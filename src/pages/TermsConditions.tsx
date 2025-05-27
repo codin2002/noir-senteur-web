@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 const TermsConditions = () => {
   useEffect(() => {
     document.title = "Terms & Conditions | Senteur Fragrances";
+    window.scrollTo(0, 0);
   }, []);
 
   return (
@@ -76,6 +77,18 @@ const TermsConditions = () => {
                 You will receive a confirmation email upon order placement and a follow-up once your order 
                 ships. If any issue arises, we'll contact you before processing further.
               </p>
+            </section>
+
+            <section className="space-y-4">
+              <h2 className="text-2xl font-serif text-gold">Contact Us</h2>
+              <p>
+                For product issues or support, please reach out to us through:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-white/80">
+                <li>Email: <a href="mailto:senteur.ae@gmail.com" className="text-gold hover:underline">senteur.ae@gmail.com</a></li>
+                <li>WhatsApp: <a href="http://wa.me/971509635636" className="text-gold hover:underline">+971 50 963 5636</a></li>
+                <li>Instagram: <a href="https://www.instagram.com/senteur.fragrances" className="text-gold hover:underline">@senteur.fragrances</a></li>
+              </ul>
             </section>
           </div>
         </div>

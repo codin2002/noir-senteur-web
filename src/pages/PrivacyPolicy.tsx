@@ -6,6 +6,7 @@ import Footer from '@/components/Footer';
 const PrivacyPolicy = () => {
   useEffect(() => {
     document.title = "Privacy Policy | Senteur Fragrances";
+    window.scrollTo(0, 0);
   }, []);
 
   return (
