@@ -142,13 +142,20 @@ export const usePerfumeDetail = () => {
     setIsLoadingClassification(true);
     
     try {
+      // First check if any classification data exists at all
+      const { data: allClassifications, error: allError } = await supabase
+        .from('perfume_classifications')
+        .select('perfume_id, id');
+
+      console.log('All classifications in database:', allClassifications);
+
       const { data, error } = await supabase
         .from('perfume_classifications')
         .select('*')
         .eq('perfume_id', id)
         .maybeSingle();
 
-      console.log('Classification query result:', { data, error });
+      console.log('Classification query result:', { data, error, searchingForId: id });
         
       if (error) {
         console.error('Error fetching classification data:', error);
@@ -173,13 +180,20 @@ export const usePerfumeDetail = () => {
     setIsLoadingRatings(true);
     
     try {
+      // First check if any ratings data exists at all
+      const { data: allRatings, error: allError } = await supabase
+        .from('perfume_ratings')
+        .select('perfume_id, id');
+
+      console.log('All ratings in database:', allRatings);
+
       const { data, error } = await supabase
         .from('perfume_ratings')
         .select('*')
         .eq('perfume_id', id)
         .maybeSingle();
 
-      console.log('Ratings query result:', { data, error });
+      console.log('Ratings query result:', { data, error, searchingForId: id });
         
       if (error) {
         console.error('Error fetching ratings data:', error);
