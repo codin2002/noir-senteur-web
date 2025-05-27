@@ -1,45 +1,63 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { CreditCard, UserPlus, ShoppingBag } from 'lucide-react';
 
 interface GuestCheckoutActionsProps {
+  onGuestCheckout: () => void;
   onSwitchToSignIn: () => void;
-  onSubmit: () => void;
-  isFormValid: boolean;
   isLoading: boolean;
+  isCheckoutDisabled: boolean;
 }
 
 const GuestCheckoutActions: React.FC<GuestCheckoutActionsProps> = ({
+  onGuestCheckout,
   onSwitchToSignIn,
-  onSubmit,
-  isFormValid,
-  isLoading
+  isLoading,
+  isCheckoutDisabled
 }) => {
   return (
-    <div className="space-y-3 pt-4 border-t border-gold/20">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onSwitchToSignIn}
-          className="flex-1 border-gold/30 hover:bg-gold/10 order-2 sm:order-1"
-          disabled={isLoading}
-        >
-          Sign In with Google
-        </Button>
-        
-        <Button
-          type="button"
-          onClick={onSubmit}
-          disabled={!isFormValid || isLoading}
-          className="flex-1 bg-gold text-darker hover:bg-gold/80 order-1 sm:order-2"
-        >
-          {isLoading ? 'Processing...' : 'Continue as Guest'}
-        </Button>
+    <div className="space-y-4 pt-6 border-t border-gold/20">
+      <Button
+        onClick={onGuestCheckout}
+        disabled={isCheckoutDisabled || isLoading}
+        className="w-full bg-gradient-to-r from-gold to-gold/80 hover:from-gold/90 hover:to-gold/70 text-dark font-semibold py-3 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:transform-none disabled:opacity-50"
+      >
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-4 h-4 border-2 border-dark/30 border-t-dark rounded-full animate-spin"></div>
+            Processing Payment...
+          </div>
+        ) : (
+          <div className="flex items-center justify-center gap-2">
+            <CreditCard className="w-5 h-5" />
+            Complete Order
+          </div>
+        )}
+      </Button>
+      
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gold/20" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-darker px-3 text-muted-foreground font-medium">or</span>
+        </div>
       </div>
       
-      <p className="text-xs text-center text-white/70">
-        Already have an account? Use the Sign In button above
+      <Button
+        onClick={onSwitchToSignIn}
+        variant="outline"
+        className="w-full border-gold/40 text-gold hover:bg-gold/10 hover:border-gold transition-all duration-200"
+      >
+        <UserPlus className="w-4 h-4 mr-2" />
+        Sign In with Google
+      </Button>
+      
+      <p className="text-xs text-muted-foreground text-center leading-relaxed">
+        By completing your order, you agree to our terms and conditions. 
+        <br />
+        Your information will be securely processed.
       </p>
     </div>
   );
