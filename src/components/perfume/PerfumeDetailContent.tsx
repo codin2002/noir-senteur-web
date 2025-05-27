@@ -79,6 +79,10 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
   isLoadingRatings,
   refreshAnalytics
 }) => {
+  console.log('PerfumeDetailContent - Classification Data:', classificationData);
+  console.log('PerfumeDetailContent - Ratings Data:', ratingsData);
+  console.log('PerfumeDetailContent - Loading states:', { isLoadingClassification, isLoadingRatings });
+
   return (
     <div className="max-w-7xl mx-auto">
       <div className="grid md:grid-cols-2 gap-12 mb-16">
@@ -103,9 +107,9 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
         </div>
       </div>
       
-      {/* Classification & Ratings */}
+      {/* Classification & Ratings - Give more space and better layout */}
       <div className="mt-16 border-t border-gold/30 pt-12">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-serif">Perfume Analytics</h2>
           <Button
             variant="outline"
@@ -119,15 +123,29 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
           </Button>
         </div>
         
-        <div className="grid lg:grid-cols-2 gap-12">
-          <PerfumeClassification 
-            classificationData={classificationData} 
-            isLoading={isLoadingClassification}
-          />
-          <PerfumeRatings 
-            ratingsData={ratingsData} 
-            isLoading={isLoadingRatings}
-          />
+        {/* Debug info to see what data we have */}
+        <div className="mb-4 p-4 bg-black/20 rounded text-xs text-gold">
+          <p>Debug Info:</p>
+          <p>Classification Data: {classificationData ? 'Available' : 'Not Available'}</p>
+          <p>Ratings Data: {ratingsData ? 'Available' : 'Not Available'}</p>
+          <p>Loading Classification: {isLoadingClassification ? 'Yes' : 'No'}</p>
+          <p>Loading Ratings: {isLoadingRatings ? 'Yes' : 'No'}</p>
+        </div>
+        
+        {/* Single column layout for better space utilization */}
+        <div className="space-y-12">
+          <div className="w-full">
+            <PerfumeClassification 
+              classificationData={classificationData} 
+              isLoading={isLoadingClassification}
+            />
+          </div>
+          <div className="w-full">
+            <PerfumeRatings 
+              ratingsData={ratingsData} 
+              isLoading={isLoadingRatings}
+            />
+          </div>
         </div>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer } from "@/components/ui/chart";
@@ -33,14 +32,26 @@ const PerfumeRatings: React.FC<PerfumeRatingsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("scent");
 
+  console.log('PerfumeRatings component - ratingsData:', ratingsData);
+  console.log('PerfumeRatings component - isLoading:', isLoading);
+
   if (isLoading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
+        <h3 className="text-xl font-serif mb-4 text-white">Community Ratings</h3>
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   if (!ratingsData) {
     return (
-      <div className="text-center py-8">
-        <p className="text-white/70">No rating data available for this perfume.</p>
+      <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
+        <h3 className="text-xl font-serif mb-4 text-white">Community Ratings</h3>
+        <div className="text-center py-8">
+          <p className="text-white/70">No rating data available for this perfume.</p>
+          <p className="text-white/50 text-sm mt-2">Data will be available once the community starts rating this fragrance.</p>
+        </div>
       </div>
     );
   }
@@ -127,154 +138,159 @@ const PerfumeRatings: React.FC<PerfumeRatingsProps> = ({
   };
 
   return (
-    <div className="mt-12">
-      <h3 className="text-xl font-serif mb-4">Community Ratings</h3>
+    <div className="bg-black/50 backdrop-blur-sm rounded-xl p-6 border border-gold/20">
+      <h3 className="text-xl font-serif mb-2 text-white">Community Ratings</h3>
+      <p className="text-white/60 text-sm mb-6">Based on {ratingsData.total_votes} reviews</p>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="w-full grid grid-cols-4 bg-darker border border-gold/20 mb-6">
+        <TabsList className="w-full grid grid-cols-4 bg-black/30 border border-gold/20 mb-6 h-12">
           <TabsTrigger 
             value="scent"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Scent
           </TabsTrigger>
           <TabsTrigger 
             value="durability"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Durability
           </TabsTrigger>
           <TabsTrigger 
             value="sillage"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Sillage
           </TabsTrigger>
           <TabsTrigger 
             value="bottle"
-            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold"
+            className="data-[state=active]:bg-gold/20 data-[state=active]:text-gold text-white/70 text-sm font-medium"
           >
             Bottle
           </TabsTrigger>
         </TabsList>
-        
-        <div className="mt-4 text-right text-sm text-white/60">
-          Based on {ratingsData.total_votes} reviews
-        </div>
 
         <TabsContent value="scent" className="border-none p-0">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-lg font-medium">
-              {ratingsData.scent_rating/10}/10
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-2xl font-bold text-gold">
+              {(ratingsData.scent_rating/10).toFixed(1)}/10
             </div>
           </div>
-          <ChartContainer config={chartConfig} className="h-[300px]">
-            <BarChart data={scentData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-              <XAxis 
-                dataKey="rating" 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-              />
-              <YAxis 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-                tickLine={{ stroke: '#333' }} 
-              />
-              <Tooltip content={renderTooltip} />
-              <Bar dataKey="count" fill="#d4af37">
-                {scentData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.scent_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
-                ))}
-              </Bar>
-            </BarChart>
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={scentData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                <XAxis 
+                  dataKey="rating" 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                />
+                <YAxis 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                  tickLine={{ stroke: '#333' }} 
+                />
+                <Tooltip content={renderTooltip} />
+                <Bar dataKey="count" fill="#d4af37">
+                  {scentData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.scent_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </TabsContent>
 
         <TabsContent value="durability" className="border-none p-0">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-lg font-medium">
-              {ratingsData.durability_rating/10}/10
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-2xl font-bold text-gold">
+              {(ratingsData.durability_rating/10).toFixed(1)}/10
             </div>
           </div>
-          <ChartContainer config={chartConfig} className="h-[300px]">
-            <BarChart data={durabilityData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-              <XAxis 
-                dataKey="rating" 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-              />
-              <YAxis 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-                tickLine={{ stroke: '#333' }} 
-              />
-              <Tooltip content={renderTooltip} />
-              <Bar dataKey="count" fill="#d4af37">
-                {durabilityData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.durability_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
-                ))}
-              </Bar>
-            </BarChart>
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={durabilityData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                <XAxis 
+                  dataKey="rating" 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                />
+                <YAxis 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                  tickLine={{ stroke: '#333' }} 
+                />
+                <Tooltip content={renderTooltip} />
+                <Bar dataKey="count" fill="#d4af37">
+                  {durabilityData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.durability_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </TabsContent>
 
         <TabsContent value="sillage" className="border-none p-0">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-lg font-medium">
-              {ratingsData.sillage_rating/10}/10
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-2xl font-bold text-gold">
+              {(ratingsData.sillage_rating/10).toFixed(1)}/10
             </div>
           </div>
-          <ChartContainer config={chartConfig} className="h-[300px]">
-            <BarChart data={sillageData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-              <XAxis 
-                dataKey="rating" 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-              />
-              <YAxis 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-                tickLine={{ stroke: '#333' }} 
-              />
-              <Tooltip content={renderTooltip} />
-              <Bar dataKey="count" fill="#d4af37">
-                {sillageData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.sillage_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
-                ))}
-              </Bar>
-            </BarChart>
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={sillageData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                <XAxis 
+                  dataKey="rating" 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                />
+                <YAxis 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                  tickLine={{ stroke: '#333' }} 
+                />
+                <Tooltip content={renderTooltip} />
+                <Bar dataKey="count" fill="#d4af37">
+                  {sillageData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.sillage_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </TabsContent>
 
         <TabsContent value="bottle" className="border-none p-0">
-          <div className="flex justify-between items-center mb-2">
-            <div className="text-lg font-medium">
-              {ratingsData.bottle_rating/10}/10
+          <div className="flex justify-between items-center mb-4">
+            <div className="text-2xl font-bold text-gold">
+              {(ratingsData.bottle_rating/10).toFixed(1)}/10
             </div>
           </div>
-          <ChartContainer config={chartConfig} className="h-[300px]">
-            <BarChart data={bottleData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
-              <XAxis 
-                dataKey="rating" 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-              />
-              <YAxis 
-                tick={{ fill: '#d4d4d4' }} 
-                axisLine={{ stroke: '#333' }} 
-                tickLine={{ stroke: '#333' }} 
-              />
-              <Tooltip content={renderTooltip} />
-              <Bar dataKey="count" fill="#d4af37">
-                {bottleData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.bottle_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
-                ))}
-              </Bar>
-            </BarChart>
+          <ChartContainer config={chartConfig} className="h-[250px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={bottleData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#333" />
+                <XAxis 
+                  dataKey="rating" 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                />
+                <YAxis 
+                  tick={{ fill: '#d4d4d4', fontSize: 12 }} 
+                  axisLine={{ stroke: '#333' }} 
+                  tickLine={{ stroke: '#333' }} 
+                />
+                <Tooltip content={renderTooltip} />
+                <Bar dataKey="count" fill="#d4af37">
+                  {bottleData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index === Math.round(ratingsData.bottle_rating/10) - 1 ? '#d4af37' : '#6b6b6b'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </ChartContainer>
         </TabsContent>
       </Tabs>
