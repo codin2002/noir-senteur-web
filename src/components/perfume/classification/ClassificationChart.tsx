@@ -19,14 +19,14 @@ interface ClassificationChartProps {
 const ClassificationChart: React.FC<ClassificationChartProps> = ({ data }) => {
   const isMobile = useIsMobile();
   
-  const chartHeight = isMobile ? 280 : 400;
-  const chartOuterRadius = isMobile ? 80 : 120;
+  const chartHeight = isMobile ? 280 : 300;
+  const chartOuterRadius = isMobile ? 80 : 100;
 
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black/90 backdrop-blur-sm border border-gold/30 rounded-lg px-3 py-2">
-          <p className="text-gold font-medium">{`${label}: ${payload[0].value}%`}</p>
+        <div className="bg-black/80 text-white text-xs px-3 py-2 rounded-lg shadow-lg border border-gray-700">
+          {`${label}: ${payload[0].value}%`}
         </div>
       );
     }
@@ -34,22 +34,22 @@ const ClassificationChart: React.FC<ClassificationChartProps> = ({ data }) => {
   };
 
   return (
-    <div className="relative w-full max-w-xl mx-auto">
+    <div className="bg-[#141414] rounded-xl p-4 shadow-inner border border-neutral-800">
       <ResponsiveContainer width="100%" height={chartHeight}>
         <RadarChart cx="50%" cy="50%" outerRadius={chartOuterRadius} data={data}>
           <PolarGrid 
-            stroke="#333333" 
+            stroke="#2e2e2e" 
             strokeWidth={1}
             gridType="polygon"
           />
           <PolarAngleAxis 
             dataKey="name" 
             tick={{ 
-              fill: '#ffffff', 
-              fontSize: isMobile ? 12 : 14,
+              fill: '#ccc', 
+              fontSize: isMobile ? 12 : 13,
               fontWeight: 500
             }}
-            className="text-white"
+            className="text-gray-300"
           />
           <PolarRadiusAxis 
             domain={[0, 100]} 
@@ -58,13 +58,13 @@ const ClassificationChart: React.FC<ClassificationChartProps> = ({ data }) => {
           />
           <Tooltip content={<CustomTooltip />} />
           <Radar 
-            name="Classification" 
+            name="Fragrance Profile" 
             dataKey="value" 
-            stroke="#d4af37" 
-            fill="#d4af37" 
+            stroke="#ffffff" 
+            fill="#ffffff" 
             fillOpacity={0.15}
-            strokeWidth={2}
-            dot={{ fill: '#d4af37', strokeWidth: 0, r: 4 }}
+            strokeWidth={1}
+            dot={{ r: 3, fill: '#ffffff' }}
           />
         </RadarChart>
       </ResponsiveContainer>
