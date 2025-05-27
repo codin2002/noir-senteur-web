@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { useCheckout } from '@/hooks/useCheckout';
@@ -200,8 +199,7 @@ const PaymentSuccess = () => {
             <ul className="text-muted-foreground text-left space-y-2">
               <li>• You will receive an order confirmation email shortly</li>
               <li>• Your order will be processed within 1-2 business days</li>
-              <li>• Delivery typically takes 2-5 business days</li>
-              <li>• You'll receive tracking information once shipped</li>
+              <li>• Delivery typically takes 2-4 business days</li>
             </ul>
           </div>
         </div>
