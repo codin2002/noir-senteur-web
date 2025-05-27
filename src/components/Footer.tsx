@@ -1,12 +1,13 @@
 
 import React from 'react';
 import { Instagram, MessageCircle } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
     <footer id="contact" className="bg-dark pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pb-12 border-b border-gray-800">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 pb-12 border-b border-gray-800">
           <div>
             <h2 className="text-2xl font-serif mb-6">SENTEUR</h2>
             <p className="text-muted-foreground mb-6">
@@ -58,6 +59,32 @@ const Footer = () => {
                     </button>
                   </div>
                 </form>
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-serif mb-6">Quick Links</h3>
+            <ul className="text-muted-foreground space-y-2">
+              <li>
+                <Link to="/terms-conditions" className="hover:text-gold transition-colors">
+                  Terms & Conditions
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy-policy" className="hover:text-gold transition-colors">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/shipping-policy" className="hover:text-gold transition-colors">
+                  Shipping & Delivery
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact-us" className="hover:text-gold transition-colors">
+                  Contact Us
+                </Link>
               </li>
             </ul>
           </div>

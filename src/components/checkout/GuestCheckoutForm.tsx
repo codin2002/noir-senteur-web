@@ -184,27 +184,31 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({
           </div>
         </div>
 
-        <div className="space-y-3 pt-4">
-          <Button
-            type="submit"
-            disabled={!isFormValid() || isLoading}
-            className="w-full bg-gold text-darker hover:bg-gold/80"
-          >
-            {isLoading ? 'Processing...' : 'Continue as Guest'}
-          </Button>
-
-          <div className="text-center">
-            <p className="text-sm text-white/70 mb-2">Already have an account?</p>
+        {/* Buttons - Fixed positioning */}
+        <div className="space-y-3 pt-4 border-t border-gold/20">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button
               type="button"
               variant="outline"
               onClick={onSwitchToSignIn}
-              className="w-full border-gold/30 hover:bg-gold/10"
+              className="flex-1 border-gold/30 hover:bg-gold/10 order-2 sm:order-1"
               disabled={isLoading}
             >
               Sign In with Google
             </Button>
+            
+            <Button
+              type="submit"
+              disabled={!isFormValid() || isLoading}
+              className="flex-1 bg-gold text-darker hover:bg-gold/80 order-1 sm:order-2"
+            >
+              {isLoading ? 'Processing...' : 'Continue as Guest'}
+            </Button>
           </div>
+          
+          <p className="text-xs text-center text-white/70">
+            Already have an account? Use the Sign In button above
+          </p>
         </div>
       </form>
     </div>
