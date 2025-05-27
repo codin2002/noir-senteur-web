@@ -18,11 +18,14 @@ serve(async (req) => {
     console.log('=== STARTING EMAIL CONFIRMATION PROCESS ===');
     console.log('Processing order confirmation for order ID:', orderId);
 
-    // Initialize Resend with API key
+    // Initialize Resend with the correct API key name
     const resendApiKey = Deno.env.get("RESEND_API_KEY_REAL");
     console.log('Resend API key configured:', !!resendApiKey);
+    console.log('Resend API key value (first 10 chars):', resendApiKey?.substring(0, 10));
     
     if (!resendApiKey) {
+      console.error('RESEND_API_KEY_REAL not found in environment variables');
+      console.log('Available env vars:', Object.keys(Deno.env.toObject()));
       throw new Error('RESEND_API_KEY_REAL not configured');
     }
     
@@ -120,7 +123,7 @@ serve(async (req) => {
     }
 
     console.log('=== STEP 4: GETTING CUSTOMER DETAILS ===');
-    // Get user profile for additional details if user exists
+    // Get customer details
     let customerPhone = 'Not provided';
     let customerName = payment.customer_name || order.guest_name || 'Guest Customer';
     let customerEmail = payment.customer_email;
@@ -172,7 +175,15 @@ serve(async (req) => {
 
     console.log('Order totals:', { subtotal, shipping, total });
 
-    // Format order items for email
+    // Create product details string for database - FIXED FORMAT
+    const productDetails = orderItems.map((item) => {
+      const perfumeName = item.perfumes?.name || 'Unknown Product';
+      return `${perfumeName} (Qty: ${item.quantity})`;
+    }).join(', ');
+
+    console.log('Product details for database:', productDetails);
+
+    // Format order items for email HTML
     const orderItemsHtml = orderItems.map((item) => {
       const perfumeName = item.perfumes?.name || 'Unknown Product';
       const imageUrl = item.perfumes?.image || '/placeholder.svg';
@@ -192,13 +203,6 @@ serve(async (req) => {
         </tr>
       `;
     }).join('');
-
-    // Create product details string for database
-    const productDetails = orderItems.map((item) => 
-      `${item.perfumes?.name || 'Unknown Product'} (Qty: ${item.quantity}, Price: AED ${item.price})`
-    ).join(', ');
-
-    console.log('Product details for database:', productDetails);
 
     console.log('=== STEP 6: PREPARING EMAIL TEMPLATES ===');
     // Customer thank you email
@@ -482,6 +486,7 @@ serve(async (req) => {
     }
 
     console.log('Payment record updated successfully');
+    console.log('Product details saved:', productDetails);
     console.log('=== EMAIL CONFIRMATION PROCESS COMPLETED SUCCESSFULLY ===');
 
     return new Response(JSON.stringify({ 
