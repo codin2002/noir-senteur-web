@@ -48,7 +48,7 @@ export const usePerfumeDetail = () => {
   };
 
   const loadClassificationData = async () => {
-    if (!id || authLoading) return;
+    if (!id) return;
     
     setIsLoadingClassification(true);
     const data = await fetchClassificationData(id);
@@ -73,15 +73,10 @@ export const usePerfumeDetail = () => {
     if (id) {
       loadPerfume();
       loadPerfumeImages();
+      loadClassificationData(); // Load classification data for everyone
       if (user && !authLoading) {
         loadWishlistStatus();
       }
-    }
-  }, [id, user, authLoading]);
-
-  useEffect(() => {
-    if (id && !authLoading) {
-      loadClassificationData();
     }
   }, [id, user, authLoading]);
 

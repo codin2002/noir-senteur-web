@@ -9,14 +9,6 @@ export const fetchClassificationData = async (id: string): Promise<PerfumeClassi
   console.log('Fetching classification data for perfume ID:', id);
   
   try {
-    // Check if user is authenticated
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      console.log('User not authenticated, skipping classification data fetch');
-      return null;
-    }
-
     const { data, error } = await supabase
       .from('perfume_classifications')
       .select('*')
@@ -27,18 +19,15 @@ export const fetchClassificationData = async (id: string): Promise<PerfumeClassi
       
     if (error) {
       console.error('Error fetching classification data:', error);
-      // Don't show toast for auth errors
-      if (!error.message.includes('row-level security')) {
-        toast.error('Failed to load classification data');
-      }
+      toast.error('Failed to load classification data');
       return null;
     }
     
     console.log('Successfully fetched classification data:', data);
 
-    // If no data found, let's create sample data for this perfume
+    // If no data found, let's create sample data for this perfume (only if authenticated)
     if (!data) {
-      console.log('No classification data found, creating sample data for perfume:', id);
+      console.log('No classification data found, checking if we can create sample data for perfume:', id);
       return await createSampleClassificationData(id);
     }
 
