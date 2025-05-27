@@ -252,7 +252,7 @@ serve(async (req) => {
       console.log('Payment recorded successfully in successful_payments table');
     }
 
-    // Trigger email confirmation function
+    // Trigger email confirmation function - IMPROVED ERROR HANDLING
     console.log('=== STEP 6: TRIGGERING EMAIL CONFIRMATION ===');
     try {
       console.log('Calling send-order-confirmation function with order ID:', orderId);
@@ -263,13 +263,14 @@ serve(async (req) => {
       console.log('Email function response:', emailResult);
       
       if (emailResult.error) {
-        console.error('Email sending failed:', emailResult.error);
+        console.error('Email sending failed, but continuing with success response:', emailResult.error);
+        // Don't throw error - just log it and continue
       } else {
         console.log('Email confirmation triggered successfully:', emailResult.data);
       }
     } catch (emailError) {
-      console.error('Error triggering email:', emailError);
-      // Don't fail the main process for email issues
+      console.error('Error triggering email, but continuing with success response:', emailError);
+      // Don't throw error - just log it and continue
     }
 
     console.log('=== VERIFICATION COMPLETE - RETURNING SUCCESS ===');
@@ -280,7 +281,8 @@ serve(async (req) => {
       paymentMethod: 'Ziina',
       deliveryMethod: 'Home Delivery',
       deliveryAddress: deliveryAddress,
-      message: 'Payment verified and order created successfully'
+      message: 'Payment verified and order created successfully',
+      emailStatus: 'Email sending attempted - check function logs for details'
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
