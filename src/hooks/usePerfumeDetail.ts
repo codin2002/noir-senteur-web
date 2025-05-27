@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -142,7 +141,14 @@ export const usePerfumeDetail = () => {
     setIsLoadingClassification(true);
     
     try {
-      // First check if any classification data exists at all
+      // First check what perfume IDs exist in the perfumes table
+      const { data: allPerfumes, error: perfumesError } = await supabase
+        .from('perfumes')
+        .select('id, name');
+
+      console.log('All perfumes in database:', allPerfumes);
+
+      // Check what classification data exists
       const { data: allClassifications, error: allError } = await supabase
         .from('perfume_classifications')
         .select('perfume_id, id');
@@ -165,6 +171,12 @@ export const usePerfumeDetail = () => {
       
       setClassificationData(data);
       console.log('Successfully fetched classification data:', data);
+
+      // If no data found, let's create sample data for this perfume
+      if (!data && allPerfumes?.find(p => p.id === id)) {
+        console.log('No classification data found, creating sample data for perfume:', id);
+        await createSampleClassificationData(id);
+      }
     } catch (error) {
       console.error('Error fetching classification data:', error);
       setClassificationData(null);
@@ -180,7 +192,7 @@ export const usePerfumeDetail = () => {
     setIsLoadingRatings(true);
     
     try {
-      // First check if any ratings data exists at all
+      // Check what ratings data exists
       const { data: allRatings, error: allError } = await supabase
         .from('perfume_ratings')
         .select('perfume_id, id');
@@ -203,11 +215,83 @@ export const usePerfumeDetail = () => {
       
       setRatingsData(data);
       console.log('Successfully fetched ratings data:', data);
+
+      // If no data found, let's create sample data for this perfume
+      if (!data) {
+        console.log('No ratings data found, creating sample data for perfume:', id);
+        await createSampleRatingsData(id);
+      }
     } catch (error) {
       console.error('Error fetching ratings data:', error);
       setRatingsData(null);
     } finally {
       setIsLoadingRatings(false);
+    }
+  };
+
+  const createSampleClassificationData = async (perfumeId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('perfume_classifications')
+        .insert({
+          perfume_id: perfumeId,
+          type_floral: 25,
+          type_fresh: 20,
+          type_oriental: 85,
+          type_woody: 75,
+          audience_masculine: 70,
+          audience_feminine: 30,
+          audience_unisex: 60,
+          occasion_casual: 40,
+          occasion_formal: 60,
+          occasion_evening: 90,
+          occasion_special: 85,
+          season_spring: 35,
+          season_summer: 25,
+          season_fall: 85,
+          season_winter: 90
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating sample classification data:', error);
+        return;
+      }
+
+      console.log('Created sample classification data:', data);
+      setClassificationData(data);
+      toast.success('Sample classification data created');
+    } catch (error) {
+      console.error('Error creating sample classification data:', error);
+    }
+  };
+
+  const createSampleRatingsData = async (perfumeId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('perfume_ratings')
+        .insert({
+          perfume_id: perfumeId,
+          scent_rating: 85,
+          durability_rating: 78,
+          sillage_rating: 82,
+          bottle_rating: 75,
+          total_votes: 2508
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating sample ratings data:', error);
+        return;
+      }
+
+      console.log('Created sample ratings data:', data);
+      setRatingsData(data);
+      toast.success('Sample ratings data created');
+    } catch (error) {
+      console.error('Error creating sample ratings data:', error);
     }
   };
 
