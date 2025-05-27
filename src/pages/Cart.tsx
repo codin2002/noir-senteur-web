@@ -11,7 +11,7 @@ import CartSummary from '@/components/cart/CartSummary';
 import CartEmpty from '@/components/cart/CartEmpty';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
-import { mergeCartItems, cleanupCartStorage } from '@/utils/cartUtils';
+import { mergeCartItems, cleanupCartStorage, removeDuplicateCartItems } from '@/utils/cartUtils';
 
 const Cart = () => {
   const [cartItems, setCartItems] = useState<CartItemType[]>([]);
@@ -98,13 +98,38 @@ const Cart = () => {
           perfume: item.perfume as unknown as CartItemType['perfume']
         }));
         
-        // Merge any duplicate items that might exist in the database
-        const mergedData = mergeCartItems(typedData);
-        setCartItems(mergedData);
+        // Check for duplicates and clean them up
+        const duplicateGroups = typedData.reduce((acc, item) => {
+          const perfumeId = item.perfume.id;
+          if (!acc[perfumeId]) acc[perfumeId] = [];
+          acc[perfumeId].push(item);
+          return acc;
+        }, {} as { [key: string]: CartItemType[] });
         
-        // If we had to merge items, update the database to clean up duplicates
-        if (mergedData.length !== typedData.length) {
-          await cleanupDatabaseCart(typedData, mergedData);
+        const hasDuplicates = Object.values(duplicateGroups).some(group => group.length > 1);
+        
+        if (hasDuplicates) {
+          console.log('Duplicate cart items detected, cleaning up...');
+          await removeDuplicateCartItems(supabase, user?.id, typedData);
+          
+          // Refetch the cart after cleanup
+          const { data: cleanedData, error: refetchError } = await supabase.rpc('get_cart_with_perfumes', {
+            user_uuid: user?.id
+          });
+          
+          if (refetchError) throw refetchError;
+          
+          const cleanedTypedData = cleanedData?.map(item => ({
+            ...item,
+            perfume: item.perfume as unknown as CartItemType['perfume']
+          })) || [];
+          
+          setCartItems(cleanedTypedData);
+          toast.success('Cart updated', {
+            description: 'Duplicate items have been merged'
+          });
+        } else {
+          setCartItems(typedData);
         }
       } else {
         setCartItems([]);
