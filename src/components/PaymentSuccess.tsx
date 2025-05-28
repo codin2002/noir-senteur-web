@@ -81,7 +81,7 @@ const PaymentSuccess = () => {
     return (
       <div className="min-h-screen bg-dark text-white flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center">
+        <div className="flex-1 flex items-center justify-center min-h-[60vh] px-6">
           <div className="text-center">
             <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <h2 className="text-2xl font-serif mb-2">Verifying your payment...</h2>
@@ -97,7 +97,7 @@ const PaymentSuccess = () => {
     return (
       <div className="min-h-screen bg-dark text-white flex flex-col">
         <Navbar />
-        <div className="flex-1 flex items-center justify-center px-6">
+        <div className="flex-1 flex items-center justify-center min-h-[60vh] px-6">
           <div className="text-center max-w-md">
             <AlertCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
             <h2 className="text-2xl font-serif mb-4">Payment Verification Issue</h2>
