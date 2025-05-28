@@ -92,8 +92,8 @@ serve(async (req) => {
 
     console.log('Sending delivery notification to:', recipientEmail);
 
-    // Initialize Resend
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+    // Initialize Resend with the correct environment variable
+    const resend = new Resend(Deno.env.get("RESEND_API_KEY_REAL"));
 
     // Create items list for email
     const itemsList = order.items.map((item: any) => 
