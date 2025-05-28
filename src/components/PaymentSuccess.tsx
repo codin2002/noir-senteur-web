@@ -1,12 +1,10 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useCheckout } from '@/hooks/useCheckout';
-import { useAuth } from '@/context/AuthContext';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import { CheckCircle, Package, ShoppingBag, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import PaymentVerificationLoader from './payment/PaymentVerificationLoader';
+import PaymentVerificationError from './payment/PaymentVerificationError';
+import PaymentSuccessContent from './payment/PaymentSuccessContent';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -15,7 +13,6 @@ const PaymentSuccess = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { verifyPayment } = useCheckout();
-  const { user } = useAuth();
   const hasVerified = useRef(false);
 
   useEffect(() => {
@@ -78,136 +75,14 @@ const PaymentSuccess = () => {
   }, [error, navigate]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen bg-dark text-white flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center min-h-[60vh] px-6">
-          <div className="text-center">
-            <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h2 className="text-2xl font-serif mb-2">Verifying your payment...</h2>
-            <p className="text-muted-foreground">Please wait while we confirm your order.</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <PaymentVerificationLoader />;
   }
 
   if (error) {
-    return (
-      <div className="min-h-screen bg-dark text-white flex flex-col">
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center min-h-[60vh] px-6">
-          <div className="text-center max-w-md">
-            <AlertCircle className="w-20 h-20 text-red-500 mx-auto mb-6" />
-            <h2 className="text-2xl font-serif mb-4">Payment Verification Issue</h2>
-            <p className="text-muted-foreground mb-6">{error}</p>
-            
-            <div className="bg-darker/50 border border-red-500/20 rounded-lg p-4 mb-6 text-left">
-              <h3 className="text-lg font-semibold mb-2 text-red-400">What to do:</h3>
-              <ul className="text-sm text-muted-foreground space-y-1">
-                <li>• Check your email for a payment confirmation</li>
-                <li>• Contact our support team if you were charged</li>
-                <li>• Try placing your order again if needed</li>
-                <li>• Screenshot this page for reference</li>
-              </ul>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link to="/cart" className="flex-1">
-                <Button variant="outline" className="w-full border-gold text-gold hover:bg-gold hover:text-darker">
-                  Return to Cart
-                </Button>
-              </Link>
-              <Link to="/" className="flex-1">
-                <Button className="w-full bg-gold text-darker hover:bg-gold/90">
-                  Go to Home
-                </Button>
-              </Link>
-            </div>
-
-            <p className="text-xs text-muted-foreground mt-4">
-              You'll be automatically redirected to your cart in a few seconds.
-            </p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
+    return <PaymentVerificationError error={error} />;
   }
 
-  return (
-    <div className="min-h-screen bg-dark text-white flex flex-col">
-      <Navbar />
-      <div className="flex-1 pt-24 pb-12 px-6">
-        <div className="max-w-4xl mx-auto text-center">
-          <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
-          
-          <h1 className="text-4xl font-serif mb-4">Payment Successful!</h1>
-          <p className="text-xl text-muted-foreground mb-8">
-            Thank you for your purchase. Your order has been confirmed.
-          </p>
-
-          {orderDetails && (
-            <div className="bg-darker border border-gold/20 rounded-lg p-8 mb-8 max-w-2xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
-                    <Package className="w-5 h-5 mr-2 text-gold" />
-                    Order Details
-                  </h3>
-                  <p className="text-muted-foreground mb-1">
-                    Order ID: #{orderDetails.orderId?.substring(0, 8)}
-                  </p>
-                  <p className="text-muted-foreground mb-1">
-                    Payment Method: {orderDetails.paymentMethod || 'Ziina'}
-                  </p>
-                  <p className="text-muted-foreground">
-                    Delivery: {orderDetails.deliveryMethod || 'Home Delivery'}
-                  </p>
-                </div>
-                
-                <div>
-                  <h3 className="text-lg font-semibold mb-2">Delivery Information</h3>
-                  <p className="text-muted-foreground text-sm">
-                    {orderDetails.deliveryAddress || 'Address on file'}
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/">
-              <Button variant="outline" className="border-gold text-gold hover:bg-gold hover:text-darker">
-                <ShoppingBag className="w-4 h-4 mr-2" />
-                Continue Shopping
-              </Button>
-            </Link>
-            
-            {user && (
-              <Link to="/profile?tab=history">
-                <Button className="bg-gold text-darker hover:bg-gold/90">
-                  <Package className="w-4 h-4 mr-2" />
-                  View Purchase History
-                </Button>
-              </Link>
-            )}
-          </div>
-
-          <div className="mt-12 p-6 bg-darker/50 border border-gold/10 rounded-lg max-w-2xl mx-auto">
-            <h3 className="text-lg font-semibold mb-3">What's Next?</h3>
-            <ul className="text-muted-foreground text-left space-y-2">
-              <li>• You will receive an order confirmation email shortly</li>
-              <li>• Your order will be processed within 1-2 business days</li>
-              <li>• Delivery typically takes 2-4 business days</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      <Footer />
-    </div>
-  );
+  return <PaymentSuccessContent orderDetails={orderDetails} />;
 };
 
 export default PaymentSuccess;
