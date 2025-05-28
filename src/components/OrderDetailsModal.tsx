@@ -4,17 +4,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Package, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useOrderDetails } from '@/hooks/useOrderDetails';
+import OrderStatusManager from '@/components/admin/OrderStatusManager';
 
 interface OrderDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderId: string | null;
+  showAdmin?: boolean; // Add prop to control admin features
 }
 
 const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   isOpen,
   onClose,
-  orderId
+  orderId,
+  showAdmin = false
 }) => {
   const { orderDetails, isLoading, fetchOrderDetails, clearOrderDetails } = useOrderDetails();
 
@@ -37,9 +40,15 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
+  const handleStatusUpdated = () => {
+    if (orderId) {
+      fetchOrderDetails(orderId);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
+      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
         <DialogHeader>
           <DialogTitle className="text-gold">Order Details</DialogTitle>
         </DialogHeader>
@@ -50,30 +59,41 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           </div>
         ) : orderDetails ? (
           <div className="space-y-6">
-            {/* Order Info */}
-            <div className="bg-dark border border-gold/10 rounded-lg p-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
-                    <Package className="w-5 h-5 mr-2 text-gold" />
-                    Order Information
-                  </h3>
-                  <p className="text-muted-foreground mb-1">
-                    Order ID: #{orderDetails.id.substring(0, 8)}
-                  </p>
-                  <p className="text-muted-foreground mb-1">
-                    Status: <Badge variant="secondary">{orderDetails.status}</Badge>
-                  </p>
-                  <p className="text-muted-foreground mb-1">
-                    Date: {formatDate(orderDetails.created_at)}
-                  </p>
-                  <p className="text-lg font-semibold text-gold">
-                    Total: AED {orderDetails.total.toFixed(2)}
-                  </p>
-                </div>
+            {/* Order Info and Admin Controls */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-dark border border-gold/10 rounded-lg p-4">
+                <h3 className="text-lg font-semibold mb-2 flex items-center">
+                  <Package className="w-5 h-5 mr-2 text-gold" />
+                  Order Information
+                </h3>
+                <p className="text-muted-foreground mb-1">
+                  Order ID: #{orderDetails.id.substring(0, 8)}
+                </p>
+                <p className="text-muted-foreground mb-1">
+                  Status: <Badge variant="secondary">{orderDetails.status}</Badge>
+                </p>
+                <p className="text-muted-foreground mb-1">
+                  Date: {formatDate(orderDetails.created_at)}
+                </p>
+                <p className="text-lg font-semibold text-gold">
+                  Total: AED {orderDetails.total.toFixed(2)}
+                </p>
+              </div>
 
-                {/* Customer Info */}
+              {/* Admin Status Manager */}
+              {showAdmin && (
                 <div>
+                  <OrderStatusManager
+                    orderId={orderDetails.id}
+                    currentStatus={orderDetails.status}
+                    onStatusUpdated={handleStatusUpdated}
+                  />
+                </div>
+              )}
+
+              {/* Customer Info */}
+              <div className={showAdmin ? "lg:col-span-2" : ""}>
+                <div className="bg-dark border border-gold/10 rounded-lg p-4">
                   <h3 className="text-lg font-semibold mb-2 flex items-center">
                     <User className="w-5 h-5 mr-2 text-gold" />
                     Customer Information
