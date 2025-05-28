@@ -2,7 +2,7 @@
 import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import { CartItemType } from '@/components/cart/CartItem';
-import { Package2, Truck } from 'lucide-react';
+import { Package2, Truck, AlertTriangle } from 'lucide-react';
 import { PRICING } from '@/utils/constants';
 
 interface OrderSummaryProps {
@@ -79,6 +79,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
         <div className="flex justify-between items-center pt-2">
           <span className="text-lg font-serif text-gold">Total (includes shipping)</span>
           <span className="text-xl font-bold text-gold">{currencySymbol}{total.toFixed(2)}</span>
+        </div>
+        
+        <div className="flex items-start gap-2 mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-red-300 leading-relaxed">
+            <strong>NOTE:</strong> Kindly do not exit website until you are redirected to the payment confirmation page
+          </p>
         </div>
       </div>
     </div>
