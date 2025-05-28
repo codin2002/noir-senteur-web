@@ -103,7 +103,7 @@ serve(async (req) => {
       success_url: `https://senteurfragrances.com/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
       cancel_url: `https://senteurfragrances.com/cart?payment=cancelled`,
       failure_url: `https://senteurfragrances.com/payment-failed`,
-      expiry: expiryTimestamp, // Number, not string
+      expiry: expiryTimestamp.toString(), // Convert to string as required by Ziina API
       test: false,
       transaction_source: "directApi",
       allow_tips: false
