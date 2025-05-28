@@ -115,10 +115,12 @@ export type Database = {
         Row: {
           created_at: string
           delivery_address: string | null
+          delivery_email_sent: boolean | null
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
           id: string
+          processing_email_sent: boolean | null
           status: string
           total: number
           user_id: string | null
@@ -126,10 +128,12 @@ export type Database = {
         Insert: {
           created_at?: string
           delivery_address?: string | null
+          delivery_email_sent?: boolean | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          processing_email_sent?: boolean | null
           status?: string
           total: number
           user_id?: string | null
@@ -137,10 +141,12 @@ export type Database = {
         Update: {
           created_at?: string
           delivery_address?: string | null
+          delivery_email_sent?: boolean | null
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          processing_email_sent?: boolean | null
           status?: string
           total?: number
           user_id?: string | null

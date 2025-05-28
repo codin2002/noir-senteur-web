@@ -1,10 +1,10 @@
 
 import React, { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import { Order } from '@/types/profile';
 import OrderDetailsModal from '@/components/OrderDetailsModal';
+import OrderStatusBadge from './OrderStatusBadge';
 
 interface OrderHistoryTableProps {
   orders: Order[];
@@ -51,7 +51,7 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({
                   {formatDate(order.created_at)}
                 </td>
                 <td className="py-3 px-4">
-                  <Badge variant="secondary">{order.status}</Badge>
+                  <OrderStatusBadge status={order.status} />
                 </td>
                 <td className="py-3 px-4 font-semibold">
                   AED {order.total.toFixed(2)}
