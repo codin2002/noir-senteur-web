@@ -54,8 +54,8 @@ const Footer = () => {
             <h3 className="text-lg font-serif mb-6">Contact</h3>
             <ul className="text-muted-foreground space-y-2">
               <li>
-                <a href="mailto:team@senteurfragrances.com" className="hover:text-gold transition-colors">
-                  team@senteurfragrances.com
+                <a href="mailto:senteur.ae@gmail.com" className="hover:text-gold transition-colors">
+                  senteur.ae@gmail.com
                 </a>
               </li>
               <li>
