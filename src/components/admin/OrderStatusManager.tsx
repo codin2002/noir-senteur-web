@@ -48,24 +48,31 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         console.log('Triggering delivery notification email...');
         
         try {
+          console.log('About to call send-delivery-notification function with orderId:', orderId);
+          
           const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-delivery-notification', {
             body: { 
               orderId: orderId
             }
           });
 
-          console.log('Delivery email function result:', emailResult);
+          console.log('Delivery email function response:', { data: emailResult, error: emailError });
 
           if (emailError) {
-            console.error('Error sending delivery notification:', emailError);
-            toast.error('Status updated but delivery notification failed');
-          } else {
+            console.error('Delivery notification function error:', emailError);
+            throw new Error(`Delivery notification failed: ${emailError.message}`);
+          }
+
+          if (emailResult && emailResult.success) {
             console.log('Delivery notification sent successfully');
             toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
+          } else {
+            console.error('Delivery notification failed - no success response:', emailResult);
+            toast.error('Status updated but delivery notification failed');
           }
-        } catch (emailErr) {
-          console.error('Email sending error:', emailErr);
-          toast.error('Status updated but email notification failed');
+        } catch (emailErr: any) {
+          console.error('Delivery email sending error:', emailErr);
+          toast.error(`Status updated but delivery notification failed: ${emailErr.message}`);
         }
       } else if (selectedStatus === 'processing') {
         console.log('Triggering order confirmation email...');
