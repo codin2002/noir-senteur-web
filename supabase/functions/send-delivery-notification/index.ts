@@ -51,11 +51,10 @@ serve(async (req) => {
 
     console.log('Order found:', order);
 
-    // Verify order status is delivered
+    // Update order status to delivered if not already
     if (order.status !== 'delivered') {
-      console.log(`Order status is ${order.status}, not delivered. Updating status first.`);
+      console.log(`Order status is ${order.status}, updating to delivered.`);
       
-      // Update order status to delivered
       const { error: updateError } = await supabaseClient
         .from('orders')
         .update({ status: 'delivered' })
@@ -92,8 +91,13 @@ serve(async (req) => {
 
     console.log('Sending delivery notification to:', recipientEmail);
 
-    // Initialize Resend with the correct environment variable
-    const resend = new Resend(Deno.env.get("RESEND_API_KEY_REAL"));
+    // Initialize Resend
+    const resendApiKey = Deno.env.get("RESEND_API_KEY_REAL");
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY_REAL environment variable is not set');
+    }
+
+    const resend = new Resend(resendApiKey);
 
     // Create items list for email
     const itemsList = order.items.map((item: any) => 
@@ -130,16 +134,6 @@ serve(async (req) => {
           <h3 style="color: #333; margin-top: 0;">💝 Thank You for Choosing Senteur Fragrances</h3>
           <p style="color: #666; line-height: 1.6;">
             We hope you love your new fragrances! Your order has been carefully prepared and delivered with love.
-          </p>
-        </div>
-
-        <div style="background-color: #fff; border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h3 style="color: #D4AF37; margin-top: 0;">⭐ How Was Your Experience?</h3>
-          <p style="color: #666; line-height: 1.6;">
-            We'd love to hear about your experience! Your feedback helps us serve you better.
-          </p>
-          <p style="color: #666;">
-            If you have any questions about your order or need assistance, please don't hesitate to reach out to us.
           </p>
         </div>
 

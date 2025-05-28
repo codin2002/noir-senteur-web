@@ -43,20 +43,51 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
       console.log('Order status updated successfully');
 
-      // Send email notification if appropriate
+      // Send email notification based on status
       if (selectedStatus === 'delivered') {
         console.log('Triggering delivery notification email...');
         
-        const { error: emailError } = await supabase.functions.invoke('send-delivery-notification', {
-          body: { orderId: orderId }
-        });
+        try {
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-delivery-notification', {
+            body: { orderId: orderId }
+          });
 
-        if (emailError) {
-          console.error('Error sending delivery notification:', emailError);
+          console.log('Email function result:', emailResult);
+
+          if (emailError) {
+            console.error('Error sending delivery notification:', emailError);
+            toast.error('Status updated but delivery notification failed');
+          } else {
+            console.log('Delivery notification sent successfully');
+            toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
+          }
+        } catch (emailErr) {
+          console.error('Email sending error:', emailErr);
           toast.error('Status updated but email notification failed');
-        } else {
-          console.log('Delivery notification sent successfully');
-          toast.success(`Order status updated to ${selectedStatus} and notification sent!`);
+        }
+      } else if (selectedStatus === 'processing') {
+        console.log('Triggering order confirmation email...');
+        
+        try {
+          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
+            body: { 
+              orderId: orderId,
+              orderStatus: selectedStatus 
+            }
+          });
+
+          console.log('Email function result:', emailResult);
+
+          if (emailError) {
+            console.error('Error sending order confirmation:', emailError);
+            toast.error('Status updated but confirmation email failed');
+          } else {
+            console.log('Order confirmation sent successfully');
+            toast.success(`Order status updated to ${selectedStatus} and confirmation sent!`);
+          }
+        } catch (emailErr) {
+          console.error('Email sending error:', emailErr);
+          toast.error('Status updated but email notification failed');
         }
       } else {
         toast.success(`Order status updated to ${selectedStatus}`);
