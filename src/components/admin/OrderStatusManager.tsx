@@ -43,7 +43,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
       console.log('Order status updated successfully');
 
-      // Send email notification based on status using the correct function
+      // Send email notification for specific statuses
       if (selectedStatus === 'delivered') {
         console.log('Triggering delivery notification email...');
         
@@ -55,7 +55,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             }
           });
 
-          console.log('Email function result:', emailResult);
+          console.log('Delivery email function result:', emailResult);
 
           if (emailError) {
             console.error('Error sending delivery notification:', emailError);
@@ -75,11 +75,11 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
             body: { 
               orderId: orderId,
-              orderStatus: selectedStatus 
+              orderStatus: 'processing'
             }
           });
 
-          console.log('Email function result:', emailResult);
+          console.log('Processing email function result:', emailResult);
 
           if (emailError) {
             console.error('Error sending order confirmation:', emailError);
