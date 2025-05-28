@@ -12,7 +12,7 @@ const corsHeaders = {
 
 interface OrderConfirmationRequest {
   orderId: string;
-  emailType?: 'confirmation' | 'delivery';
+  orderStatus?: string;
 }
 
 serve(async (req) => {
@@ -23,13 +23,13 @@ serve(async (req) => {
   try {
     console.log("=== SEND ORDER CONFIRMATION FUNCTION CALLED ===");
     
-    const { orderId, emailType = 'confirmation' }: OrderConfirmationRequest = await req.json();
+    const { orderId, orderStatus }: OrderConfirmationRequest = await req.json();
     
     if (!orderId) {
       throw new Error('Order ID is required');
     }
 
-    console.log("Processing email for order:", orderId, "Type:", emailType);
+    console.log("Processing email for order:", orderId, "Status:", orderStatus);
 
     // Create Supabase client
     const supabaseClient = createClient(
@@ -40,11 +40,30 @@ serve(async (req) => {
     // Fetch order details
     const order = await fetchOrderById(orderId, supabaseClient);
 
+    // Determine if we should send an email based on status
+    const shouldSendEmail = orderStatus === 'processing' || orderStatus === 'delivered';
+    
+    if (!shouldSendEmail) {
+      console.log(`Status "${orderStatus}" does not require email notification`);
+      return new Response(JSON.stringify({
+        success: true,
+        message: `Order status updated to ${orderStatus} - no email required`,
+        orderId: orderId,
+        emailSent: false
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // Get user information
     const userInfo = await getUserInfo(order, supabaseClient);
 
     // Create items list for email
     const itemsList = createItemsList(order);
+
+    // Determine email type based on status
+    const emailType = orderStatus === 'delivered' ? 'delivery' : 'confirmation';
 
     // Send email
     const emailResult = await sendEmail(

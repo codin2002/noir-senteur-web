@@ -4,7 +4,10 @@ export async function sendOrderConfirmation(orderId: string, supabaseService: an
   try {
     console.log('Calling send-order-confirmation function with order ID:', orderId);
     const emailResult = await supabaseService.functions.invoke('send-order-confirmation', {
-      body: { orderId: orderId }
+      body: { 
+        orderId: orderId,
+        orderStatus: 'processing'
+      }
     });
     
     console.log('Email function response:', emailResult);
