@@ -28,7 +28,10 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
     setIsUpdating(true);
     try {
-      console.log(`Updating order ${orderId} status from ${currentStatus} to ${selectedStatus}`);
+      console.log(`=== STARTING STATUS UPDATE ===`);
+      console.log(`Order ID: ${orderId}`);
+      console.log(`Current Status: ${currentStatus}`);
+      console.log(`New Status: ${selectedStatus}`);
 
       // Update order status in database
       const { error: updateError } = await supabase
@@ -41,41 +44,50 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         throw updateError;
       }
 
-      console.log('Order status updated successfully');
+      console.log('✅ Order status updated successfully in database');
 
       // Send email notification for specific statuses
       if (selectedStatus === 'delivered') {
-        console.log('Triggering delivery notification email...');
+        console.log('🚀 Triggering delivery notification email...');
+        console.log('Function URL being called:', `${supabase.supabaseUrl}/functions/v1/send-delivery-notification`);
         
         try {
-          console.log('About to call send-delivery-notification function with orderId:', orderId);
-          
-          const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-delivery-notification', {
-            body: { 
+          const functionResponse = await supabase.functions.invoke('send-delivery-notification', {
+            body: JSON.stringify({ 
               orderId: orderId
+            }),
+            headers: {
+              'Content-Type': 'application/json',
             }
           });
 
-          console.log('Delivery email function response:', { data: emailResult, error: emailError });
+          console.log('📧 Function invocation complete');
+          console.log('Response data:', functionResponse.data);
+          console.log('Response error:', functionResponse.error);
 
-          if (emailError) {
-            console.error('Delivery notification function error:', emailError);
-            throw new Error(`Delivery notification failed: ${emailError.message}`);
+          if (functionResponse.error) {
+            console.error('❌ Function invocation error:', functionResponse.error);
+            throw new Error(`Function error: ${JSON.stringify(functionResponse.error)}`);
           }
 
-          if (emailResult && emailResult.success) {
-            console.log('Delivery notification sent successfully');
+          if (functionResponse.data && functionResponse.data.success) {
+            console.log('✅ Delivery notification sent successfully');
             toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
           } else {
-            console.error('Delivery notification failed - no success response:', emailResult);
+            console.error('❌ Function returned unsuccessful response:', functionResponse.data);
             toast.error('Status updated but delivery notification failed');
           }
         } catch (emailErr: any) {
-          console.error('Delivery email sending error:', emailErr);
+          console.error('❌ Delivery email error:', emailErr);
+          console.error('Error details:', {
+            message: emailErr.message,
+            stack: emailErr.stack,
+            name: emailErr.name
+          });
           toast.error(`Status updated but delivery notification failed: ${emailErr.message}`);
         }
       } else if (selectedStatus === 'processing') {
-        console.log('Triggering order confirmation email...');
+        console.log('🚀 Triggering order confirmation email...');
         
         try {
           const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
@@ -104,7 +116,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
       onStatusUpdated();
     } catch (error: any) {
-      console.error('Error updating order status:', error);
+      console.error('❌ Error updating order status:', error);
       toast.error(`Failed to update order status: ${error.message}`);
     } finally {
       setIsUpdating(false);
