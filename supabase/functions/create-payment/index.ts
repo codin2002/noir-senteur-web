@@ -86,6 +86,24 @@ serve(async (req) => {
 
     console.log("Ziina API key found:", ziinaApiKey ? "Yes" : "No");
 
+    // Add network diagnostic logs
+    console.log("=== NETWORK DIAGNOSTICS ===");
+    console.log("Deno version:", Deno.version);
+    console.log("Current time:", new Date().toISOString());
+    console.log("Environment:", Deno.env.get("DENO_DEPLOYMENT_ID") ? "Production" : "Development");
+
+    // Test basic connectivity first
+    try {
+      console.log("Testing basic connectivity to api.ziina.com...");
+      const testResponse = await fetch("https://api.ziina.com", {
+        method: "GET",
+        signal: AbortSignal.timeout(10000)
+      });
+      console.log("Basic connectivity test status:", testResponse.status);
+    } catch (testError) {
+      console.error("Basic connectivity test failed:", testError.message);
+    }
+
     // Create Ziina payment
     const ziinaPayload = {
       amount: amountInFils,
@@ -104,15 +122,22 @@ serve(async (req) => {
 
     // Add timeout and better error handling for the Ziina API call
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // Increased to 45 seconds
 
     try {
+      console.log("=== MAKING ZIINA API REQUEST ===");
+      console.log("URL: https://api.ziina.com/v1/payment_intents");
+      console.log("Method: POST");
+      console.log("Headers: Authorization: Bearer [REDACTED], Content-Type: application/json");
+      
       const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${ziinaApiKey}`,
           "Content-Type": "application/json",
           "User-Agent": "Senteur-Fragrances/1.0",
+          "Accept": "application/json",
+          "Cache-Control": "no-cache"
         },
         body: JSON.stringify(ziinaPayload),
         signal: controller.signal,
@@ -147,27 +172,41 @@ serve(async (req) => {
     } catch (fetchError: any) {
       clearTimeout(timeoutId);
       
-      if (fetchError.name === 'AbortError') {
-        console.error("Ziina API request timed out");
-        throw new Error('Payment service timeout - please try again');
-      }
-      
-      console.error("Ziina API fetch error:", fetchError);
+      console.error("=== DETAILED FETCH ERROR ===");
+      console.error("Error type:", typeof fetchError);
+      console.error("Error constructor:", fetchError.constructor.name);
       console.error("Error name:", fetchError.name);
       console.error("Error message:", fetchError.message);
+      console.error("Error stack:", fetchError.stack);
+      console.error("Error cause:", fetchError.cause);
+      
+      if (fetchError.name === 'AbortError') {
+        console.error("Ziina API request timed out after 45 seconds");
+        throw new Error('Payment service timeout - please try again in a few minutes');
+      }
+      
+      if (fetchError.name === 'TypeError' && fetchError.message.includes('error sending request')) {
+        console.error("Network connectivity issue detected");
+        throw new Error('Unable to connect to payment service. This may be a temporary network issue. Please try again in a few minutes.');
+      }
       
       throw new Error(`Payment service connection error: ${fetchError.message}`);
     }
 
   } catch (error: any) {
-    console.error("Payment creation error:", error);
+    console.error("=== PAYMENT CREATION ERROR ===");
+    console.error("Error type:", typeof error);
+    console.error("Error constructor:", error.constructor?.name);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
     console.error("Error stack:", error.stack);
     
     return new Response(JSON.stringify({
       success: false,
       error: {
         message: error.message || "Payment creation failed",
-        details: error.stack
+        type: error.name || "UnknownError",
+        timestamp: new Date().toISOString()
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
