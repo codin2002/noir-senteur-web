@@ -70,7 +70,6 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           });
 
           console.log('📧 Function invocation response received');
-          console.log('Response status:', functionResponse.status);
           console.log('Response data:', JSON.stringify(functionResponse.data, null, 2));
           console.log('Response error:', JSON.stringify(functionResponse.error, null, 2));
 
