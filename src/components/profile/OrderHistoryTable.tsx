@@ -38,7 +38,6 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({
               <th className="text-left py-3 px-4">Date</th>
               <th className="text-left py-3 px-4">Status</th>
               <th className="text-left py-3 px-4">Total</th>
-              <th className="text-left py-3 px-4">Items</th>
               <th className="text-left py-3 px-4">Actions</th>
             </tr>
           </thead>
@@ -56,9 +55,6 @@ const OrderHistoryTable: React.FC<OrderHistoryTableProps> = ({
                 </td>
                 <td className="py-3 px-4 font-semibold">
                   AED {order.total.toFixed(2)}
-                </td>
-                <td className="py-3 px-4 text-muted-foreground">
-                  {order.items.length} item(s)
                 </td>
                 <td className="py-3 px-4">
                   <Button
