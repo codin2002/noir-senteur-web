@@ -66,7 +66,7 @@ export function createConfirmationEmailTemplate(
 
         <!-- Your Order -->
         <div style="background-color: white; padding: 20px; margin-top: 2px;">
-          <h3 style="color: #E53E3E; font-size: 18px; margin: 0 0 15px 0;">Your Order</h3>
+          <h3 style="color: #E53E3E; font-size: 18px; margin: 0 0 15px 0;">Your Order (#${order.id.substring(0, 8)})</h3>
           
           <table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">
             <thead>
