@@ -15,7 +15,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import ShippingPolicy from '@/pages/ShippingPolicy';
 import NotFound from '@/pages/NotFound';
 import AdminOrders from '@/pages/AdminOrders';
-import { PaymentSuccess } from '@/components/PaymentSuccess';
+import PaymentSuccess from '@/components/PaymentSuccess';
 
 const AppRoutes = () => {
   return (
