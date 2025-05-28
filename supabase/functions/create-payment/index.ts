@@ -7,6 +7,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Constants to match frontend pricing
+const PRICING = {
+  SHIPPING_COST: 4.99,
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -55,7 +60,7 @@ serve(async (req) => {
     
     itemsToProcess.forEach(item => {
       const perfume = item.perfume || item;
-      const price = perfume.price_value || 1;
+      const price = perfume.price_value || 100;
       const quantity = item.quantity || 1;
       
       console.log(`Item: ${perfume.name}, price: ${price}, quantity: ${quantity}`);
@@ -64,8 +69,8 @@ serve(async (req) => {
       totalQuantity += quantity;
     });
 
-    // Apply correct shipping logic - free shipping if 2+ items, otherwise 1 AED
-    const shipping = subtotal > 0 && totalQuantity < 2 ? 1 : 0;
+    // Apply correct shipping logic - free shipping if 2+ items, otherwise 4.99 AED
+    const shipping = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
     const total = subtotal + shipping;
 
     console.log("Calculated subtotal:", subtotal, "shipping:", shipping, "total:", total);
