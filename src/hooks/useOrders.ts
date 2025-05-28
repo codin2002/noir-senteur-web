@@ -15,6 +15,8 @@ export const useOrders = () => {
       console.log('=== FETCHING ORDERS FOR USER ===');
       console.log('User ID:', user?.id);
       
+      setIsLoading(true);
+      
       // Use the RPC function to get orders with items
       const { data: ordersData, error: ordersError } = await supabase.rpc('get_orders_with_items', {
         user_uuid: user?.id
@@ -45,7 +47,7 @@ export const useOrders = () => {
         // Use the order total from database directly (already includes shipping)
         const orderTotal = Number(order.total) || 0;
         
-        console.log(`Order ${order.id}: Total from DB: ${orderTotal}, Items: ${processedItems.length}`);
+        console.log(`Order ${order.id}: Total from DB: ${orderTotal}, Items: ${processedItems.length}, Status: ${order.status}`);
         
         return {
           id: order.id,
@@ -68,6 +70,12 @@ export const useOrders = () => {
     }
   };
 
+  const refreshOrders = async () => {
+    console.log('=== REFRESHING ORDERS DATA ===');
+    await fetchOrders();
+    toast.success('Order history refreshed');
+  };
+
   const formatDate = (dateString: string) => {
     const options: Intl.DateTimeFormatOptions = { 
       year: 'numeric', 
@@ -83,6 +91,7 @@ export const useOrders = () => {
     orders,
     isLoading,
     fetchOrders,
+    refreshOrders,
     formatDate
   };
 };
