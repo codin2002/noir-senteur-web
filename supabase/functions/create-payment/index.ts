@@ -77,6 +77,15 @@ serve(async (req) => {
       throw new Error('Delivery address is required');
     }
 
+    // Get Ziina API key
+    const ziinaApiKey = Deno.env.get("ZIINA_API_KEY");
+    if (!ziinaApiKey) {
+      console.error("ZIINA_API_KEY not found in environment variables");
+      throw new Error('Payment service configuration error');
+    }
+
+    console.log("Ziina API key found:", ziinaApiKey ? "Yes" : "No");
+
     // Create Ziina payment
     const ziinaPayload = {
       amount: amountInFils,
@@ -93,41 +102,72 @@ serve(async (req) => {
 
     console.log("Creating Ziina payment with payload:", ziinaPayload);
 
-    const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${Deno.env.get("ZIINA_API_KEY")}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(ziinaPayload),
-    });
+    // Add timeout and better error handling for the Ziina API call
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
-    console.log("Ziina API response status:", ziinaResponse.status);
+    try {
+      const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${ziinaApiKey}`,
+          "Content-Type": "application/json",
+          "User-Agent": "Senteur-Fragrances/1.0",
+        },
+        body: JSON.stringify(ziinaPayload),
+        signal: controller.signal,
+      });
 
-    if (!ziinaResponse.ok) {
-      const errorData = await ziinaResponse.text();
-      console.error("Ziina API error:", errorData);
-      throw new Error(`Ziina API error: ${ziinaResponse.status}`);
+      clearTimeout(timeoutId);
+
+      console.log("Ziina API response status:", ziinaResponse.status);
+      console.log("Ziina API response headers:", Object.fromEntries(ziinaResponse.headers.entries()));
+
+      if (!ziinaResponse.ok) {
+        const errorText = await ziinaResponse.text();
+        console.error("Ziina API error response:", errorText);
+        console.error("Ziina API error status:", ziinaResponse.status);
+        console.error("Ziina API error statusText:", ziinaResponse.statusText);
+        
+        throw new Error(`Ziina API error (${ziinaResponse.status}): ${errorText || ziinaResponse.statusText}`);
+      }
+
+      const ziinaData = await ziinaResponse.json();
+      console.log("Ziina payment created successfully:", ziinaData);
+
+      return new Response(JSON.stringify({
+        success: true,
+        payment_url: ziinaData.redirect_url,
+        payment_intent_id: ziinaData.id
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId);
+      
+      if (fetchError.name === 'AbortError') {
+        console.error("Ziina API request timed out");
+        throw new Error('Payment service timeout - please try again');
+      }
+      
+      console.error("Ziina API fetch error:", fetchError);
+      console.error("Error name:", fetchError.name);
+      console.error("Error message:", fetchError.message);
+      
+      throw new Error(`Payment service connection error: ${fetchError.message}`);
     }
-
-    const ziinaData = await ziinaResponse.json();
-    console.log("Ziina payment created successfully:", ziinaData);
-
-    return new Response(JSON.stringify({
-      success: true,
-      payment_url: ziinaData.redirect_url,
-      payment_intent_id: ziinaData.id
-    }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 200,
-    });
 
   } catch (error: any) {
     console.error("Payment creation error:", error);
+    console.error("Error stack:", error.stack);
+    
     return new Response(JSON.stringify({
       success: false,
       error: {
-        message: error.message || "Payment creation failed"
+        message: error.message || "Payment creation failed",
+        details: error.stack
       }
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
