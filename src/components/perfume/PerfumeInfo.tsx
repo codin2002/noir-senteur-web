@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { PRICING } from '@/utils/constants';
 
 interface Perfume {
   id: string;
@@ -20,7 +21,7 @@ const PerfumeInfo: React.FC<PerfumeInfoProps> = ({ perfume }) => {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl md:text-4xl font-serif mb-4">{perfume.name}</h1>
-        <div className="text-2xl font-bold text-gold mb-6">{perfume.price}</div>
+        <div className="text-2xl font-bold text-gold mb-6">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</div>
         <p className="text-gray-300 leading-relaxed mb-6">{perfume.description}</p>
         
         {perfume.notes && (

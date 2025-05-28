@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from './common/LoadingSpinner';
 import ProductImage from './common/ProductImage';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { getPerfumeDisplayName } from '@/utils/constants';
+import { getPerfumeDisplayName, PRICING } from '@/utils/constants';
 import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 interface PerfumeSliderItemProps {
@@ -32,7 +32,7 @@ const PerfumeSliderItem: React.FC<PerfumeSliderItemProps> = ({ perfume, onExplor
         <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
         <h3 className="text-xl font-serif mb-2">{getPerfumeDisplayName(perfume)}</h3>
         <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
-        <p className="text-gold font-light mb-4 mt-auto">{perfume.price}</p>
+        <p className="text-gold font-light mb-4 mt-auto">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</p>
         <button 
           onClick={() => onExplore(perfume.id)} 
           className="btn-outline text-center text-xs py-2"

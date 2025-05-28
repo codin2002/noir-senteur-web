@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './common/ProductImage';
-import { getPerfumeDisplayName } from '@/utils/constants';
+import { getPerfumeDisplayName, PRICING } from '@/utils/constants';
 import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 interface PerfumeCardProps {
@@ -23,7 +23,6 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   notes,
   description,
   image,
-  price,
   delay = 0,
   invert = false
 }) => {
@@ -65,7 +64,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           {description}
         </p>
         <p className="text-xl font-light text-gold mt-4">
-          {price}
+          {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
         <button className="btn-outline mt-6" onClick={handleExplore}>
           BUY
