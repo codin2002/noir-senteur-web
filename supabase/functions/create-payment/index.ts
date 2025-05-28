@@ -86,25 +86,16 @@ serve(async (req) => {
 
     console.log("Ziina API key found:", ziinaApiKey ? "Yes" : "No");
 
-    // Add network diagnostic logs
-    console.log("=== NETWORK DIAGNOSTICS ===");
-    console.log("Deno version:", Deno.version);
-    console.log("Current time:", new Date().toISOString());
-    console.log("Environment:", Deno.env.get("DENO_DEPLOYMENT_ID") ? "Production" : "Development");
+    // Create expiry timestamp (30 minutes from now)
+    const currentTimeMs = Date.now();
+    const expiryDurationMs = 30 * 60 * 1000; // 30 minutes
+    const expiryTimestamp = currentTimeMs + expiryDurationMs;
 
-    // Test basic connectivity first
-    try {
-      console.log("Testing basic connectivity to api.ziina.com...");
-      const testResponse = await fetch("https://api.ziina.com", {
-        method: "GET",
-        signal: AbortSignal.timeout(10000)
-      });
-      console.log("Basic connectivity test status:", testResponse.status);
-    } catch (testError) {
-      console.error("Basic connectivity test failed:", testError.message);
-    }
+    console.log("Current time:", currentTimeMs);
+    console.log("Expiry time:", expiryTimestamp);
+    console.log("Expiry in 30 minutes:", new Date(expiryTimestamp).toISOString());
 
-    // Create Ziina payment
+    // Create Ziina payment with correct endpoint and format
     const ziinaPayload = {
       amount: amountInFils,
       currency_code: "AED",
@@ -112,7 +103,7 @@ serve(async (req) => {
       success_url: `https://senteurfragrances.com/payment-success?payment_intent_id={PAYMENT_INTENT_ID}`,
       cancel_url: `https://senteurfragrances.com/cart?payment=cancelled`,
       failure_url: `https://senteurfragrances.com/payment-failed`,
-      expiry: (Date.now() + 15 * 60 * 1000).toString(), // 15 minutes from now
+      expiry: expiryTimestamp, // Number, not string
       test: false,
       transaction_source: "directApi",
       allow_tips: false
@@ -122,22 +113,21 @@ serve(async (req) => {
 
     // Add timeout and better error handling for the Ziina API call
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000); // Increased to 45 seconds
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
     try {
       console.log("=== MAKING ZIINA API REQUEST ===");
-      console.log("URL: https://api.ziina.com/v1/payment_intents");
+      console.log("URL: https://api-v2.ziina.com/api/payment_intent");
       console.log("Method: POST");
       console.log("Headers: Authorization: Bearer [REDACTED], Content-Type: application/json");
       
-      const ziinaResponse = await fetch("https://api.ziina.com/v1/payment_intents", {
+      const ziinaResponse = await fetch("https://api-v2.ziina.com/api/payment_intent", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${ziinaApiKey}`,
           "Content-Type": "application/json",
           "User-Agent": "Senteur-Fragrances/1.0",
-          "Accept": "application/json",
-          "Cache-Control": "no-cache"
+          "Accept": "application/json"
         },
         body: JSON.stringify(ziinaPayload),
         signal: controller.signal,
@@ -178,11 +168,10 @@ serve(async (req) => {
       console.error("Error name:", fetchError.name);
       console.error("Error message:", fetchError.message);
       console.error("Error stack:", fetchError.stack);
-      console.error("Error cause:", fetchError.cause);
       
       if (fetchError.name === 'AbortError') {
-        console.error("Ziina API request timed out after 45 seconds");
-        throw new Error('Payment service timeout - please try again in a few minutes');
+        console.error("Ziina API request timed out after 30 seconds");
+        throw new Error('Payment service timeout - please try again');
       }
       
       if (fetchError.name === 'TypeError' && fetchError.message.includes('error sending request')) {
