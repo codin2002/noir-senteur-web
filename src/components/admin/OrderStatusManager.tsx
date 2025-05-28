@@ -49,7 +49,6 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       // Send email notification for specific statuses
       if (selectedStatus === 'delivered') {
         console.log('🚀 Triggering delivery notification email...');
-        console.log('Function URL being called:', `${supabase.supabaseUrl}/functions/v1/send-delivery-notification`);
         
         try {
           const functionResponse = await supabase.functions.invoke('send-delivery-notification', {
