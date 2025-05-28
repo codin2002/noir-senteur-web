@@ -84,7 +84,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
         <div className="flex items-start gap-2 mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
           <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-red-300 leading-relaxed">
-            <strong>NOTE:</strong> Kindly do not exit website until you are redirected to the payment confirmation page
+            <strong>NOTE:</strong> Kindly wait until you are redirected back to the website after payment; do not close the tab or exit the website or your order will not be processed
           </p>
         </div>
       </div>
