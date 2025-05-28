@@ -88,11 +88,11 @@ export function createConfirmationEmailTemplate(
               `).join('')}
               <tr>
                 <td colspan="3" style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold; color: #333;">Subtotal:</td>
-                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; font-weight: bold; color: #333;">AED ${(order.total - 1).toFixed(2)}</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; font-weight: bold; color: #333;">AED ${(order.total - 4.99).toFixed(2)}</td>
               </tr>
               <tr>
                 <td colspan="3" style="padding: 12px; text-align: right; border: 1px solid #ddd; color: #333;">Shipping:</td>
-                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; color: #333;">AED 1.00</td>
+                <td style="padding: 12px; text-align: center; border: 1px solid #ddd; color: #333;">AED 4.99</td>
               </tr>
               <tr>
                 <td colspan="3" style="padding: 12px; text-align: right; border: 1px solid #ddd; font-weight: bold; color: #333;">Total (includes shipping):</td>
