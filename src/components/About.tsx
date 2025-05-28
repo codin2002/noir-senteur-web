@@ -31,19 +31,19 @@ const About = () => {
         
         <div className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="text-center p-8 bg-dark">
-            <div className="text-gold text-4xl font-serif mb-4">01</div>
+            <div className="text-gold text-4xl font-serif mb-4">1</div>
             <h4 className="text-xl font-serif mb-4">Artisanal Craft</h4>
             <p className="text-muted-foreground">Every fragrance is meticulously handcrafted in small batches to ensure quality and attention to detail.</p>
           </div>
           
           <div className="text-center p-8 bg-dark">
-            <div className="text-gold text-4xl font-serif mb-4">02</div>
+            <div className="text-gold text-4xl font-serif mb-4">2</div>
             <h4 className="text-xl font-serif mb-4">Sustainable Sources</h4>
             <p className="text-muted-foreground">We source our ingredients responsibly, ensuring ethical practices and environmental consciousness.</p>
           </div>
           
           <div className="text-center p-8 bg-dark">
-            <div className="text-gold text-4xl font-serif mb-4">03</div>
+            <div className="text-gold text-4xl font-serif mb-4">3</div>
             <h4 className="text-xl font-serif mb-4">Timeless Design</h4>
             <p className="text-muted-foreground">Our bottles are designed to be both elegant and functional, a statement piece for your collection.</p>
           </div>
