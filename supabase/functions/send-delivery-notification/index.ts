@@ -95,8 +95,23 @@ serve(async (req) => {
       itemCount: order.items?.length || 0,
       user_id: order.user_id,
       guest_email: order.guest_email,
-      guest_name: order.guest_name
+      guest_name: order.guest_name,
+      delivery_email_sent: order.delivery_email_sent
     });
+
+    // Check if delivery email was already sent
+    if (order.delivery_email_sent) {
+      console.log('⚠️ Delivery email was already sent for this order');
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Delivery notification was already sent for this order',
+        orderId: orderId,
+        alreadySent: true
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
 
     // Determine recipient email and name
     let recipientEmail = '';
@@ -201,11 +216,11 @@ serve(async (req) => {
     console.log('📧 Email HTML template prepared');
     console.log('✉️ Sending delivery notification email via Resend...');
 
-    // Send delivery notification email
+    // Send delivery notification email with specific subject
     const emailResult = await resend.emails.send({
       from: "Senteur Fragrances <orders@senteurfragrances.com>",
       to: [recipientEmail],
-      subject: "🎉 Your Senteur Fragrances Order Has Been Delivered!",
+      subject: "🎉 Your Order Has Been Delivered! - Senteur Fragrances",
       html: emailHtml,
     });
 
