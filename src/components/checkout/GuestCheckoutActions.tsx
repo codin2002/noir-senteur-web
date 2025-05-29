@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, UserPlus, ShoppingBag } from 'lucide-react';
+import { CreditCard, UserPlus, ShoppingBag, AlertTriangle } from 'lucide-react';
 
 interface GuestCheckoutActionsProps {
   onGuestCheckout: () => void;
@@ -24,6 +24,13 @@ const GuestCheckoutActions: React.FC<GuestCheckoutActionsProps> = ({
 
   return (
     <div className="space-y-4 pt-6 border-t border-gold/20">
+      <div className="flex items-start gap-2 mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+        <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+        <p className="text-xs text-red-300 leading-relaxed">
+          <strong>NOTE:</strong> Kindly wait until you are redirected back to the website after payment; do not close the tab or exit the website or your order will not be processed
+        </p>
+      </div>
+
       <Button
         onClick={onGuestCheckout}
         disabled={isCheckoutDisabled || isLoading}
