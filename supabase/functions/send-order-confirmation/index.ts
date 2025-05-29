@@ -56,6 +56,20 @@ serve(async (req) => {
       });
     }
 
+    // For delivery emails, check if already sent
+    if (orderStatus === 'delivered' && order.delivery_email_sent) {
+      console.log('⚠️ Delivery email was already sent for this order');
+      return new Response(JSON.stringify({
+        success: true,
+        message: 'Delivery notification was already sent for this order',
+        orderId: orderId,
+        alreadySent: true
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      });
+    }
+
     // Get user information
     const userInfo = await getUserInfo(order, supabaseClient);
 
@@ -73,6 +87,22 @@ serve(async (req) => {
       itemsList,
       emailType
     );
+
+    // Update delivery_email_sent flag if this was a delivery email
+    if (orderStatus === 'delivered') {
+      console.log('🔄 Updating delivery_email_sent flag...');
+      const { error: updateError } = await supabaseClient
+        .from('orders')
+        .update({ delivery_email_sent: true })
+        .eq('id', orderId);
+        
+      if (updateError) {
+        console.error('❌ Error updating delivery_email_sent flag:', updateError);
+        // Don't throw error - email was sent successfully
+      } else {
+        console.log('✅ delivery_email_sent flag updated successfully');
+      }
+    }
 
     return new Response(JSON.stringify({
       success: true,
