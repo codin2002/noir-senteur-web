@@ -21,12 +21,21 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
   const [isUpdating, setIsUpdating] = useState(false);
 
   const handleStatusUpdate = async () => {
+    console.log('🔥 === BUTTON CLICKED - STARTING STATUS UPDATE ===');
+    console.log('Button clicked at:', new Date().toISOString());
+    console.log('Order ID from props:', orderId);
+    console.log('Current status from props:', currentStatus);
+    console.log('Selected status:', selectedStatus);
+    
     if (selectedStatus === currentStatus) {
+      console.log('❌ No status change detected');
       toast.error('Please select a different status');
       return;
     }
 
+    console.log('✅ Status change detected, proceeding...');
     setIsUpdating(true);
+    
     try {
       console.log(`=== STARTING STATUS UPDATE PROCESS ===`);
       console.log(`Order ID: ${orderId}`);
@@ -51,6 +60,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       // Handle email notifications based on status
       if (selectedStatus === 'delivered') {
         console.log('🚀 Step 2: Status is DELIVERED - triggering delivery notification...');
+        console.log('About to call send-delivery-notification function');
         console.log('Function name to invoke: send-delivery-notification');
         
         try {
@@ -60,12 +70,13 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           };
           console.log('Function payload:', JSON.stringify(functionPayload, null, 2));
 
-          console.log('Invoking Supabase function...');
+          console.log('🔥 CALLING SUPABASE FUNCTION NOW...');
           const functionResponse = await supabase.functions.invoke('send-delivery-notification', {
             body: functionPayload
           });
 
-          console.log('📧 Function invocation response received');
+          console.log('📧 Function invocation completed');
+          console.log('📧 Full response object:', functionResponse);
           console.log('Response data:', JSON.stringify(functionResponse.data, null, 2));
           console.log('Response error:', JSON.stringify(functionResponse.error, null, 2));
 
@@ -146,9 +157,17 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       console.error('Error stack:', error.stack);
       toast.error(`Failed to update order status: ${error.message}`);
     } finally {
+      console.log('🏁 Setting isUpdating to false');
       setIsUpdating(false);
     }
   };
+
+  console.log('🔍 OrderStatusManager rendered with:', {
+    orderId,
+    currentStatus,
+    selectedStatus,
+    isUpdating
+  });
 
   return (
     <Card className="bg-darker border-gold/20">
@@ -158,7 +177,10 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       <CardContent className="space-y-4">
         <div>
           <label className="text-sm font-medium mb-2 block">Current Status: {currentStatus}</label>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <Select value={selectedStatus} onValueChange={(value) => {
+            console.log('📝 Status selection changed from', selectedStatus, 'to', value);
+            setSelectedStatus(value);
+          }}>
             <SelectTrigger className="bg-dark border-gold/30">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
@@ -171,7 +193,10 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         </div>
         
         <Button
-          onClick={handleStatusUpdate}
+          onClick={() => {
+            console.log('🖱️ Update button clicked!');
+            handleStatusUpdate();
+          }}
           disabled={isUpdating || selectedStatus === currentStatus}
           className="w-full bg-gold text-darker hover:bg-gold/90"
         >
