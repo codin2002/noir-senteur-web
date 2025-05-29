@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { FcGoogle } from 'react-icons/fc';
+import { AlertTriangle } from 'lucide-react';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -330,6 +331,14 @@ const Auth = () => {
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Important Payment Note */}
+                    <div className="flex items-start gap-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                      <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-red-300 leading-relaxed">
+                        <strong>NOTE:</strong> Kindly wait until you are redirected back to the website after payment; do not close the tab or exit the website or your order will not be processed
+                      </p>
                     </div>
 
                     <div className="pt-6">
