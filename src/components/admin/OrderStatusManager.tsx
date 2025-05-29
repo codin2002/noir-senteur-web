@@ -83,6 +83,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               console.log('Email ID:', functionResponse.data.emailId);
               console.log('Recipient:', functionResponse.data.recipientEmail);
               toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
+            } else if (functionResponse.data.alreadySent) {
+              console.log('⚠️ Delivery notification was already sent');
+              toast.success(`Order status updated to ${selectedStatus}. Delivery notification was already sent.`);
             } else {
               console.error('❌ Function returned unsuccessful response:', functionResponse.data);
               console.error('Error message from function:', functionResponse.data.error?.message);

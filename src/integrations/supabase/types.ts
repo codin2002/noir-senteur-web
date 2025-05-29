@@ -120,6 +120,7 @@ export type Database = {
           guest_name: string | null
           guest_phone: string | null
           id: string
+          notes: string | null
           processing_email_sent: boolean | null
           status: string
           total: number
@@ -133,6 +134,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          notes?: string | null
           processing_email_sent?: boolean | null
           status?: string
           total: number
@@ -146,6 +148,7 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          notes?: string | null
           processing_email_sent?: boolean | null
           status?: string
           total?: number
