@@ -52,7 +52,6 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       if (selectedStatus === 'delivered') {
         console.log('🚀 Step 2: Status is DELIVERED - triggering delivery notification...');
         console.log('Function name to invoke: send-delivery-notification');
-        console.log('Project URL:', 'https://gzddmdwgzcnikqurtnsy.supabase.co');
         
         try {
           console.log('Preparing function payload...');
@@ -63,10 +62,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
           console.log('Invoking Supabase function...');
           const functionResponse = await supabase.functions.invoke('send-delivery-notification', {
-            body: JSON.stringify(functionPayload),
-            headers: {
-              'Content-Type': 'application/json',
-            }
+            body: functionPayload
           });
 
           console.log('📧 Function invocation response received');
@@ -79,10 +75,8 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               context: functionResponse.error.context,
               details: functionResponse.error.details
             });
-            throw new Error(`Function error: ${JSON.stringify(functionResponse.error)}`);
-          }
-
-          if (functionResponse.data) {
+            toast.error(`Status updated but delivery notification failed: ${functionResponse.error.message}`);
+          } else if (functionResponse.data) {
             console.log('📧 Function returned data - checking success status...');
             if (functionResponse.data.success) {
               console.log('✅ Delivery notification sent successfully!');

@@ -16,7 +16,6 @@ serve(async (req) => {
   console.log("🔥 === DELIVERY NOTIFICATION FUNCTION STARTED ===");
   console.log("Request method:", req.method);
   console.log("Request URL:", req.url);
-  console.log("Request headers:", Object.fromEntries(req.headers.entries()));
   
   if (req.method === "OPTIONS") {
     console.log("⚡ Handling CORS preflight request");
@@ -54,7 +53,6 @@ serve(async (req) => {
     console.log("Environment check:");
     console.log("- SUPABASE_URL exists:", !!supabaseUrl);
     console.log("- SUPABASE_SERVICE_ROLE_KEY exists:", !!supabaseServiceKey);
-    console.log("- SUPABASE_URL value:", supabaseUrl);
     
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Missing Supabase environment variables");
@@ -99,25 +97,6 @@ serve(async (req) => {
       guest_email: order.guest_email,
       guest_name: order.guest_name
     });
-
-    // Update order status to delivered if not already
-    if (order.status !== 'delivered') {
-      console.log(`🔄 Updating order status from ${order.status} to delivered`);
-      
-      const { error: updateError } = await supabaseClient
-        .from('orders')
-        .update({ status: 'delivered' })
-        .eq('id', orderId);
-        
-      if (updateError) {
-        console.error('❌ Error updating order status:', updateError);
-        throw new Error(`Failed to update order status: ${updateError.message}`);
-      }
-      
-      console.log('✅ Order status updated to delivered successfully');
-    } else {
-      console.log('ℹ️ Order is already marked as delivered');
-    }
 
     // Determine recipient email and name
     let recipientEmail = '';
@@ -240,6 +219,20 @@ serve(async (req) => {
 
     console.log('✅ Delivery notification email sent successfully!');
     console.log('📧 Email ID:', emailResult.data?.id);
+
+    // Update delivery_email_sent flag in orders table
+    console.log('🔄 Updating delivery_email_sent flag...');
+    const { error: updateError } = await supabaseClient
+      .from('orders')
+      .update({ delivery_email_sent: true })
+      .eq('id', orderId);
+      
+    if (updateError) {
+      console.error('❌ Error updating delivery_email_sent flag:', updateError);
+      // Don't throw error - email was sent successfully
+    } else {
+      console.log('✅ delivery_email_sent flag updated successfully');
+    }
 
     const successResponse = {
       success: true,
