@@ -165,6 +165,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     isUpdating
   });
 
+  // Always enable the button - allow updates even to the same status
+  const isButtonDisabled = isUpdating;
+
   return (
     <Card className="bg-darker border-gold/20">
       <CardHeader>
@@ -194,7 +197,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             console.log('🎯 About to call handleStatusUpdate with selectedStatus:', selectedStatus);
             handleStatusUpdate();
           }}
-          disabled={isUpdating}
+          disabled={isButtonDisabled}
           className="w-full bg-gold text-darker hover:bg-gold/90"
         >
           {isUpdating ? 'Updating...' : `Update to ${selectedStatus}`}
