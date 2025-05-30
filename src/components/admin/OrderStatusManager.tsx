@@ -25,7 +25,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     console.log('Button clicked at:', new Date().toISOString());
     console.log('Order ID from props:', orderId);
     console.log('Current status from props:', currentStatus);
-    console.log('Selected status:', selectedStatus);
+    console.log('Selected status from state:', selectedStatus);
     
     console.log('✅ Proceeding with status update and notifications...');
     setIsUpdating(true);
@@ -51,7 +51,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
       console.log('✅ Step 1 Complete: Order status updated successfully in database');
 
-      // Handle email notifications based on status
+      // Handle email notifications based on the SELECTED status (not current status)
+      console.log('🎯 Checking selectedStatus for email notifications:', selectedStatus);
+      
       if (selectedStatus === 'delivered') {
         console.log('🚀 Step 2: Status is DELIVERED - triggering delivery notification...');
         console.log('About to call send-delivery-notification function');
@@ -64,7 +66,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           };
           console.log('Function payload:', JSON.stringify(functionPayload, null, 2));
 
-          console.log('🔥 CALLING SUPABASE FUNCTION NOW...');
+          console.log('🔥 CALLING SEND-DELIVERY-NOTIFICATION FUNCTION NOW...');
           const functionResponse = await supabase.functions.invoke('send-delivery-notification', {
             body: functionPayload
           });
@@ -116,7 +118,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           const { data: emailResult, error: emailError } = await supabase.functions.invoke('send-order-confirmation', {
             body: { 
               orderId: orderId,
-              orderStatus: 'processing'
+              orderStatus: selectedStatus
             }
           });
 
@@ -189,6 +191,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         <Button
           onClick={() => {
             console.log('🖱️ Update button clicked!');
+            console.log('🎯 About to call handleStatusUpdate with selectedStatus:', selectedStatus);
             handleStatusUpdate();
           }}
           disabled={isUpdating}
