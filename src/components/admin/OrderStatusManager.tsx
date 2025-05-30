@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useInventoryUpdate } from '@/hooks/useInventoryUpdate';
 
 interface OrderStatusManagerProps {
   orderId: string;
@@ -19,6 +20,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 }) => {
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [isUpdating, setIsUpdating] = useState(false);
+  const { reduceInventory, isUpdating: isReducingInventory } = useInventoryUpdate();
 
   const handleStatusUpdate = async () => {
     console.log('🔥 === BUTTON CLICKED - STARTING STATUS UPDATE ===');
@@ -50,6 +52,17 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       }
 
       console.log('✅ Step 1 Complete: Order status updated successfully in database');
+
+      // Handle inventory reduction when order is delivered
+      if (selectedStatus === 'delivered' && currentStatus !== 'delivered') {
+        console.log('📦 Step 1.5: Reducing inventory for delivered order...');
+        try {
+          reduceInventory({ orderId });
+          console.log('✅ Inventory reduction initiated');
+        } catch (inventoryError) {
+          console.error('⚠️ Inventory reduction failed, but continuing with email:', inventoryError);
+        }
+      }
 
       // Handle email notifications based on the SELECTED status (not current status)
       console.log('🎯 Checking selectedStatus for email notifications:', selectedStatus);
@@ -166,7 +179,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
   });
 
   // Always enable the button - allow updates even to the same status
-  const isButtonDisabled = isUpdating;
+  const isButtonDisabled = isUpdating || isReducingInventory;
 
   return (
     <Card className="bg-darker border-gold/20">
@@ -200,7 +213,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           disabled={isButtonDisabled}
           className="w-full bg-gold text-darker hover:bg-gold/90"
         >
-          {isUpdating ? 'Updating...' : `Update to ${selectedStatus}`}
+          {isUpdating ? 'Updating...' : isReducingInventory ? 'Updating Inventory...' : `Update to ${selectedStatus}`}
         </Button>
       </CardContent>
     </Card>
