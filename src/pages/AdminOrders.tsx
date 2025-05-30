@@ -46,7 +46,14 @@ const AdminOrders = () => {
       }
 
       console.log('✅ Fetched orders successfully:', data);
-      return data as Order[];
+      
+      // Transform the data to match our Order interface
+      const transformedOrders: Order[] = (data || []).map(order => ({
+        ...order,
+        items: Array.isArray(order.items) ? order.items as OrderItem[] : []
+      }));
+      
+      return transformedOrders;
     }
   });
 
