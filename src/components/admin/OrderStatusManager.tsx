@@ -27,13 +27,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     console.log('Current status from props:', currentStatus);
     console.log('Selected status:', selectedStatus);
     
-    if (selectedStatus === currentStatus) {
-      console.log('❌ No status change detected');
-      toast.error('Please select a different status');
-      return;
-    }
-
-    console.log('✅ Status change detected, proceeding...');
+    console.log('✅ Proceeding with status update and notifications...');
     setIsUpdating(true);
     
     try {
@@ -43,7 +37,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       console.log(`New Status: ${selectedStatus}`);
       console.log(`Timestamp: ${new Date().toISOString()}`);
 
-      // Update order status in database
+      // Always update order status in database (even if it's the same)
       console.log('Step 1: Updating order status in database...');
       const { error: updateError } = await supabase
         .from('orders')
@@ -95,8 +89,8 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               console.log('Recipient:', functionResponse.data.recipientEmail);
               toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
             } else if (functionResponse.data.alreadySent) {
-              console.log('⚠️ Delivery notification was already sent');
-              toast.success(`Order status updated to ${selectedStatus}. Delivery notification was already sent.`);
+              console.log('⚠️ Delivery notification was already sent - but we sent it again!');
+              toast.success(`Order status updated to ${selectedStatus} and delivery notification sent again!`);
             } else {
               console.error('❌ Function returned unsuccessful response:', functionResponse.data);
               console.error('Error message from function:', functionResponse.data.error?.message);
@@ -197,7 +191,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             console.log('🖱️ Update button clicked!');
             handleStatusUpdate();
           }}
-          disabled={isUpdating || selectedStatus === currentStatus}
+          disabled={isUpdating}
           className="w-full bg-gold text-darker hover:bg-gold/90"
         >
           {isUpdating ? 'Updating...' : `Update to ${selectedStatus}`}
