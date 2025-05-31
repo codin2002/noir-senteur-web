@@ -1,11 +1,11 @@
-
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import OrderStatusManager from '@/components/admin/OrderStatusManager';
 import InventoryManager from '@/components/admin/InventoryManager';
+import AdminAuth from '@/components/admin/AdminAuth';
 import { formatDistanceToNow } from 'date-fns';
 
 interface OrderItem {
@@ -33,6 +33,26 @@ interface Order {
 }
 
 const AdminOrders = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check if admin is already authenticated in session storage
+  useEffect(() => {
+    const adminAuth = sessionStorage.getItem('admin_authenticated');
+    if (adminAuth === 'true') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleAuthenticated = () => {
+    setIsAuthenticated(true);
+    sessionStorage.setItem('admin_authenticated', 'true');
+  };
+
+  // If not authenticated, show login form
+  if (!isAuthenticated) {
+    return <AdminAuth onAuthenticated={handleAuthenticated} />;
+  }
+
   const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ['admin-orders'],
     queryFn: async () => {
@@ -86,7 +106,18 @@ const AdminOrders = () => {
   return (
     <div className="min-h-screen bg-dark p-6">
       <div className="max-w-7xl mx-auto space-y-8">
-        <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
+          <button
+            onClick={() => {
+              sessionStorage.removeItem('admin_authenticated');
+              setIsAuthenticated(false);
+            }}
+            className="text-gold hover:text-gold/70 text-sm"
+          >
+            Logout
+          </button>
+        </div>
         
         {/* Inventory Management Section */}
         <InventoryManager />
