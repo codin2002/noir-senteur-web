@@ -29,10 +29,10 @@ const AppRoutes = () => {
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
-      <Route path="/contact" element={<ContactUs />} />
-      <Route path="/terms" element={<TermsConditions />} />
-      <Route path="/privacy" element={<PrivacyPolicy />} />
-      <Route path="/shipping" element={<ShippingPolicy />} />
+      <Route path="/contact-us" element={<ContactUs />} />
+      <Route path="/terms-conditions" element={<TermsConditions />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/shipping-policy" element={<ShippingPolicy />} />
       <Route path="/admin/orders" element={<AdminOrders />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
