@@ -38,7 +38,48 @@ interface AdminOrdersTableProps {
 }
 
 const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }) => {
+  const parseDeliveryInfo = (deliveryAddress: string) => {
+    if (!deliveryAddress) return null;
+    
+    if (deliveryAddress.includes('|')) {
+      const parts = deliveryAddress.split('|');
+      const info = {
+        contactName: '',
+        phone: '',
+        email: '',
+        address: ''
+      };
+      
+      parts.forEach(part => {
+        const trimmed = part.trim();
+        if (trimmed.startsWith('Contact:')) {
+          info.contactName = trimmed.replace('Contact:', '').trim();
+        } else if (trimmed.startsWith('Phone:')) {
+          info.phone = trimmed.replace('Phone:', '').trim();
+        } else if (trimmed.startsWith('Email:')) {
+          info.email = trimmed.replace('Email:', '').trim();
+        } else if (trimmed.startsWith('Address:')) {
+          info.address = trimmed.replace('Address:', '').trim();
+        }
+      });
+      
+      return info;
+    }
+    
+    return null;
+  };
+
   const getCustomerInfo = (order: Order) => {
+    const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+    
+    if (deliveryInfo && deliveryInfo.contactName) {
+      return {
+        name: deliveryInfo.contactName,
+        email: deliveryInfo.email || 'No email',
+        phone: deliveryInfo.phone || 'No phone'
+      };
+    }
+    
     if (order.guest_name) {
       return {
         name: order.guest_name,
@@ -46,11 +87,22 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
         phone: order.guest_phone || 'No phone'
       };
     }
+    
     return {
       name: 'Registered User',
       email: 'Via user account',
       phone: 'Via user account'
     };
+  };
+
+  const getDeliveryAddress = (order: Order) => {
+    const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+    
+    if (deliveryInfo && deliveryInfo.address) {
+      return deliveryInfo.address;
+    }
+    
+    return order.delivery_address || 'Address on file';
   };
 
   return (
@@ -66,6 +118,8 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
                 <TableRow className="border-gold/20">
                   <TableHead className="text-gold">Order ID</TableHead>
                   <TableHead className="text-gold">Customer</TableHead>
+                  <TableHead className="text-gold">Contact</TableHead>
+                  <TableHead className="text-gold">Delivery Address</TableHead>
                   <TableHead className="text-gold">Items</TableHead>
                   <TableHead className="text-gold">Total</TableHead>
                   <TableHead className="text-gold">Status</TableHead>
@@ -77,6 +131,7 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
               <TableBody>
                 {orders.map((order) => {
                   const customer = getCustomerInfo(order);
+                  const deliveryAddress = getDeliveryAddress(order);
                   return (
                     <TableRow key={order.id} className="border-gold/10">
                       <TableCell className="font-mono text-sm">
@@ -86,9 +141,21 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
                         <div>
                           <div className="font-medium">{customer.name}</div>
                           <div className="text-sm text-gray-400">{customer.email}</div>
-                          {customer.phone !== 'Via user account' && (
-                            <div className="text-sm text-gray-400">{customer.phone}</div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm">
+                          {customer.phone !== 'Via user account' && customer.phone !== 'No phone' && (
+                            <div className="text-gray-300">{customer.phone}</div>
                           )}
+                          {(customer.phone === 'Via user account' || customer.phone === 'No phone') && (
+                            <div className="text-gray-500">No phone</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="text-sm max-w-xs truncate" title={deliveryAddress}>
+                          {deliveryAddress}
                         </div>
                       </TableCell>
                       <TableCell>

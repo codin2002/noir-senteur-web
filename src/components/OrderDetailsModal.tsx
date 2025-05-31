@@ -10,7 +10,7 @@ interface OrderDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
   orderId: string | null;
-  showAdmin?: boolean; // Add prop to control admin features
+  showAdmin?: boolean;
 }
 
 const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
@@ -46,31 +46,43 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     }
   };
 
-  const getCustomerName = () => {
+  const getCustomerInfo = () => {
     if (orderDetails?.guest_name) {
-      return orderDetails.guest_name;
+      return {
+        name: orderDetails.guest_name,
+        email: orderDetails.guest_email || 'No email provided',
+        phone: orderDetails.guest_phone || 'No phone provided'
+      };
     }
+    
+    if (orderDetails?.parsed_delivery_info?.contactName) {
+      return {
+        name: orderDetails.parsed_delivery_info.contactName,
+        email: orderDetails.parsed_delivery_info.email || 'No email provided',
+        phone: orderDetails.parsed_delivery_info.phone || 'No phone provided'
+      };
+    }
+    
     if (orderDetails?.user_profile?.full_name) {
-      return orderDetails.user_profile.full_name;
+      return {
+        name: orderDetails.user_profile.full_name,
+        email: 'Via user account',
+        phone: orderDetails.user_profile.phone || 'Via user account'
+      };
     }
-    return 'Registered User';
+    
+    return {
+      name: 'Registered User',
+      email: 'Via user account',
+      phone: 'Via user account'
+    };
   };
 
-  const getCustomerEmail = () => {
-    if (orderDetails?.guest_email) {
-      return orderDetails.guest_email;
+  const getDeliveryAddress = () => {
+    if (orderDetails?.parsed_delivery_info?.address) {
+      return orderDetails.parsed_delivery_info.address;
     }
-    return 'Via user account';
-  };
-
-  const getCustomerPhone = () => {
-    if (orderDetails?.guest_phone) {
-      return orderDetails.guest_phone;
-    }
-    if (orderDetails?.user_profile?.phone) {
-      return orderDetails.user_profile.phone;
-    }
-    return 'Via user account';
+    return orderDetails?.delivery_address || 'Address on file';
   };
 
   return (
@@ -118,31 +130,44 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
               )}
 
-              {/* Customer Info */}
+              {/* Customer & Delivery Info */}
               <div className={showAdmin ? "lg:col-span-2" : ""}>
                 <div className="bg-dark border border-gold/10 rounded-lg p-4">
                   <h3 className="text-lg font-semibold mb-2 flex items-center">
                     <User className="w-5 h-5 mr-2 text-gold" />
-                    Customer Information
+                    Customer & Delivery Information
                   </h3>
-                  <p className="text-muted-foreground mb-1 flex items-center">
-                    <User className="w-4 h-4 mr-1" />
-                    {getCustomerName()}
-                  </p>
-                  <p className="text-muted-foreground mb-1 flex items-center">
-                    <Mail className="w-4 h-4 mr-1" />
-                    {getCustomerEmail()}
-                  </p>
-                  <p className="text-muted-foreground mb-1 flex items-center">
-                    <Phone className="w-4 h-4 mr-1" />
-                    {getCustomerPhone()}
-                  </p>
-                  {orderDetails.delivery_address && (
-                    <p className="text-muted-foreground flex items-start">
-                      <MapPin className="w-4 h-4 mr-1 mt-1 flex-shrink-0" />
-                      <span className="text-sm">{orderDetails.delivery_address}</span>
-                    </p>
-                  )}
+                  
+                  {(() => {
+                    const customer = getCustomerInfo();
+                    return (
+                      <>
+                        <div className="mb-4">
+                          <h4 className="font-medium text-gold mb-2">Contact Details</h4>
+                          <p className="text-muted-foreground mb-1 flex items-center">
+                            <User className="w-4 h-4 mr-1" />
+                            {customer.name}
+                          </p>
+                          <p className="text-muted-foreground mb-1 flex items-center">
+                            <Mail className="w-4 h-4 mr-1" />
+                            {customer.email}
+                          </p>
+                          <p className="text-muted-foreground mb-1 flex items-center">
+                            <Phone className="w-4 h-4 mr-1" />
+                            {customer.phone}
+                          </p>
+                        </div>
+                        
+                        <div>
+                          <h4 className="font-medium text-gold mb-2">Delivery Address</h4>
+                          <p className="text-muted-foreground flex items-start">
+                            <MapPin className="w-4 h-4 mr-1 mt-1 flex-shrink-0" />
+                            <span className="text-sm">{getDeliveryAddress()}</span>
+                          </p>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>

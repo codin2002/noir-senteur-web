@@ -17,6 +17,13 @@ interface OrderItem {
   };
 }
 
+interface DeliveryInfo {
+  contactName: string;
+  phone: string;
+  email: string;
+  address: string;
+}
+
 interface OrderDetails {
   id: string;
   total: number;
@@ -32,11 +39,50 @@ interface OrderDetails {
     phone: string | null;
   };
   items: OrderItem[];
+  parsed_delivery_info?: DeliveryInfo;
 }
 
 export const useOrderDetails = () => {
   const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const parseDeliveryInfo = (deliveryAddress: string): DeliveryInfo => {
+    const defaultInfo: DeliveryInfo = {
+      contactName: '',
+      phone: '',
+      email: '',
+      address: ''
+    };
+
+    if (!deliveryAddress) return defaultInfo;
+
+    // Check if it's the new structured format with |
+    if (deliveryAddress.includes('|')) {
+      const parts = deliveryAddress.split('|');
+      const info = { ...defaultInfo };
+      
+      parts.forEach(part => {
+        const trimmed = part.trim();
+        if (trimmed.startsWith('Contact:')) {
+          info.contactName = trimmed.replace('Contact:', '').trim();
+        } else if (trimmed.startsWith('Phone:')) {
+          info.phone = trimmed.replace('Phone:', '').trim();
+        } else if (trimmed.startsWith('Email:')) {
+          info.email = trimmed.replace('Email:', '').trim();
+        } else if (trimmed.startsWith('Address:')) {
+          info.address = trimmed.replace('Address:', '').trim();
+        }
+      });
+      
+      return info;
+    } else {
+      // Legacy format - treat entire string as address
+      return {
+        ...defaultInfo,
+        address: deliveryAddress
+      };
+    }
+  };
 
   const fetchOrderDetails = async (orderId: string) => {
     setIsLoading(true);
@@ -90,10 +136,14 @@ export const useOrderDetails = () => {
         }
       }
       
+      // Parse delivery information
+      const parsedDeliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+      
       const orderWithTypedItems = {
         ...order,
         items: processedItems,
         user_profile: userProfile,
+        parsed_delivery_info: parsedDeliveryInfo,
         // Use the actual order total from database (includes shipping)
         total: Number(order.total) || 0
       };

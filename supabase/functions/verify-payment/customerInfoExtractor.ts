@@ -34,19 +34,20 @@ export async function extractCustomerInfo(
       customerEmail = user.email || 'user@example.com';
     }
   } else {
-    // For guest orders, try to extract from delivery address
+    // For guest orders, extract from the structured delivery address
     const addressParts = deliveryAddress.split('|');
     for (const part of addressParts) {
-      if (part.includes('Contact:')) {
-        customerName = part.replace('Contact:', '').trim();
-      } else if (part.includes('Email:')) {
-        customerEmail = part.replace('Email:', '').trim();
-      } else if (part.includes('Phone:')) {
-        customerPhone = part.replace('Phone:', '').trim();
+      const trimmedPart = part.trim();
+      if (trimmedPart.startsWith('Contact:')) {
+        customerName = trimmedPart.replace('Contact:', '').trim();
+      } else if (trimmedPart.startsWith('Email:')) {
+        customerEmail = trimmedPart.replace('Email:', '').trim();
+      } else if (trimmedPart.startsWith('Phone:')) {
+        customerPhone = trimmedPart.replace('Phone:', '').trim();
       }
     }
   }
 
-  console.log('Customer details:', { customerName, customerEmail, customerPhone });
+  console.log('Extracted customer details:', { customerName, customerEmail, customerPhone });
   return { customerName, customerEmail, customerPhone };
 }
