@@ -80,6 +80,7 @@ const AdminOrders = () => {
       // Transform the data to match our Order interface
       const transformedOrders: Order[] = (data || []).map(order => ({
         ...order,
+        notes: order.notes,
         items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
       }));
       
