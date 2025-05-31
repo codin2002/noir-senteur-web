@@ -357,14 +357,17 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
-                  </form>
-                </div>
-              </div>
 
-              {/* OR Divider - Desktop */}
-              <div className="hidden lg:flex items-center justify-center absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-                <div className="bg-gradient-to-br from-darker/95 to-dark/90 backdrop-blur-sm px-8 py-4 rounded-full border border-gold/30 shadow-2xl">
-                  <span className="text-gold font-semibold text-xl">OR</span>
+                    {/* OR Divider - Inside Guest Checkout */}
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-gold/20" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-darker px-3 text-muted-foreground font-medium">or</span>
+                      </div>
+                    </div>
+                  </form>
                 </div>
               </div>
 
