@@ -1,9 +1,12 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import OrderStatusManager from '@/components/admin/OrderStatusManager';
+import OrderReturnManager from '@/components/admin/OrderReturnManager';
+import InvoiceGenerator from '@/components/admin/InvoiceGenerator';
 import InventoryManager from '@/components/admin/InventoryManager';
 import AdminAuth from '@/components/admin/AdminAuth';
 import { formatDistanceToNow } from 'date-fns';
@@ -176,6 +179,8 @@ const AdminOrders = () => {
                                 ? 'bg-green-500/20 text-green-400'
                                 : order.status === 'dispatched'
                                 ? 'bg-blue-500/20 text-blue-400'
+                                : order.status === 'returned'
+                                ? 'bg-red-500/20 text-red-400'
                                 : 'bg-yellow-500/20 text-yellow-400'
                             }`}>
                               {order.status}
@@ -185,11 +190,21 @@ const AdminOrders = () => {
                             {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                           </TableCell>
                           <TableCell>
-                            <OrderStatusManager
-                              orderId={order.id}
-                              currentStatus={order.status}
-                              onStatusUpdated={refetch}
-                            />
+                            <div className="flex flex-col gap-2">
+                              <OrderStatusManager
+                                orderId={order.id}
+                                currentStatus={order.status}
+                                onStatusUpdated={refetch}
+                              />
+                              <div className="flex gap-2">
+                                <OrderReturnManager
+                                  orderId={order.id}
+                                  currentStatus={order.status}
+                                  onStatusUpdated={refetch}
+                                />
+                                <InvoiceGenerator orderId={order.id} />
+                              </div>
+                            </div>
                           </TableCell>
                         </TableRow>
                       );

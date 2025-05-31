@@ -147,6 +147,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               <SelectItem value="processing">Processing</SelectItem>
               <SelectItem value="dispatched">Dispatched</SelectItem>
               <SelectItem value="delivered">Delivered</SelectItem>
+              <SelectItem value="returned">Returned</SelectItem>
             </SelectContent>
           </Select>
         </div>
