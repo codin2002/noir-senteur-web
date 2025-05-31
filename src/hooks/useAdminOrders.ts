@@ -67,19 +67,28 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
       return transformedOrders;
     },
     enabled: isAuthenticated,
-    refetchInterval: 30000, // Refetch every 30 seconds to keep data fresh
-    staleTime: 10000, // Consider data stale after 10 seconds
+    refetchInterval: false, // Disable automatic refetching to prevent status conflicts
+    staleTime: 0, // Always consider data stale so manual refreshes work immediately
   });
 
-  // Auto-refresh when window gains focus
+  // Auto-refresh when window gains focus, but with debounce to prevent conflicts
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
     const handleFocus = () => {
-      console.log('🎯 Window gained focus - refreshing orders...');
-      forceRefresh();
+      console.log('🎯 Window gained focus - scheduling orders refresh...');
+      // Debounce the refresh to prevent conflicts during status updates
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        forceRefresh();
+      }, 1000); // Wait 1 second before refreshing
     };
 
     window.addEventListener('focus', handleFocus);
-    return () => window.removeEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   return {

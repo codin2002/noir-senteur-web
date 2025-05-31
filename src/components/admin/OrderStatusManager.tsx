@@ -49,7 +49,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
       console.log('✅ Step 1 Complete: Order status updated successfully');
 
-      // Handle inventory reduction when order is delivered
+      // Handle inventory reduction when order is delivered (but only if coming from non-delivered status)
       if (selectedStatus === 'delivered' && currentStatus !== 'delivered') {
         console.log('📦 Step 1.5: Order marked as delivered - reducing inventory...');
         try {
@@ -133,15 +133,19 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     } catch (error: any) {
       console.error('❌ CRITICAL ERROR in handleStatusUpdate:', error);
       toast.error(`Failed to update order status: ${error.message}`);
+      // Reset selectedStatus to currentStatus on error
+      setSelectedStatus(currentStatus);
     } finally {
       setIsUpdating(false);
     }
   };
 
-  // Update selected status when current status changes
+  // Don't automatically reset selectedStatus when currentStatus changes during updates
   React.useEffect(() => {
-    setSelectedStatus(currentStatus);
-  }, [currentStatus]);
+    if (!isUpdating && !isReducingInventory) {
+      setSelectedStatus(currentStatus);
+    }
+  }, [currentStatus, isUpdating, isReducingInventory]);
 
   const isButtonDisabled = isUpdating || isReducingInventory || selectedStatus === currentStatus;
 
@@ -153,7 +157,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       <CardContent className="space-y-4">
         <div>
           <label className="text-sm font-medium mb-2 block">Current Status: <span className="text-gold capitalize">{currentStatus}</span></label>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating || isReducingInventory}>
             <SelectTrigger className="bg-dark border-gold/30">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
