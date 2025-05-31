@@ -77,7 +77,7 @@ export const useInventoryUpdate = () => {
         
         console.log(`📊 Inventory update: ${item.perfume_id} | Current: ${currentStock} | Reducing: ${item.quantity} | New: ${newQuantity}`);
         
-        // Update inventory
+        // Update inventory with explicit timestamp
         const { error: updateError } = await supabase
           .from('inventory')
           .update({ 
@@ -97,10 +97,14 @@ export const useInventoryUpdate = () => {
       console.log('🎉 Inventory reduction completed successfully for order:', orderId);
     },
     onSuccess: () => {
-      // Invalidate all relevant queries to refresh the UI
+      // Invalidate all relevant queries to refresh the UI immediately
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
-      console.log('✅ Inventory updated successfully - queries invalidated');
+      
+      // Also refetch data to ensure fresh data
+      queryClient.refetchQueries({ queryKey: ['inventory'] });
+      
+      console.log('✅ Inventory updated successfully - queries invalidated and refetched');
       toast.success('Inventory updated successfully');
     },
     onError: (error: any) => {
@@ -109,8 +113,16 @@ export const useInventoryUpdate = () => {
     }
   });
 
+  // Add a function to manually trigger inventory reduction for testing
+  const testInventoryReduction = async (orderId: string) => {
+    console.log('🧪 Testing inventory reduction for order:', orderId);
+    return reduceInventoryMutation.mutateAsync({ orderId });
+  };
+
   return {
     reduceInventory: reduceInventoryMutation.mutate,
+    reduceInventoryAsync: reduceInventoryMutation.mutateAsync,
+    testInventoryReduction,
     isUpdating: reduceInventoryMutation.isPending
   };
 };

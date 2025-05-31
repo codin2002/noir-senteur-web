@@ -20,7 +20,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 }) => {
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [isUpdating, setIsUpdating] = useState(false);
-  const { reduceInventory, isUpdating: isReducingInventory } = useInventoryUpdate();
+  const { reduceInventoryAsync, isUpdating: isReducingInventory } = useInventoryUpdate();
 
   const handleStatusUpdate = async () => {
     console.log('🔥 === BUTTON CLICKED - STARTING STATUS UPDATE ===');
@@ -53,20 +53,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       if (selectedStatus === 'delivered' && currentStatus !== 'delivered') {
         console.log('📦 Step 1.5: Order marked as delivered - reducing inventory...');
         try {
-          // Call the inventory reduction mutation and wait for it to complete
-          await new Promise<void>((resolve, reject) => {
-            console.log('🔄 Calling reduceInventory mutation...');
-            reduceInventory({ orderId }, {
-              onSuccess: () => {
-                console.log('✅ Inventory reduction completed successfully');
-                resolve();
-              },
-              onError: (error) => {
-                console.error('❌ Inventory reduction failed:', error);
-                reject(error);
-              }
-            });
-          });
+          await reduceInventoryAsync({ orderId });
           console.log('📊 Inventory successfully reduced for delivered order');
         } catch (inventoryError) {
           console.error('⚠️ Inventory reduction failed:', inventoryError);
