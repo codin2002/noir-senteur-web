@@ -37,19 +37,41 @@ interface Order {
 
 const AdminOrders = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   // Check if admin is already authenticated in session storage
   useEffect(() => {
+    console.log('AdminOrders: Checking authentication status...');
     const adminAuth = sessionStorage.getItem('admin_authenticated');
-    if (adminAuth === 'true') {
-      setIsAuthenticated(true);
-    }
+    console.log('AdminOrders: Found auth status:', adminAuth);
+    
+    setIsAuthenticated(adminAuth === 'true');
+    setIsCheckingAuth(false);
   }, []);
 
   const handleAuthenticated = () => {
+    console.log('AdminOrders: Authentication successful');
     setIsAuthenticated(true);
     sessionStorage.setItem('admin_authenticated', 'true');
   };
+
+  const handleLogout = () => {
+    console.log('AdminOrders: Logging out');
+    sessionStorage.removeItem('admin_authenticated');
+    setIsAuthenticated(false);
+  };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-serif mb-4 text-gold">Loading...</h2>
+          <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
 
   // If not authenticated, show login form
   if (!isAuthenticated) {
@@ -100,7 +122,7 @@ const AdminOrders = () => {
       <div className="min-h-screen bg-dark p-6">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
-          <div className="text-center">Loading...</div>
+          <div className="text-center text-gold">Loading orders...</div>
         </div>
       </div>
     );
@@ -112,10 +134,7 @@ const AdminOrders = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
           <button
-            onClick={() => {
-              sessionStorage.removeItem('admin_authenticated');
-              setIsAuthenticated(false);
-            }}
+            onClick={handleLogout}
             className="text-gold hover:text-gold/70 text-sm"
           >
             Logout

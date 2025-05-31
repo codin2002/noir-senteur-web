@@ -14,19 +14,29 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Check credentials
-    if (username === 'senteur' && password === 'SenteurSAF@2025') {
-      toast.success('Admin access granted');
-      onAuthenticated();
-    } else {
-      toast.error('Invalid credentials');
+    console.log('Admin login attempt:', { username, password: password.length > 0 ? '***' : 'empty' });
+
+    try {
+      // Check credentials
+      if (username === 'senteur' && password === 'SenteurSAF@2025') {
+        console.log('Admin credentials verified successfully');
+        toast.success('Admin access granted');
+        sessionStorage.setItem('admin_authenticated', 'true');
+        onAuthenticated();
+      } else {
+        console.log('Invalid admin credentials provided');
+        toast.error('Invalid credentials');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Login failed');
+    } finally {
+      setIsLoading(false);
     }
-    
-    setIsLoading(false);
   };
 
   return (
