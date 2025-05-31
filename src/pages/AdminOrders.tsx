@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +8,8 @@ import OrderReturnManager from '@/components/admin/OrderReturnManager';
 import InvoiceGenerator from '@/components/admin/InvoiceGenerator';
 import InventoryManager from '@/components/admin/InventoryManager';
 import AdminAuth from '@/components/admin/AdminAuth';
+import AdminDashboardSummary from '@/components/admin/AdminDashboardSummary';
+import InventoryTestModal from '@/components/admin/InventoryTestModal';
 import { formatDistanceToNow } from 'date-fns';
 
 interface OrderItem {
@@ -39,6 +40,7 @@ interface Order {
 const AdminOrders = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isInventoryTestOpen, setIsInventoryTestOpen] = useState(false);
 
   // Check if admin is already authenticated in session storage
   useEffect(() => {
@@ -62,6 +64,10 @@ const AdminOrders = () => {
     setIsAuthenticated(false);
   };
 
+  const handleInventoryTest = () => {
+    setIsInventoryTestOpen(true);
+  };
+
   // Only enable the query if authenticated
   const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ['admin-orders'],
@@ -80,7 +86,7 @@ const AdminOrders = () => {
       // Transform the data to match our Order interface
       const transformedOrders: Order[] = (data || []).map(order => ({
         ...order,
-        notes: order.notes,
+        notes: order.notes || null,
         items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
       }));
       
@@ -144,6 +150,12 @@ const AdminOrders = () => {
             Logout
           </button>
         </div>
+        
+        {/* Dashboard Summary */}
+        <AdminDashboardSummary 
+          orders={orders || []} 
+          onInventoryTest={handleInventoryTest}
+        />
         
         {/* Inventory Management Section */}
         <InventoryManager />
@@ -264,6 +276,12 @@ const AdminOrders = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Inventory Test Modal */}
+        <InventoryTestModal 
+          isOpen={isInventoryTestOpen} 
+          onClose={() => setIsInventoryTestOpen(false)} 
+        />
       </div>
     </div>
   );
