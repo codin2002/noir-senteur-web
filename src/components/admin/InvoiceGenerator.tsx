@@ -20,35 +20,55 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ orderId }) => {
     }
   }, [isOpen, orderId]);
 
-  const getCustomerName = () => {
-    if (orderDetails?.guest_name) {
-      return orderDetails.guest_name;
+  const getCustomerInfo = () => {
+    if (!orderDetails) return { name: 'Unknown', email: 'Unknown', phone: 'Unknown' };
+
+    // First check for parsed delivery info (new format)
+    if (orderDetails.parsed_delivery_info?.contactName) {
+      return {
+        name: orderDetails.parsed_delivery_info.contactName,
+        email: orderDetails.parsed_delivery_info.email || 'No email provided',
+        phone: orderDetails.parsed_delivery_info.phone || 'No phone provided'
+      };
     }
-    if (orderDetails?.user_profile?.full_name) {
-      return orderDetails.user_profile.full_name;
+
+    // Then check for guest info (legacy format)
+    if (orderDetails.guest_name) {
+      return {
+        name: orderDetails.guest_name,
+        email: orderDetails.guest_email || 'No email provided',
+        phone: orderDetails.guest_phone || 'No phone provided'
+      };
     }
-    return 'Registered User';
+
+    // Finally check for user profile (registered user)
+    if (orderDetails.user_profile?.full_name) {
+      return {
+        name: orderDetails.user_profile.full_name,
+        email: 'Via user account',
+        phone: orderDetails.user_profile.phone || 'Via user account'
+      };
+    }
+
+    return {
+      name: 'Registered User',
+      email: 'Via user account',
+      phone: 'Via user account'
+    };
   };
 
-  const getCustomerEmail = () => {
-    if (orderDetails?.guest_email) {
-      return orderDetails.guest_email;
+  const getDeliveryAddress = () => {
+    if (orderDetails?.parsed_delivery_info?.address) {
+      return orderDetails.parsed_delivery_info.address;
     }
-    return 'Via user account';
-  };
-
-  const getCustomerPhone = () => {
-    if (orderDetails?.guest_phone) {
-      return orderDetails.guest_phone;
-    }
-    if (orderDetails?.user_profile?.phone) {
-      return orderDetails.user_profile.phone;
-    }
-    return 'Via user account';
+    return orderDetails?.delivery_address || 'Address on file';
   };
 
   const generateInvoiceText = () => {
     if (!orderDetails) return '';
+
+    const customer = getCustomerInfo();
+    const deliveryAddress = getDeliveryAddress();
 
     const items = orderDetails.items.map(item => 
       `• ${item.perfume.name} x${item.quantity} - AED ${(item.price * item.quantity).toFixed(2)}`
@@ -56,10 +76,6 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ orderId }) => {
 
     const subtotal = orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const shipping = orderDetails.total - subtotal;
-
-    const customerName = getCustomerName();
-    const customerEmail = getCustomerEmail();
-    const customerPhone = getCustomerPhone();
 
     return `🧾 *SENTEUR INVOICE*
 
@@ -69,12 +85,12 @@ Date: ${new Date(orderDetails.created_at).toLocaleDateString()}
 Status: ${orderDetails.status.toUpperCase()}
 
 👤 *Customer Information:*
-Name: ${customerName}
-${customerEmail !== 'Via user account' ? `Email: ${customerEmail}` : ''}
-${customerPhone !== 'Via user account' ? `Phone: ${customerPhone}` : ''}
+Name: ${customer.name}
+${customer.email !== 'Via user account' ? `Email: ${customer.email}` : ''}
+${customer.phone !== 'Via user account' ? `Phone: ${customer.phone}` : ''}
 
 📍 *Delivery Address:*
-${orderDetails.delivery_address || 'Address on file'}
+${deliveryAddress}
 
 🛍️ *Items Ordered:*
 ${items}
@@ -100,7 +116,6 @@ Thank you for choosing Senteur! 🌹
   const copyInvoice = () => {
     const invoiceText = generateInvoiceText();
     navigator.clipboard.writeText(invoiceText);
-    // You could add a toast here if you want
   };
 
   return (
@@ -143,18 +158,23 @@ Thank you for choosing Senteur! 🌹
                 
                 <div>
                   <h3 className="font-semibold text-gold mb-2">Customer Information</h3>
-                  <p className="text-sm">{getCustomerName()}</p>
-                  {getCustomerEmail() !== 'Via user account' && <p className="text-sm">{getCustomerEmail()}</p>}
-                  {getCustomerPhone() !== 'Via user account' && <p className="text-sm">{getCustomerPhone()}</p>}
+                  {(() => {
+                    const customer = getCustomerInfo();
+                    return (
+                      <>
+                        <p className="text-sm">{customer.name}</p>
+                        {customer.email !== 'Via user account' && <p className="text-sm">{customer.email}</p>}
+                        {customer.phone !== 'Via user account' && <p className="text-sm">{customer.phone}</p>}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
 
-              {orderDetails.delivery_address && (
-                <div className="mb-6">
-                  <h3 className="font-semibold text-gold mb-2">Delivery Address</h3>
-                  <p className="text-sm">{orderDetails.delivery_address}</p>
-                </div>
-              )}
+              <div className="mb-6">
+                <h3 className="font-semibold text-gold mb-2">Delivery Address</h3>
+                <p className="text-sm">{getDeliveryAddress()}</p>
+              </div>
 
               <div className="mb-6">
                 <h3 className="font-semibold text-gold mb-2">Items Ordered</h3>
