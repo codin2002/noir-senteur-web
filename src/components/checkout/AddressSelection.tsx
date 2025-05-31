@@ -18,6 +18,8 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
 }) => {
   const [deliveryMethod] = useState('home');
   const [addressComponents, setAddressComponents] = useState({
+    contactName: '',
+    phoneNumber: '',
     buildingName: '',
     floorNumber: '',
     roomNumber: '',
@@ -46,20 +48,25 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     };
     setAddressComponents(newComponents);
 
-    // Combine all components into a single address string
-    const fullAddress = [
+    // Combine all components into a single address string with contact info
+    const contactInfo = `Contact: ${newComponents.contactName} | Phone: ${newComponents.phoneNumber} | Email: `;
+    const addressInfo = `Address: ${[
       newComponents.buildingName,
       newComponents.floorNumber,
       newComponents.roomNumber,
       newComponents.area,
       newComponents.landmark,
       newComponents.emirate
-    ].filter(Boolean).join(', ');
+    ].filter(Boolean).join(', ')}`;
 
+    const fullAddress = `${contactInfo} | ${addressInfo}`;
     onAddressChange(fullAddress);
 
-    // Check if address is valid (at least building name and area)
-    const isValid = newComponents.buildingName.trim() !== '' && newComponents.area.trim() !== '';
+    // Check if address is valid (contact name, phone, building name and area are required)
+    const isValid = newComponents.contactName.trim() !== '' && 
+                   newComponents.phoneNumber.trim() !== '' &&
+                   newComponents.buildingName.trim() !== '' && 
+                   newComponents.area.trim() !== '';
     onValidationChange(isValid);
   };
 
