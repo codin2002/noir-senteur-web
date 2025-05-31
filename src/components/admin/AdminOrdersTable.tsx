@@ -1,10 +1,10 @@
-
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import OrderStatusManager from '@/components/admin/OrderStatusManager';
 import OrderReturnManager from '@/components/admin/OrderReturnManager';
 import InvoiceGenerator from '@/components/admin/InvoiceGenerator';
+import OrdersSearchBar from '@/components/admin/OrdersSearchBar';
 import { formatDistanceToNow } from 'date-fns';
 
 interface OrderItem {
@@ -38,6 +38,8 @@ interface AdminOrdersTableProps {
 }
 
 const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const parseDeliveryInfo = (deliveryAddress: string) => {
     if (!deliveryAddress) return null;
     
@@ -105,13 +107,35 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
     return order.delivery_address || 'Address on file';
   };
 
+  // Filter orders based on search term
+  const filteredOrders = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return orders;
+    }
+
+    const searchLower = searchTerm.toLowerCase();
+    
+    return orders.filter((order) => {
+      const customer = getCustomerInfo(order);
+      const customerName = customer.name.toLowerCase();
+      const orderId = order.id.toLowerCase();
+      
+      return customerName.includes(searchLower) || orderId.includes(searchLower);
+    });
+  }, [orders, searchTerm]);
+
   return (
     <Card className="bg-darker border-gold/20">
       <CardHeader>
         <CardTitle className="text-gold">Order Management</CardTitle>
       </CardHeader>
       <CardContent>
-        {orders && orders.length > 0 ? (
+        <OrdersSearchBar 
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+        
+        {filteredOrders && filteredOrders.length > 0 ? (
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
@@ -129,7 +153,7 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {orders.map((order) => {
+                {filteredOrders.map((order) => {
                   const customer = getCustomerInfo(order);
                   const deliveryAddress = getDeliveryAddress(order);
                   return (
@@ -231,7 +255,7 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
           </div>
         ) : (
           <div className="text-center text-gray-400 py-8">
-            No orders found.
+            {searchTerm ? `No orders found matching "${searchTerm}"` : 'No orders found.'}
           </div>
         )}
       </CardContent>
