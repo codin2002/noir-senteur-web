@@ -17,6 +17,51 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
   onValidationChange
 }) => {
   const [deliveryMethod] = useState('home');
+  const [addressComponents, setAddressComponents] = useState({
+    buildingName: '',
+    floorNumber: '',
+    roomNumber: '',
+    area: '',
+    landmark: '',
+    emirate: ''
+  });
+
+  // Parse existing address into components when selectedAddress changes
+  useEffect(() => {
+    if (selectedAddress) {
+      // Try to parse the address if it's a formatted string
+      // For now, just set it as the building name if it's a simple string
+      setAddressComponents(prev => ({
+        ...prev,
+        buildingName: selectedAddress
+      }));
+    }
+  }, [selectedAddress]);
+
+  // Handle address component changes
+  const handleAddressComponentChange = (component: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newComponents = {
+      ...addressComponents,
+      [component]: e.target.value
+    };
+    setAddressComponents(newComponents);
+
+    // Combine all components into a single address string
+    const fullAddress = [
+      newComponents.buildingName,
+      newComponents.floorNumber,
+      newComponents.roomNumber,
+      newComponents.area,
+      newComponents.landmark,
+      newComponents.emirate
+    ].filter(Boolean).join(', ');
+
+    onAddressChange(fullAddress);
+
+    // Check if address is valid (at least building name and area)
+    const isValid = newComponents.buildingName.trim() !== '' && newComponents.area.trim() !== '';
+    onValidationChange(isValid);
+  };
 
   return (
     <div className="space-y-6">
@@ -39,9 +84,9 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
       </div>
 
       <DeliveryAddressForm 
-        onAddressChange={onAddressChange}
-        selectedAddress={selectedAddress}
-        onValidationChange={onValidationChange}
+        addressComponents={addressComponents}
+        onAddressComponentChange={handleAddressComponentChange}
+        isLoading={false}
       />
     </div>
   );
