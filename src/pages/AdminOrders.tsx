@@ -164,6 +164,7 @@ const AdminOrders = () => {
                       <TableHead className="text-gold">Status</TableHead>
                       <TableHead className="text-gold">Date</TableHead>
                       <TableHead className="text-gold">Actions</TableHead>
+                      <TableHead className="text-gold">Return Info</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -226,6 +227,27 @@ const AdminOrders = () => {
                                 <InvoiceGenerator orderId={order.id} />
                               </div>
                             </div>
+                          </TableCell>
+                          <TableCell>
+                            {order.status === 'returned' ? (
+                              <div className="bg-red-500/10 border border-red-500/30 rounded-md p-3 max-w-xs">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <span className="bg-red-500 text-white text-xs px-2 py-1 rounded font-semibold">
+                                    RETURNED
+                                  </span>
+                                </div>
+                                {order.notes && order.notes.includes('Return Reason:') && (
+                                  <div className="text-xs text-red-300">
+                                    <div className="font-medium mb-1">Reason:</div>
+                                    <div className="text-gray-300">
+                                      {order.notes.replace('Return Reason: ', '')}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-gray-500 text-xs">—</span>
+                            )}
                           </TableCell>
                         </TableRow>
                       );
