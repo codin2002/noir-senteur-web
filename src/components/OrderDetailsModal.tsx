@@ -46,6 +46,33 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     }
   };
 
+  const getCustomerName = () => {
+    if (orderDetails?.guest_name) {
+      return orderDetails.guest_name;
+    }
+    if (orderDetails?.user_profile?.full_name) {
+      return orderDetails.user_profile.full_name;
+    }
+    return 'Registered User';
+  };
+
+  const getCustomerEmail = () => {
+    if (orderDetails?.guest_email) {
+      return orderDetails.guest_email;
+    }
+    return 'Via user account';
+  };
+
+  const getCustomerPhone = () => {
+    if (orderDetails?.guest_phone) {
+      return orderDetails.guest_phone;
+    }
+    if (orderDetails?.user_profile?.phone) {
+      return orderDetails.user_profile.phone;
+    }
+    return 'Via user account';
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-darker border border-gold/20 text-white">
@@ -98,24 +125,18 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     <User className="w-5 h-5 mr-2 text-gold" />
                     Customer Information
                   </h3>
-                  {orderDetails.guest_name && (
-                    <p className="text-muted-foreground mb-1 flex items-center">
-                      <User className="w-4 h-4 mr-1" />
-                      {orderDetails.guest_name}
-                    </p>
-                  )}
-                  {orderDetails.guest_email && (
-                    <p className="text-muted-foreground mb-1 flex items-center">
-                      <Mail className="w-4 h-4 mr-1" />
-                      {orderDetails.guest_email}
-                    </p>
-                  )}
-                  {orderDetails.guest_phone && (
-                    <p className="text-muted-foreground mb-1 flex items-center">
-                      <Phone className="w-4 h-4 mr-1" />
-                      {orderDetails.guest_phone}
-                    </p>
-                  )}
+                  <p className="text-muted-foreground mb-1 flex items-center">
+                    <User className="w-4 h-4 mr-1" />
+                    {getCustomerName()}
+                  </p>
+                  <p className="text-muted-foreground mb-1 flex items-center">
+                    <Mail className="w-4 h-4 mr-1" />
+                    {getCustomerEmail()}
+                  </p>
+                  <p className="text-muted-foreground mb-1 flex items-center">
+                    <Phone className="w-4 h-4 mr-1" />
+                    {getCustomerPhone()}
+                  </p>
                   {orderDetails.delivery_address && (
                     <p className="text-muted-foreground flex items-start">
                       <MapPin className="w-4 h-4 mr-1 mt-1 flex-shrink-0" />

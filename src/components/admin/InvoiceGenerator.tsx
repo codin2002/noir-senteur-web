@@ -20,6 +20,33 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ orderId }) => {
     }
   }, [isOpen, orderId]);
 
+  const getCustomerName = () => {
+    if (orderDetails?.guest_name) {
+      return orderDetails.guest_name;
+    }
+    if (orderDetails?.user_profile?.full_name) {
+      return orderDetails.user_profile.full_name;
+    }
+    return 'Registered User';
+  };
+
+  const getCustomerEmail = () => {
+    if (orderDetails?.guest_email) {
+      return orderDetails.guest_email;
+    }
+    return 'Via user account';
+  };
+
+  const getCustomerPhone = () => {
+    if (orderDetails?.guest_phone) {
+      return orderDetails.guest_phone;
+    }
+    if (orderDetails?.user_profile?.phone) {
+      return orderDetails.user_profile.phone;
+    }
+    return 'Via user account';
+  };
+
   const generateInvoiceText = () => {
     if (!orderDetails) return '';
 
@@ -30,6 +57,10 @@ const InvoiceGenerator: React.FC<InvoiceGeneratorProps> = ({ orderId }) => {
     const subtotal = orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     const shipping = orderDetails.total - subtotal;
 
+    const customerName = getCustomerName();
+    const customerEmail = getCustomerEmail();
+    const customerPhone = getCustomerPhone();
+
     return `🧾 *SENTEUR INVOICE*
 
 📋 *Order Details:*
@@ -38,9 +69,9 @@ Date: ${new Date(orderDetails.created_at).toLocaleDateString()}
 Status: ${orderDetails.status.toUpperCase()}
 
 👤 *Customer Information:*
-Name: ${orderDetails.guest_name || 'Registered User'}
-${orderDetails.guest_email ? `Email: ${orderDetails.guest_email}` : ''}
-${orderDetails.guest_phone ? `Phone: ${orderDetails.guest_phone}` : ''}
+Name: ${customerName}
+${customerEmail !== 'Via user account' ? `Email: ${customerEmail}` : ''}
+${customerPhone !== 'Via user account' ? `Phone: ${customerPhone}` : ''}
 
 📍 *Delivery Address:*
 ${orderDetails.delivery_address || 'Address on file'}
@@ -112,9 +143,9 @@ Thank you for choosing Senteur! 🌹
                 
                 <div>
                   <h3 className="font-semibold text-gold mb-2">Customer Information</h3>
-                  <p className="text-sm">{orderDetails.guest_name || 'Registered User'}</p>
-                  {orderDetails.guest_email && <p className="text-sm">{orderDetails.guest_email}</p>}
-                  {orderDetails.guest_phone && <p className="text-sm">{orderDetails.guest_phone}</p>}
+                  <p className="text-sm">{getCustomerName()}</p>
+                  {getCustomerEmail() !== 'Via user account' && <p className="text-sm">{getCustomerEmail()}</p>}
+                  {getCustomerPhone() !== 'Via user account' && <p className="text-sm">{getCustomerPhone()}</p>}
                 </div>
               </div>
 

@@ -27,6 +27,10 @@ interface OrderDetails {
   guest_phone?: string;
   delivery_address?: string;
   user_id?: string;
+  user_profile?: {
+    full_name: string | null;
+    phone: string | null;
+  };
   items: OrderItem[];
 }
 
@@ -67,9 +71,29 @@ export const useOrderDetails = () => {
         quantity: Number(item.quantity) || 1
       }));
       
+      let userProfile = null;
+      
+      // If this is a registered user order, fetch their profile
+      if (order.user_id && !order.guest_name) {
+        console.log('Fetching user profile for user_id:', order.user_id);
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('full_name, phone')
+          .eq('id', order.user_id)
+          .single();
+        
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError);
+        } else {
+          userProfile = profileData;
+          console.log('User profile found:', userProfile);
+        }
+      }
+      
       const orderWithTypedItems = {
         ...order,
         items: processedItems,
+        user_profile: userProfile,
         // Use the actual order total from database (includes shipping)
         total: Number(order.total) || 0
       };
