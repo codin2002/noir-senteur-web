@@ -30,6 +30,8 @@ const OrderReturnManager: React.FC<OrderReturnManagerProps> = ({
 
     setIsProcessing(true);
     try {
+      console.log('🔄 Processing return for order:', orderId);
+      
       // Update order status to returned and add return reason to notes
       const { error } = await supabase
         .from('orders')
@@ -39,14 +41,20 @@ const OrderReturnManager: React.FC<OrderReturnManagerProps> = ({
         })
         .eq('id', orderId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error processing return:', error);
+        throw error;
+      }
 
+      console.log('✅ Order marked as returned successfully');
       toast.success('Order marked as returned');
       setIsOpen(false);
       setReturnReason('');
+      
+      // Force refresh the orders data
       onStatusUpdated();
     } catch (error: any) {
-      console.error('Error processing return:', error);
+      console.error('❌ Error processing return:', error);
       toast.error(`Failed to process return: ${error.message}`);
     } finally {
       setIsProcessing(false);

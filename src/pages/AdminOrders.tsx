@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -41,6 +42,7 @@ const AdminOrders = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [isInventoryTestOpen, setIsInventoryTestOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Check if admin is already authenticated in session storage
   useEffect(() => {
@@ -68,9 +70,15 @@ const AdminOrders = () => {
     setIsInventoryTestOpen(true);
   };
 
+  // Force refresh function that increments the key
+  const forceRefresh = () => {
+    console.log('🔄 Force refreshing orders data...');
+    setRefreshKey(prev => prev + 1);
+  };
+
   // Only enable the query if authenticated
   const { data: orders, isLoading, refetch } = useQuery({
-    queryKey: ['admin-orders'],
+    queryKey: ['admin-orders', refreshKey],
     queryFn: async () => {
       console.log('🔍 Fetching all orders for admin...');
       
@@ -89,6 +97,14 @@ const AdminOrders = () => {
         notes: order.notes || null,
         items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
       }));
+      
+      console.log('📊 Orders by status:', {
+        delivered: transformedOrders.filter(o => o.status === 'delivered').length,
+        processing: transformedOrders.filter(o => o.status === 'processing').length,
+        dispatched: transformedOrders.filter(o => o.status === 'dispatched').length,
+        returned: transformedOrders.filter(o => o.status === 'returned').length,
+        total: transformedOrders.length
+      });
       
       return transformedOrders;
     },
@@ -230,13 +246,13 @@ const AdminOrders = () => {
                               <OrderStatusManager
                                 orderId={order.id}
                                 currentStatus={order.status}
-                                onStatusUpdated={refetch}
+                                onStatusUpdated={forceRefresh}
                               />
                               <div className="flex gap-2">
                                 <OrderReturnManager
                                   orderId={order.id}
                                   currentStatus={order.status}
-                                  onStatusUpdated={refetch}
+                                  onStatusUpdated={forceRefresh}
                                 />
                                 <InvoiceGenerator orderId={order.id} />
                               </div>

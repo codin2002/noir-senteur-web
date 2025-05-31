@@ -118,7 +118,8 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       }
 
       console.log('🔄 Step 3: Refreshing order data...');
-      onStatusUpdated();
+      // Force refresh by calling the callback
+      await onStatusUpdated();
       console.log('✅ STATUS UPDATE PROCESS COMPLETE');
 
     } catch (error: any) {
