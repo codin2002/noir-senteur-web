@@ -24,61 +24,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isLoading = isContextLoading || operationsLoading;
 
-  // Function to ensure user profile exists
-  const ensureUserProfile = async (user: User) => {
-    try {
-      console.log('Checking/creating profile for user:', user.id);
-      
-      // Check if profile exists
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .single();
-
-      if (fetchError && fetchError.code === 'PGRST116') {
-        // Profile doesn't exist, create it
-        console.log('Creating new profile for user:', user.id);
-        const { data: newProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            full_name: user.user_metadata?.full_name || 
-                      user.user_metadata?.name || 
-                      user.email?.split('@')[0] || '',
-            avatar_url: user.user_metadata?.avatar_url || null
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating profile:', createError);
-        } else {
-          console.log('Profile created successfully:', newProfile);
-        }
-      } else if (existingProfile) {
-        console.log('Profile already exists for user:', user.id);
-      } else if (fetchError) {
-        console.error('Error checking profile:', fetchError);
-      }
-    } catch (error) {
-      console.error('Error in ensureUserProfile:', error);
-    }
-  };
-
   useEffect(() => {
     // Set up auth state listener first
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event, session?.user?.email);
+      async (_event, session) => {
+        console.log("Auth state changed:", _event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         setIsContextLoading(false);
         
-        // Ensure profile exists for authenticated users
-        if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        // Restore cart from localStorage on successful sign-in/sign-up
+        if (_event === 'SIGNED_IN' && session?.user) {
           setTimeout(() => {
-            ensureUserProfile(session.user);
             cartRestoreService.restoreCartFromLocalStorage(session.user.id);
           }, 100);
         }
@@ -91,13 +48,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsContextLoading(false);
-      
-      // Ensure profile exists for existing session
-      if (session?.user) {
-        setTimeout(() => {
-          ensureUserProfile(session.user);
-        }, 100);
-      }
     });
 
     return () => {

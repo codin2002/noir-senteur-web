@@ -14,49 +14,12 @@ export const useOrders = () => {
     try {
       console.log('=== FETCHING ORDERS FOR USER ===');
       console.log('User ID:', user?.id);
-      console.log('User email:', user?.email);
-      
-      if (!user?.id) {
-        console.log('No user ID available, skipping order fetch');
-        setOrders([]);
-        setIsLoading(false);
-        return;
-      }
       
       setIsLoading(true);
       
-      // First, let's check if the user has a profile
-      const { data: profileCheck, error: profileError } = await supabase
-        .from('profiles')
-        .select('id, full_name')
-        .eq('id', user.id)
-        .single();
-      
-      if (profileError && profileError.code === 'PGRST116') {
-        console.log('No profile found for user, creating one...');
-        
-        // Create profile if it doesn't exist
-        const { error: createProfileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: user.id,
-            full_name: user.user_metadata?.full_name || 
-                      user.user_metadata?.name || 
-                      user.email?.split('@')[0] || ''
-          });
-        
-        if (createProfileError) {
-          console.error('Error creating profile:', createProfileError);
-        } else {
-          console.log('Profile created successfully');
-        }
-      } else if (profileCheck) {
-        console.log('Profile found:', profileCheck);
-      }
-      
       // Use the RPC function to get orders with items
       const { data: ordersData, error: ordersError } = await supabase.rpc('get_orders_with_items', {
-        user_uuid: user.id
+        user_uuid: user?.id
       });
         
       if (ordersError) {
@@ -64,11 +27,10 @@ export const useOrders = () => {
         throw ordersError;
       }
       
-      console.log('Raw orders data received:', ordersData);
+      console.log('Orders data received:', ordersData);
       
       // Filter to only show orders for the current user (extra safety)
-      const userOrders = (ordersData || []).filter(order => order.user_id === user.id);
-      console.log('Filtered user orders:', userOrders.length);
+      const userOrders = (ordersData || []).filter(order => order.user_id === user?.id);
       
       // Process the orders to match our Order type with proper type casting
       const processedOrders: Order[] = userOrders.map(order => {
@@ -96,7 +58,7 @@ export const useOrders = () => {
         };
       });
       
-      console.log('Final processed orders for display:', processedOrders);
+      console.log('Processed orders for display:', processedOrders);
       setOrders(processedOrders);
     } catch (error: any) {
       console.error('Error fetching orders:', error);
