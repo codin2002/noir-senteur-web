@@ -13,7 +13,7 @@ export const useInventoryUpdate = () => {
 
   const reduceInventoryMutation = useMutation({
     mutationFn: async ({ orderId }: { orderId: string }) => {
-      console.log('🔄 Reducing inventory for order:', orderId);
+      console.log('🔄 Starting inventory reduction for order:', orderId);
 
       // First, get the order items
       const { data: orderItems, error: orderError } = await supabase
@@ -26,23 +26,45 @@ export const useInventoryUpdate = () => {
         throw orderError;
       }
 
+      if (!orderItems || orderItems.length === 0) {
+        console.warn('⚠️ No order items found for order:', orderId);
+        return;
+      }
+
       console.log('📦 Order items found:', orderItems);
 
       // For each item, reduce the inventory
       for (const item of orderItems as OrderItem[]) {
-        console.log(`🔽 Reducing ${item.quantity} units for perfume ${item.perfume_id}`);
+        console.log(`🔽 Processing perfume ${item.perfume_id}, reducing ${item.quantity} units`);
 
         // Get current inventory
         const { data: inventory, error: inventoryError } = await supabase
           .from('inventory')
-          .select('stock_quantity')
+          .select('stock_quantity, id')
           .eq('perfume_id', item.perfume_id)
           .single();
 
         if (inventoryError) {
-          console.error('❌ Error fetching inventory:', inventoryError);
-          // Don't throw here, just log and continue
-          continue;
+          console.error('❌ Error fetching inventory for perfume:', item.perfume_id, inventoryError);
+          // If no inventory record exists, create one with 0 stock
+          if (inventoryError.code === 'PGRST116') {
+            console.log('📝 Creating new inventory record for perfume:', item.perfume_id);
+            const { error: createError } = await supabase
+              .from('inventory')
+              .insert({
+                perfume_id: item.perfume_id,
+                stock_quantity: 0,
+                low_stock_threshold: 5
+              });
+            
+            if (createError) {
+              console.error('❌ Error creating inventory record:', createError);
+              throw createError;
+            }
+            console.log('✅ Created inventory record with 0 stock for perfume:', item.perfume_id);
+            continue;
+          }
+          throw inventoryError;
         }
 
         if (!inventory) {
@@ -50,25 +72,35 @@ export const useInventoryUpdate = () => {
           continue;
         }
 
-        const newQuantity = Math.max(0, inventory.stock_quantity - item.quantity);
+        const currentStock = inventory.stock_quantity;
+        const newQuantity = Math.max(0, currentStock - item.quantity);
+        
+        console.log(`📊 Inventory update: ${item.perfume_id} | Current: ${currentStock} | Reducing: ${item.quantity} | New: ${newQuantity}`);
         
         // Update inventory
         const { error: updateError } = await supabase
           .from('inventory')
-          .update({ stock_quantity: newQuantity })
+          .update({ 
+            stock_quantity: newQuantity,
+            updated_at: new Date().toISOString()
+          })
           .eq('perfume_id', item.perfume_id);
 
         if (updateError) {
-          console.error('❌ Error updating inventory:', updateError);
+          console.error('❌ Error updating inventory for perfume:', item.perfume_id, updateError);
           throw updateError;
         }
 
-        console.log(`✅ Updated inventory for ${item.perfume_id}: ${inventory.stock_quantity} → ${newQuantity}`);
+        console.log(`✅ Successfully updated inventory for ${item.perfume_id}: ${currentStock} → ${newQuantity}`);
       }
+
+      console.log('🎉 Inventory reduction completed successfully for order:', orderId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
-      console.log('✅ Inventory updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      console.log('✅ Inventory updated successfully - queries invalidated');
+      toast.success('Inventory updated successfully');
     },
     onError: (error: any) => {
       console.error('❌ Failed to update inventory:', error);
