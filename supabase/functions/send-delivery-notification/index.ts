@@ -173,20 +173,19 @@ serve(async (req) => {
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #D4AF37; margin: 0;">🎉 Your Order Has Been Delivered!</h1>
+          <h1 style="color: #D4AF37; margin: 0;">Your Order Has Been Delivered!</h1>
         </div>
         
         <div style="background-color: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
           <h2 style="color: #333; margin-top: 0;">Hello ${recipientName},</h2>
           <p style="color: #666; line-height: 1.6;">
-            Great news! Your Senteur Fragrances order has been successfully delivered to your address.
+            Your Senteur Fragrances order has been delivered. We hope you enjoy your new fragrance.
           </p>
         </div>
 
         <div style="background-color: #fff; border: 1px solid #eee; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
-          <h3 style="color: #D4AF37; margin-top: 0;">📦 Order Details</h3>
+          <h3 style="color: #D4AF37; margin-top: 0;">Order Details</h3>
           <p><strong>Order ID:</strong> #${order.id.substring(0, 8)}</p>
-          <p><strong>Delivery Address:</strong> ${order.delivery_address || 'Not specified'}</p>
           <p><strong>Order Total:</strong> AED ${Number(order.total).toFixed(2)}</p>
           
           <h4 style="color: #333; margin-bottom: 10px;">Items Delivered:</h4>
@@ -196,9 +195,9 @@ serve(async (req) => {
         </div>
 
         <div style="background-color: #f0f8ff; border-left: 4px solid #D4AF37; padding: 20px; margin-bottom: 20px;">
-          <h3 style="color: #333; margin-top: 0;">💝 Thank You for Choosing Senteur Fragrances</h3>
+          <h3 style="color: #333; margin-top: 0;">Thank You for Choosing Senteur Fragrances</h3>
           <p style="color: #666; line-height: 1.6;">
-            We hope you love your new fragrances! Your order has been carefully prepared and delivered with love.
+            Thank you for choosing Senteur Fragrances to be part of your fragrance journey. We value your feedback and would love to hear about your experience.
           </p>
         </div>
 
@@ -220,7 +219,7 @@ serve(async (req) => {
     const emailResult = await resend.emails.send({
       from: "Senteur Fragrances <orders@senteurfragrances.com>",
       to: [recipientEmail],
-      subject: "🎉 Your Order Has Been Delivered! - Senteur Fragrances",
+      subject: "Your Order Has Been Delivered! - Senteur Fragrances",
       html: emailHtml,
     });
 
