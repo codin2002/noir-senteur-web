@@ -61,23 +61,7 @@ const AdminOrders = () => {
     setIsAuthenticated(false);
   };
 
-  // Show loading while checking authentication
-  if (isCheckingAuth) {
-    return (
-      <div className="min-h-screen bg-dark flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-serif mb-4 text-gold">Loading...</h2>
-          <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  // If not authenticated, show login form
-  if (!isAuthenticated) {
-    return <AdminAuth onAuthenticated={handleAuthenticated} />;
-  }
-
+  // Only enable the query if authenticated
   const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ['admin-orders'],
     queryFn: async () => {
@@ -99,7 +83,8 @@ const AdminOrders = () => {
       }));
       
       return transformedOrders;
-    }
+    },
+    enabled: isAuthenticated // Only run query when authenticated
   });
 
   const getCustomerInfo = (order: Order) => {
@@ -116,6 +101,23 @@ const AdminOrders = () => {
       phone: 'Via user account'
     };
   };
+
+  // Show loading while checking authentication
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-serif mb-4 text-gold">Loading...</h2>
+          <div className="w-16 h-16 border-4 border-t-gold border-b-gold border-r-transparent border-l-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, show login form
+  if (!isAuthenticated) {
+    return <AdminAuth onAuthenticated={handleAuthenticated} />;
+  }
 
   if (isLoading) {
     return (
