@@ -19,9 +19,12 @@ const AdminOrders = () => {
     setIsInventoryTestOpen(true);
   };
 
-  const handleOrderUpdate = () => {
+  const handleOrderUpdate = async () => {
     console.log('🔄 Order updated - forcing refresh of all data...');
-    forceRefresh();
+    // Add a small delay to ensure database changes are reflected
+    setTimeout(() => {
+      forceRefresh();
+    }, 500);
   };
 
   if (isCheckingAuth) {

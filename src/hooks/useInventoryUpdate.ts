@@ -97,6 +97,7 @@ export const useInventoryUpdate = () => {
       console.log('🎉 Inventory reduction completed successfully for order:', orderId);
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to refresh the UI
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       console.log('✅ Inventory updated successfully - queries invalidated');
