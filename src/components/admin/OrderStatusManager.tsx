@@ -28,6 +28,11 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     console.log('Current status:', currentStatus);
     console.log('Selected status:', selectedStatus);
     
+    if (selectedStatus === currentStatus) {
+      toast.info('Status is already set to ' + selectedStatus);
+      return;
+    }
+    
     setIsUpdating(true);
     
     try {
@@ -133,7 +138,12 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     }
   };
 
-  const isButtonDisabled = isUpdating || isReducingInventory;
+  // Update selected status when current status changes
+  React.useEffect(() => {
+    setSelectedStatus(currentStatus);
+  }, [currentStatus]);
+
+  const isButtonDisabled = isUpdating || isReducingInventory || selectedStatus === currentStatus;
 
   return (
     <Card className="bg-darker border-gold/20">
@@ -142,7 +152,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="text-sm font-medium mb-2 block">Current Status: {currentStatus}</label>
+          <label className="text-sm font-medium mb-2 block">Current Status: <span className="text-gold capitalize">{currentStatus}</span></label>
           <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="bg-dark border-gold/30">
               <SelectValue placeholder="Select new status" />
@@ -159,9 +169,12 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         <Button
           onClick={handleStatusUpdate}
           disabled={isButtonDisabled}
-          className="w-full bg-gold text-darker hover:bg-gold/90"
+          className="w-full bg-gold text-darker hover:bg-gold/90 disabled:opacity-50"
         >
-          {isUpdating ? 'Updating...' : isReducingInventory ? 'Updating Inventory...' : `Update to ${selectedStatus}`}
+          {isUpdating ? 'Updating...' : 
+           isReducingInventory ? 'Updating Inventory...' : 
+           selectedStatus === currentStatus ? `Already ${selectedStatus}` :
+           `Update to ${selectedStatus}`}
         </Button>
       </CardContent>
     </Card>

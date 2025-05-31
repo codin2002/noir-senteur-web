@@ -19,6 +19,11 @@ const AdminOrders = () => {
     setIsInventoryTestOpen(true);
   };
 
+  const handleOrderUpdate = () => {
+    console.log('🔄 Order updated - forcing refresh of all data...');
+    forceRefresh();
+  };
+
   if (isCheckingAuth) {
     return <AdminLoadingState />;
   }
@@ -52,7 +57,7 @@ const AdminOrders = () => {
         
         <AdminOrdersTable 
           orders={orders || []} 
-          onRefresh={forceRefresh} 
+          onRefresh={handleOrderUpdate} 
         />
 
         <InventoryTestModal 

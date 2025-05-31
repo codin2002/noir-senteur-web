@@ -66,8 +66,21 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
       
       return transformedOrders;
     },
-    enabled: isAuthenticated
+    enabled: isAuthenticated,
+    refetchInterval: 30000, // Refetch every 30 seconds to keep data fresh
+    staleTime: 10000, // Consider data stale after 10 seconds
   });
+
+  // Auto-refresh when window gains focus
+  useEffect(() => {
+    const handleFocus = () => {
+      console.log('🎯 Window gained focus - refreshing orders...');
+      forceRefresh();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, []);
 
   return {
     orders,

@@ -16,10 +16,18 @@ interface AdminDashboardSummaryProps {
 }
 
 const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, onInventoryTest }) => {
-  const deliveredOrders = orders?.filter(order => order.status === 'delivered') || [];
-  const processingOrders = orders?.filter(order => order.status === 'processing') || [];
-  const dispatchedOrders = orders?.filter(order => order.status === 'dispatched') || [];
-  const returnedOrders = orders?.filter(order => order.status === 'returned') || [];
+  // Force re-render by using the orders array length as a key dependency
+  const deliveredOrders = React.useMemo(() => 
+    orders?.filter(order => order.status === 'delivered') || [], [orders]);
+  
+  const processingOrders = React.useMemo(() => 
+    orders?.filter(order => order.status === 'processing') || [], [orders]);
+  
+  const dispatchedOrders = React.useMemo(() => 
+    orders?.filter(order => order.status === 'dispatched') || [], [orders]);
+  
+  const returnedOrders = React.useMemo(() => 
+    orders?.filter(order => order.status === 'returned') || [], [orders]);
   
   const deliveredCount = deliveredOrders.length;
   const processingCount = processingOrders.length;
@@ -28,6 +36,19 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
   
   const totalDeliveredValue = deliveredOrders.reduce((sum, order) => sum + order.total, 0);
   const totalDispatchedValue = dispatchedOrders.reduce((sum, order) => sum + order.total, 0);
+
+  // Debug logging
+  React.useEffect(() => {
+    console.log('📊 Dashboard Summary Updated:', {
+      totalOrders: orders?.length || 0,
+      delivered: deliveredCount,
+      processing: processingCount,
+      dispatched: dispatchedCount,
+      returned: returnedCount,
+      deliveredValue: totalDeliveredValue,
+      dispatchedValue: totalDispatchedValue
+    });
+  }, [orders, deliveredCount, processingCount, dispatchedCount, returnedCount, totalDeliveredValue, totalDispatchedValue]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
