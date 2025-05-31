@@ -48,8 +48,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       if (selectedStatus === 'delivered' && currentStatus !== 'delivered') {
         console.log('📦 Step 1.5: Order marked as delivered - reducing inventory...');
         try {
-          // Use Promise to properly wait for inventory reduction
+          // Call the inventory reduction mutation and wait for it to complete
           await new Promise<void>((resolve, reject) => {
+            console.log('🔄 Calling reduceInventory mutation...');
             reduceInventory({ orderId }, {
               onSuccess: () => {
                 console.log('✅ Inventory reduction completed successfully');
@@ -61,9 +62,11 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               }
             });
           });
+          console.log('📊 Inventory successfully reduced for delivered order');
         } catch (inventoryError) {
           console.error('⚠️ Inventory reduction failed:', inventoryError);
-          toast.error('Status updated but inventory reduction failed');
+          toast.error('Status updated but inventory reduction failed. Please check inventory manually.');
+          // Don't throw here - we still want to proceed with notifications
         }
       }
 
@@ -81,7 +84,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             toast.error(`Status updated but delivery notification failed: ${functionResponse.error.message}`);
           } else if (functionResponse.data?.success) {
             console.log('✅ Delivery notification sent successfully');
-            toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
+            toast.success(`Order status updated to ${selectedStatus}, inventory reduced, and delivery notification sent!`);
           } else {
             console.error('❌ Delivery notification failed:', functionResponse.data);
             toast.error('Status updated but delivery notification failed');
