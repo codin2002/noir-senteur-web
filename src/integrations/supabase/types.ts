@@ -594,6 +594,7 @@ export type Database = {
           guest_email: string
           guest_phone: string
           delivery_address: string
+          notes: string
           items: Json
         }[]
       }
