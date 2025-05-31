@@ -32,6 +32,7 @@ interface Order {
   guest_email: string | null;
   guest_phone: string | null;
   delivery_address: string | null;
+  notes: string | null;
   items: OrderItem[];
 }
 
