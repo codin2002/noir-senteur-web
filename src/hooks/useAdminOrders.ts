@@ -39,7 +39,7 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
   const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ['admin-orders', refreshKey],
     queryFn: async () => {
-      console.log('🔍 Fetching all orders for admin...');
+      console.log('🔍 Fetching all orders for admin with refresh key:', refreshKey);
       
       const { data, error } = await supabase.rpc('get_orders_with_items');
 
@@ -48,13 +48,23 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
         throw error;
       }
 
-      console.log('✅ Fetched orders successfully:', data);
+      console.log('✅ Fetched orders successfully:', data?.length, 'orders');
       
-      const transformedOrders: Order[] = (data || []).map(order => ({
-        ...order,
-        notes: order.notes || null,
-        items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
-      }));
+      const transformedOrders: Order[] = (data || []).map(order => {
+        console.log(`📦 Order ${order.id}:`, {
+          user_id: order.user_id,
+          guest_name: order.guest_name,
+          guest_email: order.guest_email,
+          guest_phone: order.guest_phone,
+          status: order.status
+        });
+        
+        return {
+          ...order,
+          notes: order.notes || null,
+          items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
+        };
+      });
       
       console.log('📊 Orders by status:', {
         delivered: transformedOrders.filter(o => o.status === 'delivered').length,
@@ -67,26 +77,36 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
       return transformedOrders;
     },
     enabled: isAuthenticated,
-    refetchInterval: false, // Disable automatic refetching to prevent status conflicts
-    staleTime: 0, // Always consider data stale so manual refreshes work immediately
+    refetchInterval: false,
+    staleTime: 0, // Always fetch fresh data
+    gcTime: 0, // Don't cache data
   });
 
-  // Auto-refresh when window gains focus, but with debounce to prevent conflicts
+  // Auto-refresh when window gains focus
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     
     const handleFocus = () => {
       console.log('🎯 Window gained focus - scheduling orders refresh...');
-      // Debounce the refresh to prevent conflicts during status updates
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         forceRefresh();
-      }, 1000); // Wait 1 second before refreshing
+      }, 500);
+    };
+
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        console.log('👀 Page became visible - refreshing orders...');
+        forceRefresh();
+      }
     };
 
     window.addEventListener('focus', handleFocus);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
     return () => {
       window.removeEventListener('focus', handleFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearTimeout(timeoutId);
     };
   }, []);

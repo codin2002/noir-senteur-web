@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -72,28 +73,42 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
   };
 
   const getCustomerInfo = (order: Order) => {
-    const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
-    
-    if (deliveryInfo && deliveryInfo.contactName) {
+    // Always prioritize the guest information from orders table if present
+    if (order.guest_name || order.guest_email || order.guest_phone) {
       return {
-        name: deliveryInfo.contactName,
-        email: deliveryInfo.email || 'No email',
-        phone: deliveryInfo.phone || 'No phone'
+        name: order.guest_name || 'No name provided',
+        email: order.guest_email || 'No email provided',
+        phone: order.guest_phone || 'No phone provided',
+        isGuest: true
       };
     }
     
-    if (order.guest_name) {
+    // Check parsed delivery info
+    const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+    if (deliveryInfo && deliveryInfo.contactName) {
       return {
-        name: order.guest_name,
-        email: order.guest_email || 'No email',
-        phone: order.guest_phone || 'No phone'
+        name: deliveryInfo.contactName,
+        email: deliveryInfo.email || 'No email provided',
+        phone: deliveryInfo.phone || 'No phone provided',
+        isGuest: true
+      };
+    }
+    
+    // If user_id exists but no guest info, this is a registered user
+    if (order.user_id) {
+      return {
+        name: 'Registered User',
+        email: 'Via user account',
+        phone: 'Via user account',
+        isGuest: false
       };
     }
     
     return {
-      name: 'Registered User',
-      email: 'Via user account',
-      phone: 'Via user account'
+      name: 'Unknown Customer',
+      email: 'No email',
+      phone: 'No phone',
+      isGuest: true
     };
   };
 
@@ -119,10 +134,18 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
       const customer = getCustomerInfo(order);
       const customerName = customer.name.toLowerCase();
       const orderId = order.id.toLowerCase();
+      const customerEmail = customer.email.toLowerCase();
       
-      return customerName.includes(searchLower) || orderId.includes(searchLower);
+      return customerName.includes(searchLower) || 
+             orderId.includes(searchLower) ||
+             customerEmail.includes(searchLower);
     });
   }, [orders, searchTerm]);
+
+  const handleOrderUpdate = () => {
+    console.log('🔄 Order updated in admin table - refreshing data...');
+    onRefresh();
+  };
 
   return (
     <Card className="bg-darker border-gold/20">
@@ -141,8 +164,9 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
               <TableHeader>
                 <TableRow className="border-gold/20">
                   <TableHead className="text-gold">Order ID</TableHead>
-                  <TableHead className="text-gold">Customer</TableHead>
-                  <TableHead className="text-gold">Contact</TableHead>
+                  <TableHead className="text-gold">Customer Type</TableHead>
+                  <TableHead className="text-gold">Customer Info</TableHead>
+                  <TableHead className="text-gold">Contact Details</TableHead>
                   <TableHead className="text-gold">Delivery Address</TableHead>
                   <TableHead className="text-gold">Items</TableHead>
                   <TableHead className="text-gold">Total</TableHead>
@@ -162,6 +186,15 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
                         {order.id.split('-')[0]}...
                       </TableCell>
                       <TableCell>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          customer.isGuest 
+                            ? 'bg-orange-500/20 text-orange-400'
+                            : 'bg-blue-500/20 text-blue-400'
+                        }`}>
+                          {customer.isGuest ? 'Guest' : 'Registered'}
+                        </span>
+                      </TableCell>
+                      <TableCell>
                         <div>
                           <div className="font-medium">{customer.name}</div>
                           <div className="text-sm text-gray-400">{customer.email}</div>
@@ -169,10 +202,11 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {customer.phone !== 'Via user account' && customer.phone !== 'No phone' && (
+                          {customer.phone !== 'Via user account' && 
+                           customer.phone !== 'No phone provided' && 
+                           customer.phone !== 'No phone' ? (
                             <div className="text-gray-300">{customer.phone}</div>
-                          )}
-                          {(customer.phone === 'Via user account' || customer.phone === 'No phone') && (
+                          ) : (
                             <div className="text-gray-500">No phone</div>
                           )}
                         </div>
@@ -214,13 +248,13 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
                           <OrderStatusManager
                             orderId={order.id}
                             currentStatus={order.status}
-                            onStatusUpdated={onRefresh}
+                            onStatusUpdated={handleOrderUpdate}
                           />
                           <div className="flex gap-2">
                             <OrderReturnManager
                               orderId={order.id}
                               currentStatus={order.status}
-                              onStatusUpdated={onRefresh}
+                              onStatusUpdated={handleOrderUpdate}
                             />
                             <InvoiceGenerator orderId={order.id} />
                           </div>
