@@ -1,4 +1,3 @@
-
 interface EmailTemplate {
   subject: string;
   html: string;
@@ -106,7 +105,7 @@ export function createConfirmationEmailTemplate(
         <div style="background-color: #FFF8DC; padding: 20px; margin-top: 2px;">
           <h3 style="color: #333; font-size: 18px; margin: 0 0 15px 0;">What's Next?</h3>
           <ul style="margin: 0; padding-left: 20px; color: #333; line-height: 1.8;">
-            <li>Your order will be delivered within 2-5 business days</li>
+            <li>Your order will be delivered within 2-3 business days</li>
             <li>You'll receive a confirmation call before delivery</li>
             <li>Have your confirmation email ready</li>
             <li>Ensure someone is available at the delivery address</li>

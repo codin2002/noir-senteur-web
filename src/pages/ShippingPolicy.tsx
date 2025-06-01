@@ -19,7 +19,7 @@ const ShippingPolicy = () => {
           <div className="prose prose-invert max-w-none space-y-6">
             <ul className="list-disc list-inside space-y-2 text-white/80">
               <li>Orders are processed within 24 hours</li>
-              <li>Delivery takes approximately 2–4 working days, depending on location</li>
+              <li>Delivery takes approximately 2–3 working days, depending on location</li>
               <li>We are not liable for delays caused by third-party logistics or unforeseen circumstances</li>
             </ul>
           </div>
