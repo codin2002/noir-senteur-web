@@ -73,7 +73,39 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
   };
 
   const getCustomerInfo = (order: Order) => {
-    // Always prioritize the guest information from orders table if present
+    // If user_id exists, this is a registered user
+    if (order.user_id) {
+      // Check if guest info is available (might be filled for registered users too)
+      if (order.guest_name || order.guest_email || order.guest_phone) {
+        return {
+          name: order.guest_name || 'Registered User',
+          email: order.guest_email || 'Via user account',
+          phone: order.guest_phone || 'Via user account',
+          isGuest: false
+        };
+      }
+      
+      // Check parsed delivery info for registered users
+      const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+      if (deliveryInfo && deliveryInfo.contactName) {
+        return {
+          name: deliveryInfo.contactName,
+          email: deliveryInfo.email || 'Via user account',
+          phone: deliveryInfo.phone || 'Via user account',
+          isGuest: false
+        };
+      }
+      
+      // Default for registered users
+      return {
+        name: 'Registered User',
+        email: 'Via user account',
+        phone: 'Via user account',
+        isGuest: false
+      };
+    }
+    
+    // Handle guest users (no user_id)
     if (order.guest_name || order.guest_email || order.guest_phone) {
       return {
         name: order.guest_name || 'No name provided',
@@ -83,7 +115,7 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
       };
     }
     
-    // Check parsed delivery info
+    // Check parsed delivery info for guests
     const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
     if (deliveryInfo && deliveryInfo.contactName) {
       return {
@@ -91,16 +123,6 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
         email: deliveryInfo.email || 'No email provided',
         phone: deliveryInfo.phone || 'No phone provided',
         isGuest: true
-      };
-    }
-    
-    // If user_id exists but no guest info, this is a registered user
-    if (order.user_id) {
-      return {
-        name: 'Registered User',
-        email: 'Via user account',
-        phone: 'Via user account',
-        isGuest: false
       };
     }
     
