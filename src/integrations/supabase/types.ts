@@ -76,6 +76,57 @@ export type Database = {
           },
         ]
       }
+      inventory_logs: {
+        Row: {
+          change_type: string
+          created_at: string
+          id: string
+          order_id: string | null
+          perfume_id: string
+          quantity_after: number
+          quantity_before: number
+          quantity_change: number
+          reason: string
+        }
+        Insert: {
+          change_type: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          perfume_id: string
+          quantity_after: number
+          quantity_before: number
+          quantity_change: number
+          reason: string
+        }
+        Update: {
+          change_type?: string
+          created_at?: string
+          id?: string
+          order_id?: string | null
+          perfume_id?: string
+          quantity_after?: number
+          quantity_before?: number
+          quantity_change?: number
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_logs_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_logs_perfume_id_fkey"
+            columns: ["perfume_id"]
+            isOneToOne: false
+            referencedRelation: "perfumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       newsletter_subscriptions: {
         Row: {
           created_at: string

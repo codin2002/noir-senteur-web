@@ -22,7 +22,7 @@ export const useInventoryUpdate = () => {
   ) => {
     try {
       const { error } = await supabase
-        .from('inventory_logs')
+        .from('inventory_logs' as any)
         .insert({
           perfume_id: perfumeId,
           change_type: changeType,

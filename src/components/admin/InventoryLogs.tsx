@@ -27,7 +27,7 @@ const InventoryLogs: React.FC = () => {
     queryKey: ['inventory-logs'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('inventory_logs')
+        .from('inventory_logs' as any)
         .select(`
           *,
           perfumes (
@@ -62,8 +62,8 @@ const InventoryLogs: React.FC = () => {
     const variants = {
       manual_adjustment: 'secondary',
       order_delivery: 'destructive',
-      stock_addition: 'success',
-      return_processing: 'default'
+      stock_addition: 'default',
+      return_processing: 'outline'
     } as const;
 
     return (
