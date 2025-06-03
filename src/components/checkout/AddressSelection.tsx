@@ -30,9 +30,8 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
 
   // Parse existing address into components when selectedAddress changes
   useEffect(() => {
-    if (selectedAddress) {
-      // Try to parse the address if it's a formatted string
-      // For now, just set it as the building name if it's a simple string
+    if (selectedAddress && !selectedAddress.includes('|')) {
+      // Simple address - just set as building name
       setAddressComponents(prev => ({
         ...prev,
         buildingName: selectedAddress
@@ -48,19 +47,19 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     };
     setAddressComponents(newComponents);
 
-    // Combine all components into a single address string with contact info
-    const contactInfo = `Contact: ${newComponents.contactName} | Phone: ${newComponents.phoneNumber} | Email: `;
-    const addressInfo = `Address: ${[
+    // Create a clean, structured address format
+    const addressParts = [
       newComponents.buildingName,
       newComponents.floorNumber,
       newComponents.roomNumber,
       newComponents.area,
       newComponents.landmark,
       newComponents.emirate
-    ].filter(Boolean).join(', ')}`;
+    ].filter(part => part && part.trim() !== '');
 
-    const fullAddress = `${contactInfo} | ${addressInfo}`;
-    onAddressChange(fullAddress);
+    const formattedAddress = `Contact: ${newComponents.contactName} | Phone: ${newComponents.phoneNumber} | Address: ${addressParts.join(', ')}`;
+    
+    onAddressChange(formattedAddress);
 
     // Check if address is valid (contact name, phone, building name and area are required)
     const isValid = newComponents.contactName.trim() !== '' && 

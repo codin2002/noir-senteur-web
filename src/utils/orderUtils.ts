@@ -41,6 +41,7 @@ interface Order {
 export const parseDeliveryInfo = (deliveryAddress: string): DeliveryInfo | null => {
   if (!deliveryAddress) return null;
   
+  // Check for structured format with |
   if (deliveryAddress.includes('|')) {
     const parts = deliveryAddress.split('|');
     const info = {
@@ -66,7 +67,19 @@ export const parseDeliveryInfo = (deliveryAddress: string): DeliveryInfo | null 
     return info;
   }
   
-  return null;
+  // For legacy or simple addresses, clean up any repetition
+  const cleanAddress = deliveryAddress
+    .split(',')
+    .map(part => part.trim())
+    .filter((part, index, arr) => arr.indexOf(part) === index) // Remove duplicates
+    .join(', ');
+  
+  return {
+    contactName: '',
+    phone: '',
+    email: '',
+    address: cleanAddress
+  };
 };
 
 export const getCustomerInfo = (order: Order): CustomerInfo => {
