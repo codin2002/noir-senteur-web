@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -22,7 +21,7 @@ export const useInventoryUpdate = () => {
   ) => {
     try {
       const { error } = await supabase
-        .from('inventory_logs' as any)
+        .from('inventory_logs')
         .insert({
           perfume_id: perfumeId,
           change_type: changeType,
