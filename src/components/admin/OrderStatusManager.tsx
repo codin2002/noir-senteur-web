@@ -136,23 +136,43 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
   const isButtonDisabled = isUpdating || isReducingInventory || selectedStatus === currentStatus;
 
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'processing': return 'Processing';
+      case 'dispatched': return 'Dispatched';
+      case 'delivered': return 'Delivered';
+      case 'returned': return 'Returned';
+      default: return status;
+    }
+  };
+
   return (
     <Card className="bg-darker border-gold/20">
       <CardHeader>
-        <CardTitle className="text-gold">Update Order Status</CardTitle>
+        <CardTitle className="text-gold text-sm">Update Order Status</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="text-sm font-medium mb-2 block">Current Status: <span className="text-gold capitalize">{currentStatus}</span></label>
+          <label className="text-sm font-medium mb-2 block text-gray-300">
+            Current: <span className="text-gold font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
+          </label>
           <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating || isReducingInventory}>
-            <SelectTrigger className="bg-dark border-gold/30">
+            <SelectTrigger className="bg-dark border-gold/30 text-white">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
             <SelectContent className="bg-dark border-gold/30">
-              <SelectItem value="processing">Processing</SelectItem>
-              <SelectItem value="dispatched">Dispatched</SelectItem>
-              <SelectItem value="delivered">Delivered</SelectItem>
-              <SelectItem value="returned">Returned</SelectItem>
+              <SelectItem value="processing" className="text-white hover:bg-gold/20">
+                Processing
+              </SelectItem>
+              <SelectItem value="dispatched" className="text-white hover:bg-gold/20">
+                Dispatched
+              </SelectItem>
+              <SelectItem value="delivered" className="text-white hover:bg-gold/20">
+                Delivered
+              </SelectItem>
+              <SelectItem value="returned" className="text-white hover:bg-gold/20">
+                Returned
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -160,13 +180,19 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         <Button
           onClick={handleStatusUpdate}
           disabled={isButtonDisabled}
-          className="w-full bg-gold text-darker hover:bg-gold/90 disabled:opacity-50"
+          className="w-full bg-gold text-darker hover:bg-gold/90 disabled:opacity-50 font-medium"
         >
-          {isUpdating ? 'Updating...' : 
-           isReducingInventory ? 'Updating Inventory...' : 
-           selectedStatus === currentStatus ? `Already ${selectedStatus}` :
-           `Update to ${selectedStatus}`}
+          {isUpdating ? 'Updating Status...' : 
+           isReducingInventory ? 'Processing Inventory...' : 
+           selectedStatus === currentStatus ? `Already ${getStatusLabel(selectedStatus)}` :
+           `Change to ${getStatusLabel(selectedStatus)}`}
         </Button>
+
+        {selectedStatus !== currentStatus && (
+          <p className="text-xs text-gray-400 text-center">
+            This will change the order from "{getStatusLabel(currentStatus)}" to "{getStatusLabel(selectedStatus)}"
+          </p>
+        )}
       </CardContent>
     </Card>
   );
