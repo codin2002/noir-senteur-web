@@ -35,5 +35,40 @@ export async function createOrder(
 
   console.log('Order created successfully with ID:', orderId);
   console.log('Order total saved to database:', orderCalculation.totalAmount);
+
+  // Log the order placement in inventory logs for tracking
+  try {
+    console.log('📝 Logging order placement in inventory logs...');
+    
+    for (const item of orderCalculation.orderItems) {
+      // Get current inventory for this perfume
+      const { data: inventory, error: inventoryError } = await supabaseService
+        .from('inventory')
+        .select('stock_quantity')
+        .eq('perfume_id', item.perfume_id)
+        .single();
+
+      if (!inventoryError && inventory) {
+        // Log the order placement (no quantity change yet, just logging the order)
+        await supabaseService
+          .from('inventory_logs')
+          .insert({
+            perfume_id: item.perfume_id,
+            change_type: 'order_delivery',
+            quantity_before: inventory.stock_quantity,
+            quantity_after: inventory.stock_quantity, // No change yet
+            quantity_change: 0, // Will be reduced when order is marked as delivered
+            reason: `Order placed - ${item.quantity} units reserved (Order: ${orderId.substring(0, 8)})`,
+            order_id: orderId
+          });
+      }
+    }
+    
+    console.log('✅ Order placement logged in inventory logs');
+  } catch (logError) {
+    console.error('⚠️ Failed to log order placement:', logError);
+    // Don't fail the order creation for logging issues
+  }
+
   return orderId;
 }
