@@ -11,9 +11,41 @@ interface OrderItem {
 export const useInventoryUpdate = () => {
   const queryClient = useQueryClient();
 
+  // Function to log inventory changes
+  const logInventoryChange = async (
+    perfumeId: string,
+    changeType: 'manual_adjustment' | 'order_delivery' | 'stock_addition' | 'return_processing',
+    quantityBefore: number,
+    quantityAfter: number,
+    reason: string,
+    orderId?: string
+  ) => {
+    try {
+      const { error } = await supabase
+        .from('inventory_logs')
+        .insert({
+          perfume_id: perfumeId,
+          change_type: changeType,
+          quantity_before: quantityBefore,
+          quantity_after: quantityAfter,
+          quantity_change: quantityAfter - quantityBefore,
+          reason,
+          order_id: orderId
+        });
+
+      if (error) {
+        console.error('❌ Error logging inventory change:', error);
+      } else {
+        console.log('✅ Inventory change logged successfully');
+      }
+    } catch (error) {
+      console.error('❌ Failed to log inventory change:', error);
+    }
+  };
+
   const reduceInventoryMutation = useMutation({
     mutationFn: async ({ orderId }: { orderId: string }) => {
-      console.log('🔄 Starting inventory reduction for order:', orderId);
+      console.log('🔄 Starting automated inventory reduction for order:', orderId);
 
       // First, get the order items
       const { data: orderItems, error: orderError } = await supabase
@@ -33,7 +65,7 @@ export const useInventoryUpdate = () => {
 
       console.log('📦 Order items found:', orderItems);
 
-      // For each item, reduce the inventory
+      // For each item, reduce the inventory and log the change
       for (const item of orderItems as OrderItem[]) {
         console.log(`🔽 Processing perfume ${item.perfume_id}, reducing ${item.quantity} units`);
 
@@ -61,6 +93,17 @@ export const useInventoryUpdate = () => {
               console.error('❌ Error creating inventory record:', createError);
               throw createError;
             }
+
+            // Log the creation
+            await logInventoryChange(
+              item.perfume_id,
+              'order_delivery',
+              0,
+              0,
+              `Order delivery - Created inventory record with 0 stock (Order: ${orderId.substring(0, 8)})`,
+              orderId
+            );
+
             console.log('✅ Created inventory record with 0 stock for perfume:', item.perfume_id);
             continue;
           }
@@ -91,21 +134,34 @@ export const useInventoryUpdate = () => {
           throw updateError;
         }
 
-        console.log(`✅ Successfully updated inventory for ${item.perfume_id}: ${currentStock} → ${newQuantity}`);
+        // Log the inventory change
+        await logInventoryChange(
+          item.perfume_id,
+          'order_delivery',
+          currentStock,
+          newQuantity,
+          `Automated reduction for order delivery (Order: ${orderId.substring(0, 8)})`,
+          orderId
+        );
+
+        console.log(`✅ Successfully updated and logged inventory for ${item.perfume_id}: ${currentStock} → ${newQuantity}`);
       }
 
-      console.log('🎉 Inventory reduction completed successfully for order:', orderId);
+      console.log('🎉 Automated inventory reduction completed successfully for order:', orderId);
     },
     onSuccess: () => {
       // Invalidate all relevant queries to refresh the UI immediately
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-logs'] });
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       
       // Also refetch data to ensure fresh data
       queryClient.refetchQueries({ queryKey: ['inventory'] });
+      queryClient.refetchQueries({ queryKey: ['inventory-summary'] });
       
       console.log('✅ Inventory updated successfully - queries invalidated and refetched');
-      toast.success('Inventory updated successfully');
+      toast.success('Inventory automatically reduced and logged');
     },
     onError: (error: any) => {
       console.error('❌ Failed to update inventory:', error);
@@ -113,16 +169,69 @@ export const useInventoryUpdate = () => {
     }
   });
 
+  // Manual inventory adjustment with logging
+  const manualAdjustmentMutation = useMutation({
+    mutationFn: async ({ 
+      perfumeId, 
+      newQuantity, 
+      reason 
+    }: { 
+      perfumeId: string; 
+      newQuantity: number; 
+      reason: string; 
+    }) => {
+      // Get current inventory
+      const { data: inventory, error: fetchError } = await supabase
+        .from('inventory')
+        .select('stock_quantity')
+        .eq('perfume_id', perfumeId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const currentStock = inventory.stock_quantity;
+
+      // Update inventory
+      const { error: updateError } = await supabase
+        .from('inventory')
+        .update({ stock_quantity: newQuantity })
+        .eq('perfume_id', perfumeId);
+
+      if (updateError) throw updateError;
+
+      // Log the change
+      await logInventoryChange(
+        perfumeId,
+        'manual_adjustment',
+        currentStock,
+        newQuantity,
+        reason
+      );
+
+      return { currentStock, newQuantity };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory-logs'] });
+      toast.success('Manual inventory adjustment logged successfully');
+    },
+    onError: (error: any) => {
+      toast.error(`Failed to adjust inventory: ${error.message}`);
+    }
+  });
+
   // Add a function to manually trigger inventory reduction for testing
   const testInventoryReduction = async (orderId: string) => {
-    console.log('🧪 Testing inventory reduction for order:', orderId);
+    console.log('🧪 Testing automated inventory reduction for order:', orderId);
     return reduceInventoryMutation.mutateAsync({ orderId });
   };
 
   return {
     reduceInventory: reduceInventoryMutation.mutate,
     reduceInventoryAsync: reduceInventoryMutation.mutateAsync,
+    manualAdjustment: manualAdjustmentMutation.mutateAsync,
     testInventoryReduction,
-    isUpdating: reduceInventoryMutation.isPending
+    isUpdating: reduceInventoryMutation.isPending || manualAdjustmentMutation.isPending
   };
 };

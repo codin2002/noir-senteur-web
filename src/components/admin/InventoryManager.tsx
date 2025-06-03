@@ -5,8 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import { AlertTriangle, Package, Plus, Minus } from 'lucide-react';
+import { useInventoryUpdate } from '@/hooks/useInventoryUpdate';
 
 interface InventoryItem {
   id: string;
@@ -24,7 +26,9 @@ interface InventoryItem {
 
 const InventoryManager: React.FC = () => {
   const [adjustmentAmount, setAdjustmentAmount] = useState<number>(1);
+  const [adjustmentReason, setAdjustmentReason] = useState<string>('');
   const queryClient = useQueryClient();
+  const { manualAdjustment, isUpdating } = useInventoryUpdate();
 
   // Fetch inventory data
   const { data: inventory, isLoading } = useQuery({
@@ -51,37 +55,27 @@ const InventoryManager: React.FC = () => {
     }
   });
 
-  // Update stock mutation
-  const updateStockMutation = useMutation({
-    mutationFn: async ({ inventoryId, newQuantity }: { inventoryId: string; newQuantity: number }) => {
-      if (newQuantity < 0) {
-        throw new Error('Stock quantity cannot be negative');
-      }
-
-      const { error } = await supabase
-        .from('inventory')
-        .update({ stock_quantity: newQuantity })
-        .eq('id', inventoryId);
-
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory'] });
-      toast.success('Stock updated successfully');
-    },
-    onError: (error: any) => {
-      toast.error(`Failed to update stock: ${error.message}`);
+  const handleStockAdjustment = async (item: InventoryItem, isIncrease: boolean) => {
+    if (!adjustmentReason.trim()) {
+      toast.error('Please provide a reason for the inventory adjustment');
+      return;
     }
-  });
 
-  const handleStockAdjustment = (item: InventoryItem, isIncrease: boolean) => {
     const adjustment = isIncrease ? adjustmentAmount : -adjustmentAmount;
-    const newQuantity = item.stock_quantity + adjustment;
+    const newQuantity = Math.max(0, item.stock_quantity + adjustment);
     
-    updateStockMutation.mutate({
-      inventoryId: item.id,
-      newQuantity
-    });
+    try {
+      await manualAdjustment({
+        perfumeId: item.perfume_id,
+        newQuantity,
+        reason: adjustmentReason
+      });
+      
+      // Clear the reason after successful adjustment
+      setAdjustmentReason('');
+    } catch (error) {
+      console.error('Failed to adjust inventory:', error);
+    }
   };
 
   const isLowStock = (item: InventoryItem) => item.stock_quantity <= item.low_stock_threshold;
@@ -107,17 +101,32 @@ const InventoryManager: React.FC = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Stock Adjustment Controls */}
-        <div className="bg-dark/50 p-4 rounded-lg border border-gold/10">
-          <label className="text-sm font-medium mb-2 block text-gold/80">
-            Adjustment Amount
-          </label>
-          <Input
-            type="number"
-            min="1"
-            value={adjustmentAmount}
-            onChange={(e) => setAdjustmentAmount(Number(e.target.value))}
-            className="w-24 bg-dark border-gold/30"
-          />
+        <div className="bg-dark/50 p-4 rounded-lg border border-gold/10 space-y-3">
+          <div>
+            <label className="text-sm font-medium mb-2 block text-gold/80">
+              Adjustment Amount
+            </label>
+            <Input
+              type="number"
+              min="1"
+              value={adjustmentAmount}
+              onChange={(e) => setAdjustmentAmount(Number(e.target.value))}
+              className="w-24 bg-dark border-gold/30"
+            />
+          </div>
+          
+          <div>
+            <label className="text-sm font-medium mb-2 block text-gold/80">
+              Reason for Adjustment (Required)
+            </label>
+            <Textarea
+              value={adjustmentReason}
+              onChange={(e) => setAdjustmentReason(e.target.value)}
+              placeholder="e.g., Stock received from supplier, Damaged goods removed, etc."
+              className="bg-dark border-gold/30"
+              rows={2}
+            />
+          </div>
         </div>
 
         {/* Inventory Items */}
@@ -166,7 +175,7 @@ const InventoryManager: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleStockAdjustment(item, false)}
-                      disabled={updateStockMutation.isPending || item.stock_quantity === 0}
+                      disabled={isUpdating || item.stock_quantity === 0 || !adjustmentReason.trim()}
                       className="border-red-500/50 text-red-400 hover:bg-red-500/10"
                     >
                       <Minus className="w-4 h-4" />
@@ -176,7 +185,7 @@ const InventoryManager: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleStockAdjustment(item, true)}
-                      disabled={updateStockMutation.isPending}
+                      disabled={isUpdating || !adjustmentReason.trim()}
                       className="border-green-500/50 text-green-400 hover:bg-green-500/10"
                     >
                       <Plus className="w-4 h-4" />

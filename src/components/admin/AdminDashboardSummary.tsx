@@ -2,7 +2,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Package, CheckCircle, Clock, Edit, Truck, RotateCcw } from 'lucide-react';
+import { Package, CheckCircle, Clock, Edit, Truck, RotateCcw, DollarSign } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Order {
   id: string;
@@ -16,6 +18,33 @@ interface AdminDashboardSummaryProps {
 }
 
 const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, onInventoryTest }) => {
+  // Fetch inventory data to calculate total value
+  const { data: inventory } = useQuery({
+    queryKey: ['inventory-summary'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('inventory')
+        .select(`
+          stock_quantity,
+          perfumes (
+            price_value
+          )
+        `);
+
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Calculate total inventory value
+  const totalInventoryValue = React.useMemo(() => {
+    if (!inventory) return 0;
+    return inventory.reduce((total, item) => {
+      const price = item.perfumes?.price_value || 0;
+      return total + (item.stock_quantity * price);
+    }, 0);
+  }, [inventory]);
+
   // Force re-render by using the orders array length as a key dependency
   const deliveredOrders = React.useMemo(() => 
     orders?.filter(order => order.status === 'delivered') || [], [orders]);
@@ -46,12 +75,13 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
       dispatched: dispatchedCount,
       returned: returnedCount,
       deliveredValue: totalDeliveredValue,
-      dispatchedValue: totalDispatchedValue
+      dispatchedValue: totalDispatchedValue,
+      inventoryValue: totalInventoryValue
     });
-  }, [orders, deliveredCount, processingCount, dispatchedCount, returnedCount, totalDeliveredValue, totalDispatchedValue]);
+  }, [orders, deliveredCount, processingCount, dispatchedCount, returnedCount, totalDeliveredValue, totalDispatchedValue, totalInventoryValue]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-6">
       <Card className="bg-darker border-gold/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gold">Delivered Orders</CardTitle>
@@ -113,6 +143,19 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
           <div className="text-2xl font-bold text-blue-400">{orders?.length || 0}</div>
           <p className="text-xs text-gray-400 mt-1">
             All time orders
+          </p>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-darker border-gold/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-gold">Inventory Value</CardTitle>
+          <DollarSign className="h-4 w-4 text-gold" />
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-gold">AED {totalInventoryValue.toFixed(0)}</div>
+          <p className="text-xs text-gray-400 mt-1">
+            Total stock value
           </p>
         </CardContent>
       </Card>
