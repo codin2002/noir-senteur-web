@@ -3,6 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { reduceInventoryForOrder, adjustInventoryManually } from '@/services/inventoryOperationsService';
 
+interface ManualAdjustmentParams {
+  perfumeId: string;
+  newQuantity: number;
+  reason: string;
+}
+
 export const useInventoryUpdate = () => {
   const queryClient = useQueryClient();
 
@@ -32,7 +38,9 @@ export const useInventoryUpdate = () => {
 
   // Manual inventory adjustment with logging
   const manualAdjustmentMutation = useMutation({
-    mutationFn: adjustInventoryManually,
+    mutationFn: async ({ perfumeId, newQuantity, reason }: ManualAdjustmentParams) => {
+      return adjustInventoryManually(perfumeId, newQuantity, reason);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
