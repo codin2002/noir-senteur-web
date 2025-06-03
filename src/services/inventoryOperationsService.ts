@@ -83,7 +83,8 @@ export const reduceInventoryForOrder = async (orderId: string) => {
     
     console.log(`📊 Inventory update: ${item.perfume_id} | Current: ${currentStock} | Reducing: ${item.quantity} | New: ${newQuantity}`);
     
-    // Update inventory
+    // Update inventory with explicit logging
+    console.log(`🔄 Updating inventory in database for perfume ${item.perfume_id}...`);
     const { error: updateError } = await supabase
       .from('inventory')
       .update({ 
@@ -97,7 +98,10 @@ export const reduceInventoryForOrder = async (orderId: string) => {
       throw updateError;
     }
 
+    console.log(`✅ Database update successful for ${item.perfume_id}: ${currentStock} → ${newQuantity}`);
+
     // Log the inventory change
+    console.log(`📝 Logging inventory change for perfume ${item.perfume_id}...`);
     await logInventoryChange(
       item.perfume_id,
       'order_delivery',
@@ -118,6 +122,8 @@ export const adjustInventoryManually = async (
   newQuantity: number, 
   reason: string
 ) => {
+  console.log(`🔧 Manual inventory adjustment for perfume ${perfumeId}: new quantity = ${newQuantity}`);
+  
   // Get current inventory
   const { data: inventory, error: fetchError } = await supabase
     .from('inventory')
@@ -125,17 +131,29 @@ export const adjustInventoryManually = async (
     .eq('perfume_id', perfumeId)
     .single();
 
-  if (fetchError) throw fetchError;
+  if (fetchError) {
+    console.error('❌ Error fetching current inventory:', fetchError);
+    throw fetchError;
+  }
 
   const currentStock = inventory.stock_quantity;
+  console.log(`📊 Current stock: ${currentStock}, New quantity: ${newQuantity}`);
 
   // Update inventory
   const { error: updateError } = await supabase
     .from('inventory')
-    .update({ stock_quantity: newQuantity })
+    .update({ 
+      stock_quantity: newQuantity,
+      updated_at: new Date().toISOString()
+    })
     .eq('perfume_id', perfumeId);
 
-  if (updateError) throw updateError;
+  if (updateError) {
+    console.error('❌ Error updating inventory:', updateError);
+    throw updateError;
+  }
+
+  console.log(`✅ Manual inventory update successful: ${currentStock} → ${newQuantity}`);
 
   // Log the change
   await logInventoryChange(

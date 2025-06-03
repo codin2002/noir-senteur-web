@@ -52,9 +52,13 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       // Handle inventory reduction when order is delivered (but only if coming from non-delivered status)
       if (selectedStatus === 'delivered' && currentStatus !== 'delivered') {
         console.log('📦 Step 1.5: Order marked as delivered - reducing inventory...');
+        console.log('Calling reduceInventoryAsync with orderId:', orderId);
+        
         try {
-          await reduceInventoryAsync({ orderId });
-          console.log('📊 Inventory successfully reduced for delivered order');
+          const result = await reduceInventoryAsync({ orderId });
+          console.log('📊 Inventory reduction result:', result);
+          console.log('✅ Inventory successfully reduced for delivered order');
+          toast.success('Inventory reduced successfully for delivered order');
         } catch (inventoryError) {
           console.error('⚠️ Inventory reduction failed:', inventoryError);
           toast.error('Status updated but inventory reduction failed. Please check inventory manually.');
@@ -191,6 +195,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         {selectedStatus !== currentStatus && (
           <p className="text-xs text-gray-400 text-center">
             This will change the order from "{getStatusLabel(currentStatus)}" to "{getStatusLabel(selectedStatus)}"
+            {selectedStatus === 'delivered' && currentStatus !== 'delivered' && (
+              <span className="text-yellow-400"> and reduce inventory</span>
+            )}
           </p>
         )}
       </CardContent>
