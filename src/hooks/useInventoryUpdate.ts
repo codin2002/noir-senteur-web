@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -44,7 +45,7 @@ export const useInventoryUpdate = () => {
 
   const reduceInventoryMutation = useMutation({
     mutationFn: async ({ orderId }: { orderId: string }) => {
-      console.log('🔄 Starting automated inventory reduction for order:', orderId);
+      console.log('🔄 Starting inventory reduction for order:', orderId);
 
       // First, get the order items
       const { data: orderItems, error: orderError } = await supabase
@@ -93,13 +94,13 @@ export const useInventoryUpdate = () => {
               throw createError;
             }
 
-            // Log the creation
+            // Log the creation with zero reduction
             await logInventoryChange(
               item.perfume_id,
               'order_delivery',
               0,
               0,
-              `Order delivery - Created inventory record with 0 stock (Order: ${orderId.substring(0, 8)})`,
+              `Order delivery - No stock available (Order: ${orderId.substring(0, 8)})`,
               orderId
             );
 
@@ -119,7 +120,7 @@ export const useInventoryUpdate = () => {
         
         console.log(`📊 Inventory update: ${item.perfume_id} | Current: ${currentStock} | Reducing: ${item.quantity} | New: ${newQuantity}`);
         
-        // Update inventory with explicit timestamp
+        // Update inventory
         const { error: updateError } = await supabase
           .from('inventory')
           .update({ 
@@ -139,14 +140,14 @@ export const useInventoryUpdate = () => {
           'order_delivery',
           currentStock,
           newQuantity,
-          `Automated reduction for order delivery (Order: ${orderId.substring(0, 8)})`,
+          `Inventory reduced for delivered order (Order: ${orderId.substring(0, 8)})`,
           orderId
         );
 
         console.log(`✅ Successfully updated and logged inventory for ${item.perfume_id}: ${currentStock} → ${newQuantity}`);
       }
 
-      console.log('🎉 Automated inventory reduction completed successfully for order:', orderId);
+      console.log('🎉 Inventory reduction completed successfully for order:', orderId);
     },
     onSuccess: () => {
       // Invalidate all relevant queries to refresh the UI immediately
@@ -160,7 +161,7 @@ export const useInventoryUpdate = () => {
       queryClient.refetchQueries({ queryKey: ['inventory-summary'] });
       
       console.log('✅ Inventory updated successfully - queries invalidated and refetched');
-      toast.success('Inventory automatically reduced and logged');
+      toast.success('Inventory reduced successfully for delivered order');
     },
     onError: (error: any) => {
       console.error('❌ Failed to update inventory:', error);
@@ -213,7 +214,7 @@ export const useInventoryUpdate = () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-summary'] });
       queryClient.invalidateQueries({ queryKey: ['inventory-logs'] });
-      toast.success('Manual inventory adjustment logged successfully');
+      toast.success('Manual inventory adjustment completed successfully');
     },
     onError: (error: any) => {
       toast.error(`Failed to adjust inventory: ${error.message}`);
@@ -222,7 +223,7 @@ export const useInventoryUpdate = () => {
 
   // Add a function to manually trigger inventory reduction for testing
   const testInventoryReduction = async (orderId: string) => {
-    console.log('🧪 Testing automated inventory reduction for order:', orderId);
+    console.log('🧪 Testing inventory reduction for order:', orderId);
     return reduceInventoryMutation.mutateAsync({ orderId });
   };
 
