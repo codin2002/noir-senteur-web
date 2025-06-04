@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useInventoryUpdate } from '@/hooks/useInventoryUpdate';
 
 interface OrderStatusManagerProps {
   orderId: string;
@@ -20,7 +19,6 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 }) => {
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [isUpdating, setIsUpdating] = useState(false);
-  const { reduceInventoryAsync, isUpdating: isReducingInventory } = useInventoryUpdate();
 
   const handleStatusUpdate = async () => {
     console.log('🔥 === BUTTON CLICKED - STARTING STATUS UPDATE ===');
@@ -49,21 +47,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
       console.log('✅ Step 1 Complete: Order status updated successfully');
 
-      // Handle inventory reduction when order is delivered (but only if coming from non-delivered status)
-      if (selectedStatus === 'delivered' && currentStatus !== 'delivered') {
-        console.log('📦 Step 1.5: Order marked as delivered - reducing inventory...');
-        console.log('Calling reduceInventoryAsync with orderId:', orderId);
-        
-        try {
-          const result = await reduceInventoryAsync({ orderId });
-          console.log('📊 Inventory reduction result:', result);
-          console.log('✅ Inventory successfully reduced for delivered order');
-          toast.success('Inventory reduced successfully for delivered order');
-        } catch (inventoryError) {
-          console.error('⚠️ Inventory reduction failed:', inventoryError);
-          toast.error('Status updated but inventory reduction failed. Please check inventory manually.');
-          // Don't throw here - we still want to proceed with notifications
-        }
+      // Note: Inventory is now reduced during order placement, not delivery
+      if (selectedStatus === 'delivered') {
+        console.log('📦 Order marked as delivered - inventory was already reduced during order placement');
       }
 
       // Handle email notifications
@@ -80,7 +66,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             toast.error(`Status updated but delivery notification failed: ${functionResponse.error.message}`);
           } else if (functionResponse.data?.success) {
             console.log('✅ Delivery notification sent successfully');
-            toast.success(`Order status updated to ${selectedStatus}, inventory reduced, and delivery notification sent!`);
+            toast.success(`Order status updated to ${selectedStatus} and delivery notification sent!`);
           } else {
             console.error('❌ Delivery notification failed:', functionResponse.data);
             toast.error('Status updated but delivery notification failed');
@@ -133,12 +119,12 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
 
   // Don't automatically reset selectedStatus when currentStatus changes during updates
   React.useEffect(() => {
-    if (!isUpdating && !isReducingInventory) {
+    if (!isUpdating) {
       setSelectedStatus(currentStatus);
     }
-  }, [currentStatus, isUpdating, isReducingInventory]);
+  }, [currentStatus, isUpdating]);
 
-  const isButtonDisabled = isUpdating || isReducingInventory || selectedStatus === currentStatus;
+  const isButtonDisabled = isUpdating || selectedStatus === currentStatus;
 
   const getStatusLabel = (status: string) => {
     switch (status) {
@@ -160,7 +146,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           <label className="text-sm font-medium mb-2 block text-gray-300">
             Current: <span className="text-gold font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
           </label>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating || isReducingInventory}>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating}>
             <SelectTrigger className="bg-dark border-gold/30 text-white">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
@@ -187,7 +173,6 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
           className="w-full bg-gold text-darker hover:bg-gold/90 disabled:opacity-50 font-medium"
         >
           {isUpdating ? 'Updating Status...' : 
-           isReducingInventory ? 'Processing Inventory...' : 
            selectedStatus === currentStatus ? `Already ${getStatusLabel(selectedStatus)}` :
            `Change to ${getStatusLabel(selectedStatus)}`}
         </Button>
@@ -195,8 +180,8 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         {selectedStatus !== currentStatus && (
           <p className="text-xs text-gray-400 text-center">
             This will change the order from "{getStatusLabel(currentStatus)}" to "{getStatusLabel(selectedStatus)}"
-            {selectedStatus === 'delivered' && currentStatus !== 'delivered' && (
-              <span className="text-yellow-400"> and reduce inventory</span>
+            {selectedStatus === 'delivered' && (
+              <span className="text-green-400"> (inventory was reduced when order was placed)</span>
             )}
           </p>
         )}
