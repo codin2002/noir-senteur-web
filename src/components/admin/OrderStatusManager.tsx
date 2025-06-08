@@ -35,17 +35,49 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
     
     try {
       console.log('Step 1: Updating order status in database...');
-      const { error: updateError } = await supabase
+      console.log('About to execute update query with:', { orderId, selectedStatus });
+      
+      const { data: updateData, error: updateError } = await supabase
         .from('orders')
         .update({ status: selectedStatus })
-        .eq('id', orderId);
+        .eq('id', orderId)
+        .select(); // Add select to see what was actually updated
+
+      console.log('Update query result:', { updateData, updateError });
 
       if (updateError) {
         console.error('❌ Error updating order status:', updateError);
         throw updateError;
       }
 
+      if (!updateData || updateData.length === 0) {
+        console.error('❌ No rows were updated - order might not exist');
+        throw new Error('No order was updated. Order might not exist.');
+      }
+
       console.log('✅ Step 1 Complete: Order status updated successfully');
+      console.log('Updated order data:', updateData[0]);
+
+      // Verify the update by fetching the order again
+      console.log('🔍 Verifying update by fetching order...');
+      const { data: verifyData, error: verifyError } = await supabase
+        .from('orders')
+        .select('id, status')
+        .eq('id', orderId)
+        .single();
+
+      if (verifyError) {
+        console.error('❌ Error verifying update:', verifyError);
+      } else {
+        console.log('✅ Verification result:', verifyData);
+        if (verifyData.status !== selectedStatus) {
+          console.error('❌ CRITICAL: Status not updated in database!', {
+            expected: selectedStatus,
+            actual: verifyData.status
+          });
+          throw new Error(`Status update failed. Expected: ${selectedStatus}, Actual: ${verifyData.status}`);
+        }
+      }
 
       // Note: Inventory is now reduced during order placement, not delivery
       if (selectedStatus === 'delivered') {
