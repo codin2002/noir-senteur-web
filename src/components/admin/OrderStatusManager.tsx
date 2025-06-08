@@ -102,9 +102,23 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         toast.success(`Order status updated to ${selectedStatus}`);
       }
 
-      console.log('🔄 Step 3: Refreshing order data...');
-      // Force refresh by calling the callback and wait for it
+      console.log('🔄 Step 3: Force refreshing all order data...');
+      
+      // Force multiple refresh attempts to ensure data consistency
       await onStatusUpdated();
+      
+      // Additional refresh after a short delay to ensure database consistency
+      setTimeout(async () => {
+        console.log('🔄 Secondary refresh after database sync...');
+        await onStatusUpdated();
+      }, 1000);
+      
+      // Final refresh to ensure UI is updated
+      setTimeout(async () => {
+        console.log('🔄 Final refresh to ensure UI consistency...');
+        await onStatusUpdated();
+      }, 2000);
+      
       console.log('✅ STATUS UPDATE PROCESS COMPLETE');
 
     } catch (error: any) {

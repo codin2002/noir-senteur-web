@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
 interface OrderItem {
@@ -30,16 +30,26 @@ interface Order {
 
 export const useAdminOrders = (isAuthenticated: boolean) => {
   const [refreshKey, setRefreshKey] = useState(0);
+  const queryClient = useQueryClient();
 
   const forceRefresh = () => {
     console.log('🔄 Force refreshing orders data...');
     setRefreshKey(prev => prev + 1);
+    
+    // Invalidate all related queries to ensure fresh data
+    queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+    queryClient.invalidateQueries({ queryKey: ['orders'] });
+    queryClient.removeQueries({ queryKey: ['admin-orders'] });
+    queryClient.removeQueries({ queryKey: ['orders'] });
   };
 
   const { data: orders, isLoading, refetch } = useQuery({
     queryKey: ['admin-orders', refreshKey],
     queryFn: async () => {
       console.log('🔍 Fetching all orders for admin with refresh key:', refreshKey);
+      
+      // Add a small delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       const { data, error } = await supabase.rpc('get_orders_with_items');
 

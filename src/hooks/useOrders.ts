@@ -17,6 +17,9 @@ export const useOrders = () => {
       
       setIsLoading(true);
       
+      // Add a small delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
       // Use the RPC function to get orders with items
       const { data: ordersData, error: ordersError } = await supabase.rpc('get_orders_with_items', {
         user_uuid: user?.id

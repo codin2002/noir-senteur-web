@@ -21,11 +21,22 @@ const AdminOrders = () => {
   };
 
   const handleOrderUpdate = async () => {
-    console.log('🔄 Order updated - forcing refresh of all data...');
-    // Add a small delay to ensure database changes are reflected
+    console.log('🔄 Order updated - forcing immediate refresh of all data...');
+    
+    // Immediate refresh
+    forceRefresh();
+    
+    // Additional refresh after a delay to ensure database consistency
     setTimeout(() => {
+      console.log('🔄 Secondary refresh after database sync delay...');
       forceRefresh();
-    }, 500);
+    }, 1500);
+    
+    // Final refresh to ensure UI consistency
+    setTimeout(() => {
+      console.log('🔄 Final refresh to ensure complete UI update...');
+      forceRefresh();
+    }, 3000);
   };
 
   if (isCheckingAuth) {
