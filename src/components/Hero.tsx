@@ -1,21 +1,27 @@
+
 import React, { useEffect, useRef, useState } from 'react';
+
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [videoStarted, setVideoStarted] = useState(false);
+  const [userInteracted, setUserInteracted] = useState(false);
+
   useEffect(() => {
-    // Preload the video before attempting to play
+    // Check if device is mobile
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
     const preloadVideo = () => {
       if (videoRef.current) {
         videoRef.current.load();
         console.log("Video preloading started");
       }
     };
+
     const attemptPlay = async () => {
       if (videoRef.current) {
         try {
-          // Only set video started after play() succeeds
           await videoRef.current.play();
           console.log("Video playback started successfully");
           setIsVideoLoaded(true);
@@ -24,55 +30,118 @@ const Hero = () => {
           console.error("Auto-play failed:", error);
           setVideoError(true);
 
-          // Add a click event listener to play the video on user interaction
-          const handleClick = () => {
-            if (videoRef.current) {
-              videoRef.current.play().then(() => {
-                console.log("Video playing after user interaction");
-                setIsVideoLoaded(true);
-                setVideoStarted(true);
-              }).catch(e => {
-                console.error("Still could not play video after click:", e);
-                setVideoError(true);
-              });
-              document.removeEventListener('click', handleClick);
-            }
-          };
-          document.addEventListener('click', handleClick);
+          // For mobile devices, show a more prominent play button
+          if (isMobile) {
+            console.log("Mobile device detected, waiting for user interaction");
+          }
         }
+      }
+    };
+
+    // Global click handler for mobile
+    const handleAnyClick = (event: Event) => {
+      if (!userInteracted && videoRef.current && !videoStarted) {
+        console.log("User interaction detected, attempting to play video");
+        setUserInteracted(true);
+        
+        videoRef.current.play().then(() => {
+          console.log("Video playing after user interaction");
+          setIsVideoLoaded(true);
+          setVideoStarted(true);
+          setVideoError(false);
+        }).catch(e => {
+          console.error("Still could not play video after click:", e);
+          setVideoError(true);
+        });
       }
     };
 
     // Start preloading immediately
     preloadVideo();
 
-    // Wait a moment for the video element to be properly initialized
+    // For mobile, try to play immediately but expect it to fail
+    // For desktop, wait a moment for initialization
     const timer = setTimeout(() => {
       attemptPlay();
+    }, isMobile ? 100 : 1000);
 
-      // Debug video element
-      if (videoRef.current) {
-        console.log("Video element ready state:", videoRef.current.readyState);
-      }
-    }, 1000);
+    // Add global click listener for mobile autoplay
+    document.addEventListener('click', handleAnyClick, { passive: true });
+    document.addEventListener('touchstart', handleAnyClick, { passive: true });
+
     return () => {
       clearTimeout(timer);
-      document.removeEventListener('click', () => {});
+      document.removeEventListener('click', handleAnyClick);
+      document.removeEventListener('touchstart', handleAnyClick);
     };
-  }, []);
-  return <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Only show the background when video hasn't started or there's an error */}
-      {(!videoStarted || videoError) && <div className="absolute inset-0 bg-gradient-to-b from-cartier-red/40 to-cartier-red/70 z-0"></div>}
+  }, [userInteracted, videoStarted]);
+
+  return (
+    <div className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Background gradient - show when video hasn't started or there's an error */}
+      {(!videoStarted || videoError) && (
+        <div className="absolute inset-0 bg-gradient-to-b from-cartier-red/40 to-cartier-red/70 z-0"></div>
+      )}
       
-      {/* Video background with opacity 0 until loaded */}
-      <video ref={videoRef} className={`absolute top-0 left-0 min-w-full min-h-full object-cover transition-opacity duration-700 ${videoStarted ? 'opacity-100' : 'opacity-0'}`} autoPlay loop muted playsInline poster="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1887&auto=format&fit=crop" onLoadedData={() => setIsVideoLoaded(true)} onError={() => setVideoError(true)} preload="auto" style={{
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover'
-    }}>
-        <source src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4" type="video/mp4" onError={e => console.error("MP4 source failed:", e)} />
+      {/* Video background */}
+      <video 
+        ref={videoRef} 
+        className={`absolute top-0 left-0 min-w-full min-h-full object-cover transition-opacity duration-700 ${
+          videoStarted ? 'opacity-100' : 'opacity-0'
+        }`} 
+        autoPlay 
+        loop 
+        muted 
+        playsInline
+        webkit-playsinline="true"
+        poster="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1887&auto=format&fit=crop" 
+        onLoadedData={() => {
+          console.log("Video data loaded");
+          setIsVideoLoaded(true);
+        }} 
+        onError={(e) => {
+          console.error("Video error:", e);
+          setVideoError(true);
+        }} 
+        onCanPlay={() => {
+          console.log("Video can play");
+        }}
+        preload="auto" 
+        style={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover'
+        }}
+      >
+        <source 
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4" 
+          type="video/mp4" 
+        />
         Your browser does not support video playback.
       </video>
+      
+      {/* Show play button overlay on mobile if video hasn't started */}
+      {!videoStarted && !userInteracted && (
+        <div className="absolute inset-0 flex items-center justify-center z-15 md:hidden">
+          <button 
+            onClick={() => {
+              if (videoRef.current) {
+                setUserInteracted(true);
+                videoRef.current.play().then(() => {
+                  setVideoStarted(true);
+                  setVideoError(false);
+                }).catch(console.error);
+              }
+            }}
+            className="bg-black/50 text-white p-4 rounded-full hover:bg-black/70 transition-colors"
+            aria-label="Play video"
+          >
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7z"/>
+            </svg>
+          </button>
+        </div>
+      )}
       
       {/* Dark overlay for text visibility */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80 z-10"></div>
@@ -95,6 +164,8 @@ const Hero = () => {
           <path d="M12 5V19M12 19L5 12M12 19L19 12" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Hero;
