@@ -48,8 +48,8 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
     queryFn: async () => {
       console.log('🔍 Fetching all orders for admin with refresh key:', refreshKey);
       
-      // Add a small delay to ensure database consistency
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Add a longer delay to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const { data, error } = await supabase.rpc('get_orders_with_items');
 

@@ -102,22 +102,23 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         toast.success(`Order status updated to ${selectedStatus}`);
       }
 
-      console.log('🔄 Step 3: Force refreshing all order data...');
+      console.log('🔄 Step 3: Force refreshing all order data with extended delays...');
       
-      // Force multiple refresh attempts to ensure data consistency
+      // Wait longer before first refresh to ensure database consistency
+      await new Promise(resolve => setTimeout(resolve, 1000));
       await onStatusUpdated();
       
-      // Additional refresh after a short delay to ensure database consistency
+      // Additional refresh after longer delay
       setTimeout(async () => {
-        console.log('🔄 Secondary refresh after database sync...');
+        console.log('🔄 Secondary refresh after extended database sync...');
         await onStatusUpdated();
-      }, 1000);
+      }, 3000);
       
-      // Final refresh to ensure UI is updated
+      // Final refresh with even longer delay
       setTimeout(async () => {
-        console.log('🔄 Final refresh to ensure UI consistency...');
+        console.log('🔄 Final refresh to ensure complete database propagation...');
         await onStatusUpdated();
-      }, 2000);
+      }, 6000);
       
       console.log('✅ STATUS UPDATE PROCESS COMPLETE');
 
