@@ -20,6 +20,38 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
   const [selectedStatus, setSelectedStatus] = useState(currentStatus);
   const [isUpdating, setIsUpdating] = useState(false);
 
+  // Add debugging when component mounts or currentStatus changes
+  React.useEffect(() => {
+    console.log('🔍 OrderStatusManager DEBUG INFO:');
+    console.log('Order ID:', orderId);
+    console.log('Current Status Prop:', currentStatus);
+    console.log('Current Status Type:', typeof currentStatus);
+    console.log('Current Status Length:', currentStatus?.length);
+    console.log('Current Status Chars:', Array.from(currentStatus || '').map(c => `'${c}' (${c.charCodeAt(0)})`));
+    
+    // Fetch raw order data to see what's actually in the database
+    const fetchRawOrderData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('id, status, user_id, guest_name')
+          .eq('id', orderId)
+          .single();
+        
+        console.log('🔍 RAW DATABASE DATA for order:', orderId);
+        console.log('Raw order data:', data);
+        console.log('Raw status:', data?.status);
+        console.log('Raw status type:', typeof data?.status);
+        console.log('Raw status chars:', Array.from(data?.status || '').map(c => `'${c}' (${c.charCodeAt(0)})`));
+        console.log('Database error:', error);
+      } catch (err) {
+        console.error('Failed to fetch raw order data:', err);
+      }
+    };
+    
+    fetchRawOrderData();
+  }, [orderId, currentStatus]);
+
   const handleStatusUpdate = async () => {
     console.log('🔥 === BUTTON CLICKED - STARTING STATUS UPDATE ===');
     console.log('Order ID:', orderId);
@@ -174,12 +206,15 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
   const isButtonDisabled = isUpdating || selectedStatus === currentStatus;
 
   const getStatusLabel = (status: string) => {
+    console.log('🏷️ Getting status label for:', status, 'Type:', typeof status);
     switch (status) {
       case 'processing': return 'Processing';
       case 'dispatched': return 'Dispatched';
       case 'delivered': return 'Delivered';
       case 'returned': return 'Returned';
-      default: return status;
+      default: 
+        console.warn('⚠️ Unknown status encountered:', status);
+        return status;
     }
   };
 
