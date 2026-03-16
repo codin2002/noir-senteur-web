@@ -47,7 +47,7 @@ const Collection = () => {
     <section id="collection" className="section bg-black">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif mb-4 text-white">OUR PRODUCT</h2>
+          <h2 className="text-4xl md:text-5xl font-serif mb-4 text-white">CYPHER COLLECTION</h2>
           <div className="w-24 h-0.5 bg-gold mx-auto"></div>
         </div>
 
