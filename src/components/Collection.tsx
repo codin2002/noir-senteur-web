@@ -62,7 +62,7 @@ const Collection = () => {
             <p className="text-white/80">No perfumes found in the collection.</p>
           </div>
         ) : (
-          <div className="space-y-24">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
             {featuredPerfumes.map((perfume, index) => (
               <PerfumeCard
                 key={perfume.id}
@@ -72,7 +72,6 @@ const Collection = () => {
                 description={perfume.description}
                 image={perfume.image}
                 price={perfume.price}
-                invert={index % 2 !== 0}
                 delay={index * 200}
               />
             ))}
