@@ -21,14 +21,13 @@ export const PERFUMES = {
     SHORT_DESCRIPTION: "A sophisticated blend of amber and oud with vanilla undertones.",
     // Images now fetched from database
   },
-  LUXURY_COLLECTION: {
-    ID: "luxury-collection",
-    NAME: "Luxury Collection",
-    DISPLAY_NAME: "Luxury Collection",
-    NOTES: "Rose, Jasmine, Sandalwood",
-    DESCRIPTION: "An exquisite combination of rose and jasmine, with a rich sandalwood base that offers an elegant and refined sensory experience.",
-    SHORT_DESCRIPTION: "Elegant floral notes with a rich sandalwood base.",
-    // Images now fetched from database
+  FOUR_TWO_FOUR: {
+    ID: "424",
+    NAME: "٤٢٤",
+    DISPLAY_NAME: "٤٢٤",
+    NOTES: "Amber, Oud, Cashmere",
+    DESCRIPTION: "٤٢٤ starts off with a slight warm and spicy nutmeg scent and then the middle note is carried forward by a fresh violet flower and then the most interesting part of a perfume is the base note which is Amber, oud and cashmere",
+    SHORT_DESCRIPTION: "A warm and spicy blend with amber, oud and cashmere.",
   }
 };
 
