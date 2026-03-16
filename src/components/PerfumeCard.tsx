@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './common/ProductImage';
 import { getPerfumeDisplayName, PRICING } from '@/utils/constants';
@@ -24,7 +23,6 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   description,
   image,
   delay = 0,
-  invert = false
 }) => {
   const navigate = useNavigate();
   const { primaryImage } = usePerfumeImages(id);
@@ -34,39 +32,30 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   };
 
   return (
-    <div 
-      className={cn(
-        "group flex flex-col md:flex-row gap-8 items-center",
-        invert && "md:flex-row-reverse"
-      )}
+    <div
+      className="group flex flex-col cursor-pointer"
       style={{ animationDelay: `${delay}ms` }}
+      onClick={handleExplore}
     >
-      <div className="w-full md:w-1/2 overflow-hidden">
-        <div className="relative h-[400px] md:h-[500px] flex items-center justify-center">
-          <ProductImage 
-            src={primaryImage || image}
-            alt={name}
-            fullWidth={true}
-            hover={true}
-            aspectRatio="auto"
-            objectFit="contain"
-            className="max-h-full p-4"
-          />
-        </div>
+      <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary/30">
+        <ProductImage
+          src={primaryImage || image}
+          alt={name}
+          fullWidth={true}
+          hover={true}
+          aspectRatio="square"
+          objectFit="contain"
+          className="w-full h-full p-4"
+        />
       </div>
-      
-      <div className="w-full md:w-1/2 space-y-4 text-left md:text-center">
-        <div className="mb-2">
-          <h3 className="text-sm uppercase tracking-widest text-gold">{notes}</h3>
-          <h2 className="text-3xl md:text-4xl font-serif">{getPerfumeDisplayName({ name })}</h2>
-        </div>
-        <p className="text-muted-foreground leading-relaxed max-w-md mx-auto">
-          {description}
-        </p>
-        <p className="text-xl font-light text-gold mt-4">
+
+      <div className="mt-4 space-y-1 text-center">
+        <h3 className="text-xs uppercase tracking-widest text-accent">{notes}</h3>
+        <h2 className="text-lg md:text-xl font-serif text-foreground">{getPerfumeDisplayName({ name })}</h2>
+        <p className="text-sm text-accent font-light">
           {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
-        <button className="btn-outline mt-6" onClick={handleExplore}>
+        <button className="btn-outline mt-3 text-[10px] py-2 px-4" onClick={(e) => { e.stopPropagation(); handleExplore(); }}>
           BUY
         </button>
       </div>
