@@ -43,7 +43,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           alt={name}
           fullWidth={true}
           hover={true}
-          aspectRatio="square"
+          aspectRatio={1}
           objectFit="contain"
           className="w-full h-full p-4"
         />
