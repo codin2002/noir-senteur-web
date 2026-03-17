@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import AdminAuth from '@/components/admin/AdminAuth';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
@@ -8,10 +8,19 @@ import { Button } from '@/components/ui/button';
 import { siteConfig } from '@/config/siteConfig';
 import { Construction, Globe, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const ActionsInsights = () => {
   const { isAuthenticated, isCheckingAuth, handleAuthenticated, handleLogout } = useAdminAuth();
   const navigate = useNavigate();
+  const [isMaintenanceOn, setIsMaintenanceOn] = useState(siteConfig.maintenanceMode);
+
+  const handleToggle = (checked: boolean) => {
+    const newValue = !checked; // checked = live, so maintenance = !checked
+    siteConfig.maintenanceMode = newValue;
+    setIsMaintenanceOn(newValue);
+    toast.success(newValue ? 'Maintenance mode enabled' : 'Site is now live!');
+  };
 
   if (isCheckingAuth) return <AdminLoadingState />;
   if (!isAuthenticated) return <AdminAuth onAuthenticated={handleAuthenticated} />;
@@ -52,17 +61,17 @@ const ActionsInsights = () => {
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between p-4 rounded-lg bg-dark border border-gold/10">
               <div className="flex items-center gap-3">
-                {siteConfig.maintenanceMode ? (
+                {isMaintenanceOn ? (
                   <Construction className="h-6 w-6 text-accent" />
                 ) : (
                   <Globe className="h-6 w-6 text-green-500" />
                 )}
                 <div>
                   <p className="text-foreground font-medium">
-                    {siteConfig.maintenanceMode ? 'Under Construction' : 'Live Site'}
+                    {isMaintenanceOn ? 'Under Construction' : 'Live Site'}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {siteConfig.maintenanceMode
+                    {isMaintenanceOn
                       ? 'Visitors see the "Coming Soon" page'
                       : 'Visitors see the full website'}
                   </p>
@@ -70,28 +79,20 @@ const ActionsInsights = () => {
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-sm text-muted-foreground">
-                  {siteConfig.maintenanceMode ? 'Maintenance' : 'Live'}
+                  {isMaintenanceOn ? 'Maintenance' : 'Live'}
                 </span>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  siteConfig.maintenanceMode
-                    ? 'bg-accent/20 text-accent'
-                    : 'bg-green-500/20 text-green-400'
-                }`}>
-                  {siteConfig.maintenanceMode ? 'ON' : 'OFF'}
-                </div>
+                <Switch
+                  checked={!isMaintenanceOn}
+                  onCheckedChange={handleToggle}
+                />
               </div>
             </div>
 
             <div className="p-4 rounded-lg border border-gold/10 bg-dark/50">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                <strong className="text-gold">How to toggle:</strong> Edit{' '}
-                <code className="px-1.5 py-0.5 rounded bg-secondary text-accent text-xs">
-                  src/config/siteConfig.ts
-                </code>{' '}
-                and set <code className="px-1.5 py-0.5 rounded bg-secondary text-accent text-xs">maintenanceMode</code>{' '}
-                to <code className="px-1.5 py-0.5 rounded bg-secondary text-accent text-xs">false</code> to go live, 
-                or <code className="px-1.5 py-0.5 rounded bg-secondary text-accent text-xs">true</code> for maintenance. 
-                Then publish the site.
+                Toggle the switch to instantly switch between the <strong className="text-gold">"Under Construction"</strong> page 
+                and the <strong className="text-gold">full live site</strong>. Changes take effect immediately — 
+                just refresh the homepage to see the result.
               </p>
             </div>
           </CardContent>
