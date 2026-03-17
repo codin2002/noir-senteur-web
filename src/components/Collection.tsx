@@ -41,7 +41,7 @@ const Collection = () => {
   }, []);
 
   // Display only the first 3 perfumes in the main section
-  const featuredPerfumes = perfumes.slice(0, 3);
+  const featuredPerfumes = perfumes.slice(0, 1);
 
   return (
     <section id="collection" className="section bg-black">
