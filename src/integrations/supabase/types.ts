@@ -48,26 +48,35 @@ export type Database = {
       }
       inventory: {
         Row: {
+          avg_daily_usage: number
           created_at: string
           id: string
+          lead_time_days: number
           low_stock_threshold: number
           perfume_id: string
+          safety_stock: number
           stock_quantity: number
           updated_at: string
         }
         Insert: {
+          avg_daily_usage?: number
           created_at?: string
           id?: string
+          lead_time_days?: number
           low_stock_threshold?: number
           perfume_id: string
+          safety_stock?: number
           stock_quantity?: number
           updated_at?: string
         }
         Update: {
+          avg_daily_usage?: number
           created_at?: string
           id?: string
+          lead_time_days?: number
           low_stock_threshold?: number
           perfume_id?: string
+          safety_stock?: number
           stock_quantity?: number
           updated_at?: string
         }
@@ -83,37 +92,49 @@ export type Database = {
       }
       inventory_logs: {
         Row: {
+          action_category: string | null
           change_type: string
           created_at: string
           id: string
+          is_unusual: boolean
           order_id: string | null
           perfume_id: string
           quantity_after: number
           quantity_before: number
           quantity_change: number
           reason: string
+          reference_id: string | null
+          user_name: string | null
         }
         Insert: {
+          action_category?: string | null
           change_type: string
           created_at?: string
           id?: string
+          is_unusual?: boolean
           order_id?: string | null
           perfume_id: string
           quantity_after: number
           quantity_before: number
           quantity_change: number
           reason: string
+          reference_id?: string | null
+          user_name?: string | null
         }
         Update: {
+          action_category?: string | null
           change_type?: string
           created_at?: string
           id?: string
+          is_unusual?: boolean
           order_id?: string | null
           perfume_id?: string
           quantity_after?: number
           quantity_before?: number
           quantity_change?: number
           reason?: string
+          reference_id?: string | null
+          user_name?: string | null
         }
         Relationships: [
           {
