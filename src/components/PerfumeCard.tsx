@@ -14,6 +14,7 @@ interface PerfumeCardProps {
   price: string;
   delay?: number;
   invert?: boolean;
+  stockQuantity?: number;
 }
 
 const PerfumeCard: React.FC<PerfumeCardProps> = ({
@@ -23,9 +24,11 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   description,
   image,
   delay = 0,
+  stockQuantity,
 }) => {
   const navigate = useNavigate();
   const { primaryImage } = usePerfumeImages(id);
+  const isOutOfStock = stockQuantity !== undefined && stockQuantity <= 0;
 
   const handleExplore = () => {
     navigate(`/perfume/${id}`);
@@ -47,6 +50,11 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           objectFit="contain"
           className="w-full h-full p-4"
         />
+        {isOutOfStock && (
+          <div className="absolute top-2 right-2 bg-gold text-black text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded">
+            Preorder
+          </div>
+        )}
       </div>
 
       <div className="mt-4 space-y-1 text-center">
@@ -55,8 +63,11 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
         <p className="text-sm text-accent font-light">
           {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
+        {isOutOfStock && (
+          <p className="text-[10px] uppercase tracking-widest text-gold">Out of stock</p>
+        )}
         <button className="btn-outline mt-3 text-[10px] py-2 px-4" onClick={(e) => { e.stopPropagation(); handleExplore(); }}>
-          BUY
+          {isOutOfStock ? 'PREORDER' : 'BUY'}
         </button>
       </div>
     </div>

@@ -26,8 +26,11 @@ const Collection = () => {
         }
 
         if (data) {
-          console.log("Fetched perfumes:", data);
-          setPerfumes(data);
+          const { data: inv } = await supabase.from('inventory').select('perfume_id, stock_quantity');
+          const stockMap = new Map((inv || []).map((i: any) => [i.perfume_id, i.stock_quantity]));
+          const merged = data.map((p: any) => ({ ...p, stock_quantity: stockMap.get(p.id) ?? 0 }));
+          console.log("Fetched perfumes:", merged);
+          setPerfumes(merged as any);
         }
       } catch (error) {
         console.error('Error fetching perfumes:', error);
@@ -72,6 +75,7 @@ const Collection = () => {
                 description={perfume.description}
                 image={perfume.image}
                 price={perfume.price}
+                stockQuantity={(perfume as any).stock_quantity}
                 delay={index * 200}
               />
             ))}
