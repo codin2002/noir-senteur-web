@@ -5,6 +5,7 @@ import AdminOrdersHeader from '@/components/admin/AdminOrdersHeader';
 import AdminDashboardSummary from '@/components/admin/AdminDashboardSummary';
 import InventoryManager from '@/components/admin/InventoryManager';
 import InventoryLogs from '@/components/admin/InventoryLogs';
+import InventoryInsights from '@/components/admin/InventoryInsights';
 import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
 import InventoryTestModal from '@/components/admin/InventoryTestModal';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
@@ -68,6 +69,8 @@ const AdminOrders = () => {
           onInventoryTest={handleInventoryTest}
         />
         
+        <InventoryInsights />
+
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           <InventoryManager />
           <InventoryLogs />
