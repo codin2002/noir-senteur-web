@@ -6,8 +6,8 @@ const MAINTENANCE_KEY = 'senteur_maintenance_mode';
 export const siteConfig = {
   get maintenanceMode(): boolean {
     const stored = localStorage.getItem(MAINTENANCE_KEY);
-    // Default to true (under construction) if never set
-    return stored === null ? true : stored === 'true';
+    // Default to false (live site) if never set
+    return stored === null ? false : stored === 'true';
   },
   set maintenanceMode(value: boolean) {
     localStorage.setItem(MAINTENANCE_KEY, String(value));
