@@ -67,7 +67,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
           <p className="text-[10px] uppercase tracking-widest text-gold">Out of stock</p>
         )}
         <button className="btn-outline mt-3 text-[10px] py-2 px-4" onClick={(e) => { e.stopPropagation(); handleExplore(); }}>
-          {isOutOfStock ? 'PREORDER' : 'BUY'}
+          PREORDER
         </button>
       </div>
     </div>
