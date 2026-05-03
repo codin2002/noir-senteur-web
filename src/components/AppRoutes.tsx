@@ -15,6 +15,7 @@ import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import ShippingPolicy from '@/pages/ShippingPolicy';
 import NotFound from '@/pages/NotFound';
 import AdminOrders from '@/pages/AdminOrders';
+import AdminAnalytics from '@/pages/AdminAnalytics';
 import PaymentSuccess from '@/components/PaymentSuccess';
 
 const AppRoutes = () => {
@@ -34,6 +35,7 @@ const AppRoutes = () => {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/shipping-policy" element={<ShippingPolicy />} />
       <Route path="/admin/orders" element={<AdminOrders />} />
+      <Route path="/admin/analytics" element={<AdminAnalytics />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
