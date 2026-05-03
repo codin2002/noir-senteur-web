@@ -1,0 +1,2 @@
+UPDATE storage.buckets SET public = true WHERE id = 'perfume2';
+UPDATE public.perfumes SET image = 'https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/perfume2/perfume.jpg' WHERE id = '37b4d1ef-6589-4852-a74d-c4a10bc04302';
