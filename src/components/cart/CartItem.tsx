@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { Minus, Plus, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { usePreorderInfo } from '@/hooks/usePreorderInfo';
 
 export interface CartItemType {
   id: string;
@@ -34,6 +35,7 @@ const CartItem: React.FC<CartItemProps> = ({
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
+  const { info: preorderInfo, isActive: isPreorder } = usePreorderInfo(item.perfume.id);
 
   const updateLocalStorage = (updatedItems: CartItemType[]) => {
     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
@@ -116,9 +118,21 @@ const CartItem: React.FC<CartItemProps> = ({
       />
       
       <div className="flex-grow">
-        <h3 className="font-semibold">{item.perfume.name}</h3>
+        <div className="flex items-center gap-2 flex-wrap">
+          <h3 className="font-semibold">{item.perfume.name}</h3>
+          {isPreorder && (
+            <span className="inline-flex items-center gap-1 bg-gold/20 text-gold border border-gold/40 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded">
+              <Clock className="w-3 h-3" /> Preorder
+            </span>
+          )}
+        </div>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
         <p className="font-medium mt-1">{item.perfume.price}</p>
+        {isPreorder && preorderInfo?.expected_shipping_date && (
+          <p className="text-xs text-gold mt-1">
+            Estimated delivery: {new Date(preorderInfo.expected_shipping_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+          </p>
+        )}
       </div>
       
       <div className="flex items-center gap-2">
