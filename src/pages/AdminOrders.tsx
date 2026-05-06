@@ -6,6 +6,7 @@ import AdminDashboardSummary from '@/components/admin/AdminDashboardSummary';
 import InventoryManager from '@/components/admin/InventoryManager';
 import InventoryLogs from '@/components/admin/InventoryLogs';
 import InventoryInsights from '@/components/admin/InventoryInsights';
+import PreorderManager from '@/components/admin/PreorderManager';
 import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
 import InventoryTestModal from '@/components/admin/InventoryTestModal';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
@@ -75,6 +76,8 @@ const AdminOrders = () => {
           <InventoryManager />
           <InventoryLogs />
         </div>
+
+        <PreorderManager />
         
         <AdminOrdersTable 
           orders={orders || []} 
