@@ -7,6 +7,8 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useCartCount } from '@/hooks/useCartCount';
+import { usePreorderInfo } from '@/hooks/usePreorderInfo';
+import PreorderBadge from './PreorderBadge';
 
 interface Perfume {
   id: string;
@@ -36,6 +38,7 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
   const [addingToCart, setAddingToCart] = useState(false);
   const [addingToWishlist, setAddingToWishlist] = useState(false);
   const { refresh: refreshCartCount } = useCartCount(user?.id);
+  const { info: preorderInfo, isActive: isPreorder } = usePreorderInfo(perfumeId);
 
   const addToWishlist = async () => {
     if (!user) {
@@ -160,13 +163,14 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
 
   return (
     <div className="space-y-4">
+      {isPreorder && preorderInfo && <PreorderBadge info={preorderInfo} />}
       <Button 
         onClick={addToCart}
         disabled={addingToCart}
         className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6"
       >
         <ShoppingCart className="h-5 w-5 mr-2" />
-        {addingToCart ? 'Adding...' : 'Add to Cart'}
+        {addingToCart ? 'Adding...' : isPreorder ? 'Preorder Now' : 'Add to Cart'}
       </Button>
       
       <div className="grid grid-cols-1 gap-4">
