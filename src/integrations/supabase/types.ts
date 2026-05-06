@@ -51,9 +51,11 @@ export type Database = {
           avg_daily_usage: number
           created_at: string
           id: string
+          incoming_stock: number
           lead_time_days: number
           low_stock_threshold: number
           perfume_id: string
+          reserved_stock: number
           safety_stock: number
           stock_quantity: number
           updated_at: string
@@ -62,9 +64,11 @@ export type Database = {
           avg_daily_usage?: number
           created_at?: string
           id?: string
+          incoming_stock?: number
           lead_time_days?: number
           low_stock_threshold?: number
           perfume_id: string
+          reserved_stock?: number
           safety_stock?: number
           stock_quantity?: number
           updated_at?: string
@@ -73,9 +77,11 @@ export type Database = {
           avg_daily_usage?: number
           created_at?: string
           id?: string
+          incoming_stock?: number
           lead_time_days?: number
           low_stock_threshold?: number
           perfume_id?: string
+          reserved_stock?: number
           safety_stock?: number
           stock_quantity?: number
           updated_at?: string
@@ -178,6 +184,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_preorder: boolean
           order_id: string
           perfume_id: string
           price: number
@@ -186,6 +193,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_preorder?: boolean
           order_id: string
           perfume_id: string
           price: number
@@ -194,6 +202,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_preorder?: boolean
           order_id?: string
           perfume_id?: string
           price?: number
@@ -232,7 +241,9 @@ export type Database = {
           guest_name: string | null
           guest_phone: string | null
           id: string
+          is_preorder: boolean
           notes: string | null
+          payment_status: string
           processing_email_sent: boolean | null
           status: string
           total: number
@@ -246,7 +257,9 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          is_preorder?: boolean
           notes?: string | null
+          payment_status?: string
           processing_email_sent?: boolean | null
           status?: string
           total: number
@@ -260,7 +273,9 @@ export type Database = {
           guest_name?: string | null
           guest_phone?: string | null
           id?: string
+          is_preorder?: boolean
           notes?: string | null
+          payment_status?: string
           processing_email_sent?: boolean | null
           status?: string
           total?: number
@@ -434,32 +449,53 @@ export type Database = {
         Row: {
           created_at: string
           description: string
+          expected_shipping_date: string | null
           id: string
           image: string
           name: string
           notes: string
+          preorder_count: number
+          preorder_enabled: boolean
+          preorder_end_date: string | null
+          preorder_limit: number | null
+          preorder_start_date: string | null
           price: string
           price_value: number
+          product_type: string
         }
         Insert: {
           created_at?: string
           description: string
+          expected_shipping_date?: string | null
           id?: string
           image: string
           name: string
           notes: string
+          preorder_count?: number
+          preorder_enabled?: boolean
+          preorder_end_date?: string | null
+          preorder_limit?: number | null
+          preorder_start_date?: string | null
           price: string
           price_value: number
+          product_type?: string
         }
         Update: {
           created_at?: string
           description?: string
+          expected_shipping_date?: string | null
           id?: string
           image?: string
           name?: string
           notes?: string
+          preorder_count?: number
+          preorder_enabled?: boolean
+          preorder_end_date?: string | null
+          preorder_limit?: number | null
+          preorder_start_date?: string | null
           price?: string
           price_value?: number
+          product_type?: string
         }
         Relationships: []
       }
@@ -489,6 +525,42 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      preorder_fulfillments: {
+        Row: {
+          created_at: string
+          fulfilled_at: string | null
+          fulfilled_quantity: number
+          id: string
+          notes: string | null
+          order_item_id: string
+          perfume_id: string
+          preorder_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fulfilled_at?: string | null
+          fulfilled_quantity?: number
+          id?: string
+          notes?: string | null
+          order_item_id: string
+          perfume_id: string
+          preorder_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fulfilled_at?: string | null
+          fulfilled_quantity?: number
+          id?: string
+          notes?: string | null
+          order_item_id?: string
+          perfume_id?: string
+          preorder_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -680,6 +752,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cancel_preorder_order: { Args: { _order_id: string }; Returns: undefined }
       create_order_with_items: {
         Args: {
           cart_items: Json
@@ -728,6 +801,13 @@ export type Database = {
           perfume: Json
           perfume_id: string
           user_id: string
+        }[]
+      }
+      receive_stock_and_fulfill_preorders: {
+        Args: { _notes?: string; _perfume_id: string; _quantity: number }
+        Returns: {
+          fulfilled_items: number
+          remaining_stock: number
         }[]
       }
       update_cart_item: {
