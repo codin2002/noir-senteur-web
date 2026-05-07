@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Package, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useOrderDetails } from '@/hooks/useOrderDetails';
 import OrderStatusManager from '@/components/admin/OrderStatusManager';
+import OrderStatusTimeline from '@/components/profile/OrderStatusTimeline';
 
 interface OrderDetailsModalProps {
   isOpen: boolean;
@@ -171,6 +172,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {/* Status Timeline */}
+            <OrderStatusTimeline status={orderDetails.status} createdAt={orderDetails.created_at} />
 
             {/* Order Items */}
             <div>
