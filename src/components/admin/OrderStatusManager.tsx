@@ -212,6 +212,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       case 'dispatched': return 'Dispatched';
       case 'delivered': return 'Delivered';
       case 'returned': return 'Returned';
+      case 'refunded': return 'Refunded';
       default: 
         console.warn('⚠️ Unknown status encountered:', status);
         return status;
@@ -244,6 +245,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               </SelectItem>
               <SelectItem value="returned" className="text-white hover:bg-gold/20">
                 Returned
+              </SelectItem>
+              <SelectItem value="refunded" className="text-white hover:bg-gold/20">
+                Refunded
               </SelectItem>
             </SelectContent>
           </Select>

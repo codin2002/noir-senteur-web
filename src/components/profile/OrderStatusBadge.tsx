@@ -36,6 +36,8 @@ const OrderStatusBadge: React.FC<OrderStatusBadgeProps> = ({ status }) => {
         return 'text-green-600 bg-green-100';
       case 'cancelled':
         return 'text-red-600 bg-red-100';
+      case 'refunded':
+        return 'text-pink-700 bg-pink-100';
       default:
         return 'text-gray-600 bg-gray-100';
     }
