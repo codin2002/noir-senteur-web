@@ -36,11 +36,74 @@ export async function createOrder(
   console.log('Order created successfully with ID:', orderId);
   console.log('Order total saved to database:', orderCalculation.totalAmount);
 
-  // Reduce inventory immediately when order is placed
+  // ===== PREORDER DETECTION =====
+  // Look up perfume product_type / preorder_enabled for each item
+  const perfumeIds = orderCalculation.orderItems.map((i: any) => i.perfume_id);
+  const { data: perfumesMeta } = await supabaseService
+    .from('perfumes')
+    .select('id, product_type, preorder_enabled')
+    .in('id', perfumeIds);
+
+  const preorderMap = new Map<string, boolean>();
+  (perfumesMeta || []).forEach((p: any) => {
+    preorderMap.set(p.id, p.product_type === 'preorder' || p.preorder_enabled === true);
+  });
+
+  const preorderItems = orderCalculation.orderItems.filter((i: any) => preorderMap.get(i.perfume_id));
+  const inStockItems = orderCalculation.orderItems.filter((i: any) => !preorderMap.get(i.perfume_id));
+  const hasPreorder = preorderItems.length > 0;
+  const allPreorder = hasPreorder && inStockItems.length === 0;
+
+  if (hasPreorder) {
+    console.log(`🕒 Preorder detected: ${preorderItems.length} preorder items, ${inStockItems.length} in-stock items`);
+
+    // Flag preorder order_items
+    for (const item of preorderItems) {
+      await supabaseService
+        .from('order_items')
+        .update({ is_preorder: true })
+        .eq('order_id', orderId)
+        .eq('perfume_id', item.perfume_id);
+
+      // Increment preorder_count and reserved_stock
+      const { data: perfumeRow } = await supabaseService
+        .from('perfumes')
+        .select('preorder_count')
+        .eq('id', item.perfume_id)
+        .single();
+      await supabaseService
+        .from('perfumes')
+        .update({ preorder_count: (perfumeRow?.preorder_count || 0) + item.quantity })
+        .eq('id', item.perfume_id);
+
+      const { data: invRow } = await supabaseService
+        .from('inventory')
+        .select('reserved_stock')
+        .eq('perfume_id', item.perfume_id)
+        .maybeSingle();
+      if (invRow) {
+        await supabaseService
+          .from('inventory')
+          .update({ reserved_stock: (invRow.reserved_stock || 0) + item.quantity })
+          .eq('perfume_id', item.perfume_id);
+      }
+    }
+
+    // Update order with preorder status/flag
+    await supabaseService
+      .from('orders')
+      .update({
+        is_preorder: true,
+        status: allPreorder ? 'awaiting_release' : 'processing',
+      })
+      .eq('id', orderId);
+  }
+
+  // Reduce inventory immediately for IN-STOCK items only
   try {
-    console.log('📦 Reducing inventory for order placement...');
+    console.log('📦 Reducing inventory for in-stock items...');
     
-    for (const item of orderCalculation.orderItems) {
+    for (const item of inStockItems) {
       console.log(`🔽 Processing perfume ${item.perfume_id}, reducing ${item.quantity} units`);
 
       // Get current inventory
