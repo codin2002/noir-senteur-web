@@ -246,6 +246,9 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
               <SelectItem value="returned" className="text-white hover:bg-gold/20">
                 Returned
               </SelectItem>
+              <SelectItem value="refunded" className="text-white hover:bg-gold/20">
+                Refunded
+              </SelectItem>
             </SelectContent>
           </Select>
         </div>
