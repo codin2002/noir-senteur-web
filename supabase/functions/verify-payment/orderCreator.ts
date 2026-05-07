@@ -87,6 +87,23 @@ export async function createOrder(
           .update({ reserved_stock: (invRow.reserved_stock || 0) + item.quantity })
           .eq('perfume_id', item.perfume_id);
       }
+
+      // Insert a row in the preorders table for visibility/tracking
+      const { error: preorderInsertError } = await supabaseService
+        .from('preorders')
+        .insert({
+          perfume_id: item.perfume_id,
+          user_id: isGuest ? null : actualUserId,
+          guest_name: isGuest ? customerInfo.customerName : null,
+          guest_email: isGuest ? customerInfo.customerEmail : null,
+          guest_phone: isGuest ? customerInfo.customerPhone : null,
+          quantity: item.quantity,
+          order_id: orderId,
+          status: 'pending',
+        });
+      if (preorderInsertError) {
+        console.error('⚠️ Failed to insert into preorders table:', preorderInsertError);
+      }
     }
 
     // Update order with preorder status/flag
