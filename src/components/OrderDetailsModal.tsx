@@ -173,6 +173,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               </div>
             </div>
 
+            {/* Status Timeline */}
+            <OrderStatusTimeline status={orderDetails.status} createdAt={orderDetails.created_at} />
+
             {/* Order Items */}
             <div>
               <h3 className="text-lg font-semibold mb-4">Order Items</h3>
