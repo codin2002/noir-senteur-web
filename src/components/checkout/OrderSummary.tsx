@@ -15,8 +15,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
-  // Free shipping if 3 or more items, otherwise apply shipping cost
-  const shipping = subtotal > 0 && totalQuantity < 3 ? PRICING.SHIPPING_COST : 0;
+  // Free shipping above the threshold, otherwise apply shipping cost
+  const shipping = subtotal > 0 && totalQuantity < PRICING.FREE_SHIPPING_THRESHOLD ? PRICING.SHIPPING_COST : 0;
 
   return (
     <div className="bg-darker/80 border border-gold/20 rounded-xl p-6 backdrop-blur-sm">
@@ -68,13 +68,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
           </span>
         </div>
         
-        {totalQuantity >= 3 ? (
+        {totalQuantity >= PRICING.FREE_SHIPPING_THRESHOLD ? (
           <div className="text-xs text-green-400 text-center">
-            🎉 Free shipping on 3+ items!
+            🎉 Free shipping on {PRICING.FREE_SHIPPING_THRESHOLD}+ items!
           </div>
         ) : (
           <div className="text-xs text-gold/70 text-center">
-            Add {3 - totalQuantity} more item{3 - totalQuantity === 1 ? '' : 's'} for free shipping
+            Add {PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity} more item{PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity === 1 ? '' : 's'} for free shipping
           </div>
         )}
         
