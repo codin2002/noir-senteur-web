@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -13,7 +14,11 @@ const Hero = () => {
     const tryPlay = () => {
       video.muted = true;
       const p = video.play();
-      if (p && typeof p.catch === 'function') p.catch(() => {});
+      if (p && typeof p.then === 'function') {
+        p.then(() => setAutoplayBlocked(false)).catch(() => {
+          setAutoplayBlocked(true);
+        });
+      }
     };
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') tryPlay();
@@ -35,37 +40,40 @@ const Hero = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Black background while video loads */}
-      <div className="absolute inset-0 bg-black z-0"></div>
-      
-      {/* Video background */}
-      <video 
-        ref={videoRef} 
-        className={`absolute top-0 left-0 min-w-full min-h-full object-cover pointer-events-none transition-opacity duration-300 ${
-          isVideoLoaded ? 'opacity-100' : 'opacity-0'
-        }`} 
-        autoPlay 
-        loop 
-        muted 
-        playsInline
-        {...({ 'webkit-playsinline': 'true', 'x-webkit-airplay': 'deny' } as any)}
-        controls={false}
-        disablePictureInPicture
-        disableRemotePlayback
-        onLoadedData={() => setIsVideoLoaded(true)} 
-        preload="auto" 
+      {/* Fallback background — also shown when autoplay is blocked (iOS Low Power Mode) */}
+      <div
+        className="absolute inset-0 z-0"
         style={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover'
+          background:
+            'radial-gradient(ellipse at center, #5a3210 0%, #2a1605 60%, #000000 100%)',
         }}
-      >
-        <source 
-          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4" 
-          type="video/mp4" 
-        />
-        Your browser does not support video playback.
-      </video>
+      />
+
+      {/* Video background — removed entirely if autoplay is blocked, so no native play button can appear */}
+      {!autoplayBlocked && (
+        <video
+          ref={videoRef}
+          className={`absolute top-0 left-0 min-w-full min-h-full object-cover pointer-events-none transition-opacity duration-300 ${
+            isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          autoPlay
+          loop
+          muted
+          playsInline
+          {...({ 'webkit-playsinline': 'true', 'x-webkit-airplay': 'deny' } as any)}
+          controls={false}
+          disablePictureInPicture
+          disableRemotePlayback
+          onLoadedData={() => setIsVideoLoaded(true)}
+          preload="auto"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+        >
+          <source
+            src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4"
+            type="video/mp4"
+          />
+        </video>
+      )}
       
       {/* Dark overlay for text visibility */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80 z-10"></div>
