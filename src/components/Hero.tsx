@@ -4,76 +4,90 @@ import React, { useEffect, useRef, useState } from 'react';
 const Hero = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
-  const [autoplayBlocked, setAutoplayBlocked] = useState(false);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
     const handleCanPlay = () => setIsVideoLoaded(true);
+    const handleVideoReady = () => {
+      setIsVideoLoaded(true);
+      tryPlay();
+    };
     const tryPlay = () => {
       video.muted = true;
+      video.defaultMuted = true;
+      video.playsInline = true;
       const p = video.play();
-      if (p && typeof p.then === 'function') {
-        p.then(() => setAutoplayBlocked(false)).catch(() => {
-          setAutoplayBlocked(true);
-        });
-      }
+      if (p && typeof p.catch === 'function') p.catch(() => undefined);
     };
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') tryPlay();
     };
 
     video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('loadedmetadata', tryPlay);
+    video.addEventListener('loadeddata', handleVideoReady);
+    video.addEventListener('loadedmetadata', handleVideoReady);
+    video.addEventListener('playing', handleCanPlay);
+    video.addEventListener('timeupdate', handleCanPlay);
     video.addEventListener('pause', tryPlay);
+    window.addEventListener('focus', tryPlay);
+    window.addEventListener('pageshow', tryPlay);
+    window.addEventListener('click', tryPlay);
+    window.addEventListener('touchstart', tryPlay, { passive: true });
     document.addEventListener('visibilitychange', handleVisibility);
     tryPlay();
+    const retryPlayback = window.setInterval(tryPlay, 1200);
 
     return () => {
+      window.clearInterval(retryPlayback);
       video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('loadedmetadata', tryPlay);
+      video.removeEventListener('loadeddata', handleVideoReady);
+      video.removeEventListener('loadedmetadata', handleVideoReady);
+      video.removeEventListener('playing', handleCanPlay);
+      video.removeEventListener('timeupdate', handleCanPlay);
       video.removeEventListener('pause', tryPlay);
+      window.removeEventListener('focus', tryPlay);
+      window.removeEventListener('pageshow', tryPlay);
+      window.removeEventListener('click', tryPlay);
+      window.removeEventListener('touchstart', tryPlay);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
   }, []);
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Fallback background — also shown when autoplay is blocked (iOS Low Power Mode) */}
+      {/* Black fallback while the video starts */}
       <div
         className="absolute inset-0 z-0"
         style={{
-          background:
-            'radial-gradient(ellipse at center, #5a3210 0%, #2a1605 60%, #000000 100%)',
+          background: '#000000',
         }}
       />
 
-      {/* Video background — removed entirely if autoplay is blocked, so no native play button can appear */}
-      {!autoplayBlocked && (
-        <video
-          ref={videoRef}
-          className={`absolute top-0 left-0 min-w-full min-h-full object-cover pointer-events-none transition-opacity duration-300 ${
-            isVideoLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-          autoPlay
-          loop
-          muted
-          playsInline
-          {...({ 'webkit-playsinline': 'true', 'x-webkit-airplay': 'deny' } as any)}
-          controls={false}
-          disablePictureInPicture
-          disableRemotePlayback
-          onLoadedData={() => setIsVideoLoaded(true)}
-          preload="auto"
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        >
-          <source
-            src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4"
-            type="video/mp4"
-          />
-        </video>
-      )}
+      {/* Video background */}
+      <video
+        ref={videoRef}
+        className={`absolute top-0 left-0 min-w-full min-h-full object-cover pointer-events-none transition-opacity duration-300 ${
+          isVideoLoaded ? 'opacity-100' : 'opacity-95'
+        }`}
+        autoPlay
+        loop
+        muted
+        playsInline
+        {...({ 'webkit-playsinline': 'true', 'x-webkit-airplay': 'deny' } as any)}
+        controls={false}
+        disablePictureInPicture
+        disableRemotePlayback
+        onLoadedData={() => setIsVideoLoaded(true)}
+        preload="auto"
+        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+      >
+        <source
+          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4"
+          type="video/mp4"
+        />
+      </video>
       
       {/* Dark overlay for text visibility */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/80 z-10"></div>
