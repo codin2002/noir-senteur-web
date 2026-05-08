@@ -23,7 +23,7 @@ const AdminAnalytics: React.FC = () => {
   if (!isAuthenticated) return <AdminAuth onAuthenticated={handleAuthenticated} />;
 
   return (
-    <div className="min-h-screen bg-dark p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -33,15 +33,15 @@ const AdminAnalytics: React.FC = () => {
             >
               <ArrowLeft size={16} /> Back to Orders
             </Link>
-            <h1 className="font-serif text-3xl text-gold">Analytics Dashboard</h1>
+            <h1 className="font-serif text-3xl text-gray-900">Analytics Dashboard</h1>
           </div>
-          <button onClick={handleLogout} className="text-sm text-gold hover:text-gray-500">
+          <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-700">
             Logout
           </button>
         </div>
 
         {isLoading || !data ? (
-          <div className="py-20 text-center text-gold">Loading analytics...</div>
+          <div className="py-20 text-center text-gray-600">Loading analytics...</div>
         ) : (
           <>
             {/* Row 1 — KPIs */}
