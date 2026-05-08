@@ -16,7 +16,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ label, value, delta, hint }) =>
   const color = positive ? 'text-emerald-400' : negative ? 'text-rose-400' : 'text-muted-foreground';
 
   return (
-    <div className="rounded-lg border border-gold/20 bg-dark/50 p-5 transition-all hover:border-gold/40">
+    <div className="rounded-lg border border-gold/20 bg-darker p-5 transition-all hover:border-gold/40">
       <div className="text-xs uppercase tracking-wider text-gold/70">{label}</div>
       <div className="mt-2 text-2xl font-semibold text-gold">{value}</div>
       {showDelta && (
