@@ -22,7 +22,7 @@ const ActivityHeatmap: React.FC<Props> = ({ data, peak }) => {
           <p className="text-[11px] text-muted-foreground">Inventory events by weekday × hour</p>
         </div>
         {total > 0 && peak.busiestDay && peak.busiestHourBlock && (
-          <div className="rounded-md border border-gray-200 bg-dark/50 px-3 py-1.5 text-right">
+          <div className="rounded-md border border-gray-200 bg-gray-100 px-3 py-1.5 text-right">
             <div className="text-[10px] uppercase tracking-wide text-gray-400">Peak window</div>
             <div className="text-xs font-semibold text-gray-900">{peak.busiestDay.name} · {peak.busiestHourBlock}</div>
           </div>
@@ -45,7 +45,7 @@ const ActivityHeatmap: React.FC<Props> = ({ data, peak }) => {
               </div>
               {DAYS.map((d, di) => (
                 <div key={d} className="flex items-center">
-                  <div className="w-12 pr-2 text-right text-xs font-semibold text-gold/85">{d}</div>
+                  <div className="w-12 pr-2 text-right text-xs font-semibold text-gray-700">{d}</div>
                   {Array.from({ length: 24 }, (_, h) => {
                     const v = cellAt(di, h);
                     const intensity = max > 0 ? v / max : 0;

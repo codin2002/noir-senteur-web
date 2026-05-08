@@ -49,12 +49,12 @@ const ReorderConfigDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, p
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <Label className="text-gold/80">Lead Time (days)</Label>
+            <Label className="text-gray-600">Lead Time (days)</Label>
             <Input type="number" min={0} value={lead} onChange={(e) => setLead(Number(e.target.value))} className="bg-white border-gray-300 mt-1" />
             <p className="text-xs text-muted-foreground mt-1">How many days from order to receipt.</p>
           </div>
           <div>
-            <Label className="text-gold/80">Safety Stock (units)</Label>
+            <Label className="text-gray-600">Safety Stock (units)</Label>
             <Input type="number" min={0} value={safety} onChange={(e) => setSafety(Number(e.target.value))} className="bg-white border-gray-300 mt-1" />
             <p className="text-xs text-muted-foreground mt-1">Buffer to keep on hand.</p>
           </div>

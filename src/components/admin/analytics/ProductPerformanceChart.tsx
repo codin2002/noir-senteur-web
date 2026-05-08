@@ -27,7 +27,7 @@ const ProductPerformanceChart: React.FC<{ data: ProductPerformance[] }> = ({ dat
               key={m}
               onClick={() => setMode(m)}
               className={`rounded px-3 py-1 text-xs font-medium capitalize transition ${
-                mode === m ? 'bg-gray-900 text-dark' : 'text-gray-500 hover:text-gold'
+                mode === m ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               {m}
@@ -84,8 +84,8 @@ const ProductPerformanceChart: React.FC<{ data: ProductPerformance[] }> = ({ dat
       ) : (
         <div className="space-y-2">
           {top.map((p, i) => (
-            <div key={p.perfumeId} className="flex items-center gap-3 rounded-md border border-gray-200 bg-dark/40 p-3">
-              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold/15 text-sm font-bold text-gray-900">
+            <div key={p.perfumeId} className="flex items-center gap-3 rounded-md border border-gray-200 bg-gray-50 p-3">
+              <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-900">
                 #{i + 1}
               </div>
               <div className="min-w-0 flex-1">

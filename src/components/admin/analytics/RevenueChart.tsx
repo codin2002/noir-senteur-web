@@ -34,7 +34,7 @@ const RevenueChart: React.FC<{ data: MonthlyRevenuePoint[] }> = ({ data }) => {
               key={m}
               onClick={() => setView(m)}
               className={`rounded px-3 py-1 text-xs font-medium capitalize transition ${
-                view === m ? 'bg-gray-900 text-dark' : 'text-gray-500 hover:text-gold'
+                view === m ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
               }`}
             >
               {m}

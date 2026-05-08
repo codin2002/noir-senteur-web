@@ -29,7 +29,7 @@ const InventoryMovementChart: React.FC<{ data: InventoryMovementPoint[] }> = ({ 
                 onClick={() => setStacked(m === 'stacked')}
                 className={`rounded px-2.5 py-1 text-[11px] font-medium capitalize transition ${
                   (stacked && m === 'stacked') || (!stacked && m === 'grouped')
-                    ? 'bg-gray-900 text-dark' : 'text-gray-500 hover:text-gold'
+                    ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
                 }`}
               >
                 {m}
@@ -43,13 +43,13 @@ const InventoryMovementChart: React.FC<{ data: InventoryMovementPoint[] }> = ({ 
                   key={m}
                   onClick={() => setScale(m)}
                   className={`rounded px-2.5 py-1 text-[11px] font-medium capitalize transition ${
-                    scale === m ? 'bg-gray-900 text-dark' : 'text-gray-500 hover:text-gold'
+                    scale === m ? 'bg-gray-900 text-white' : 'text-gray-500 hover:text-gray-900'
                   }`}
                 >
                   {m}
                 </button>
               ))}
-              <span className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden w-56 rounded-md border border-gray-200 bg-white p-2 text-[10px] text-gold/80 shadow-lg group-hover:block">
+              <span className="pointer-events-none absolute right-0 top-full z-10 mt-1 hidden w-56 rounded-md border border-gray-200 bg-white p-2 text-[10px] text-gray-600 shadow-lg group-hover:block">
                 <Info size={10} className="mr-1 inline" />
                 Log scale lets small and large values be compared on the same axis.
               </span>

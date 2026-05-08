@@ -104,7 +104,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
 
         <div className="space-y-4">
           <div>
-            <Label className="text-gold/80">
+            <Label className="text-gray-600">
               {category === 'manual_correction' ? 'New Stock Value' : 'Quantity'}
             </Label>
             <Input
@@ -117,7 +117,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
           </div>
 
           <div>
-            <Label className="text-gold/80">Reason</Label>
+            <Label className="text-gray-600">Reason</Label>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -127,7 +127,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
           </div>
 
           <div>
-            <Label className="text-gold/80">{meta.refLabel}</Label>
+            <Label className="text-gray-600">{meta.refLabel}</Label>
             <Input
               value={reference}
               onChange={(e) => setReference(e.target.value)}
@@ -136,7 +136,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
             />
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-dark/40 p-3 text-sm">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Before</span><span className="font-mono">{currentStock}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Change</span><span className={`font-mono ${delta >= 0 ? 'text-green-400' : 'text-red-400'}`}>{delta >= 0 ? '+' : ''}{delta}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">After</span><span className={`font-mono ${wouldBeNegative ? 'text-red-400' : 'text-gray-900 font-semibold'}`}>{projected}</span></div>

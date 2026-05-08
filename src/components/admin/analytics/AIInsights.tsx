@@ -14,7 +14,7 @@ const SEV: Record<Severity, { border: string; chip: string; icon: React.ReactNod
   positive:    { border: 'border-l-emerald-400', chip: 'bg-emerald-400/15 text-emerald-300',  icon: <TrendingUp size={14} />,    label: 'Trend' },
   warning:     { border: 'border-l-amber-400',   chip: 'bg-amber-400/15 text-amber-300',      icon: <AlertTriangle size={14} />, label: 'Warning' },
   risk:        { border: 'border-l-rose-400',    chip: 'bg-rose-400/15 text-rose-300',        icon: <TrendingDown size={14} />,  label: 'Risk' },
-  opportunity: { border: 'border-l-gold',        chip: 'bg-gold/15 text-gold',                icon: <Lightbulb size={14} />,     label: 'Opportunity' },
+  opportunity: { border: 'border-l-gray-900',        chip: 'bg-gray-100 text-gold',                icon: <Lightbulb size={14} />,     label: 'Opportunity' },
   info:        { border: 'border-l-slate-400',   chip: 'bg-slate-400/15 text-slate-300',      icon: <Sparkles size={14} />,      label: 'Info' },
 };
 
@@ -96,7 +96,7 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
           const isOpen = expanded === idx;
           const hasMore = !!(i.detail || i.action);
           return (
-            <li key={idx} className={`rounded-md border border-gray-200 border-l-[3px] ${meta.border} bg-dark/40 transition`}>
+            <li key={idx} className={`rounded-md border border-gray-200 border-l-[3px] ${meta.border} bg-gray-50 transition`}>
               <button
                 onClick={() => hasMore && setExpanded(isOpen ? null : idx)}
                 className="flex w-full items-start gap-3 px-3 py-2.5 text-left"
@@ -104,14 +104,14 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
                 <span className={`mt-0.5 flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${meta.chip}`}>
                   {meta.icon} {meta.label}
                 </span>
-                <span className="flex-1 text-sm text-gold/95">{i.title}</span>
+                <span className="flex-1 text-sm text-gray-900">{i.title}</span>
                 {hasMore && (isOpen ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />)}
               </button>
               {isOpen && hasMore && (
                 <div className="space-y-1.5 border-t border-gray-200 px-3 py-2.5 pl-[88px] text-xs">
                   {i.detail && <div className="text-gray-500">{i.detail}</div>}
                   {i.action && (
-                    <div className="text-gold/90">
+                    <div className="text-gray-800">
                       <span className="font-semibold text-gray-900">→ Recommendation:</span> {i.action}
                     </div>
                   )}
