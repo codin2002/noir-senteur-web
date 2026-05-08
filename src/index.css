@@ -99,6 +99,23 @@
 }
 
 /* Force light theme inside admin pages */
+.admin-light {
+  color: rgb(17 24 39);
+}
+.admin-light h1,
+.admin-light h2,
+.admin-light h3,
+.admin-light h4,
+.admin-light h5,
+.admin-light h6,
+.admin-light p,
+.admin-light span,
+.admin-light div,
+.admin-light td,
+.admin-light th,
+.admin-light li {
+  color: inherit;
+}
 .admin-light input,
 .admin-light textarea,
 .admin-light select {
@@ -115,8 +132,23 @@
 .admin-light .text-muted-foreground {
   color: rgb(107 114 128) !important;
 }
-.admin-light input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+.admin-light input[type="datetime-local"]::-webkit-calendar-picker-indicator,
+.admin-light input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.3);
+}
+/* Select triggers (radix) */
+.admin-light [role="combobox"] {
+  color: rgb(17 24 39);
+  background-color: #fff;
+}
+.admin-light [role="combobox"] [data-placeholder],
+.admin-light [role="combobox"] > span {
+  color: rgb(17 24 39);
+}
+/* Outline buttons */
+.admin-light button[class*="border-input"] {
+  background-color: #fff;
+  color: rgb(17 24 39);
 }
 
 .vertical-text {
