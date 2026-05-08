@@ -41,15 +41,17 @@ const Hero = () => {
       {/* Video background */}
       <video 
         ref={videoRef} 
-        className={`absolute top-0 left-0 min-w-full min-h-full object-cover transition-opacity duration-300 ${
+        className={`absolute top-0 left-0 min-w-full min-h-full object-cover pointer-events-none transition-opacity duration-300 ${
           isVideoLoaded ? 'opacity-100' : 'opacity-0'
         }`} 
         autoPlay 
         loop 
         muted 
         playsInline
+        {...({ 'webkit-playsinline': 'true', 'x-webkit-airplay': 'deny' } as any)}
         controls={false}
         disablePictureInPicture
+        disableRemotePlayback
         onLoadedData={() => setIsVideoLoaded(true)} 
         preload="auto" 
         style={{
