@@ -157,12 +157,12 @@ export const getDeliveryAddress = (order: Order): string => {
 export const getStatusBadgeClasses = (status: string): string => {
   switch (status) {
     case 'delivered':
-      return 'bg-green-500/20 text-green-400';
+      return 'bg-green-100 text-green-700 border border-green-300';
     case 'dispatched':
-      return 'bg-blue-500/20 text-blue-400';
+      return 'bg-blue-100 text-blue-700 border border-blue-300';
     case 'returned':
-      return 'bg-red-500/20 text-red-400';
+      return 'bg-red-100 text-red-700 border border-red-300';
     default:
-      return 'bg-yellow-500/20 text-yellow-400';
+      return 'bg-yellow-100 text-yellow-800 border border-yellow-300';
   }
 };

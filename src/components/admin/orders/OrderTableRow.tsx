@@ -43,28 +43,28 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
 
   return (
     <TableRow className="border-gray-200">
-      <TableCell className="font-mono text-sm">
+      <TableCell className="font-mono text-sm text-gray-700">
         {order.id.split('-')[0]}...
       </TableCell>
       
       <CustomerInfoCell customer={customer} />
       
       <TableCell>
-        <div className="text-sm max-w-xs truncate" title={deliveryAddress}>
+        <div className="text-sm text-gray-700 max-w-xs truncate" title={deliveryAddress}>
           {deliveryAddress}
         </div>
       </TableCell>
       
       <TableCell>
         {order.items.map((item, index) => (
-          <div key={item.id} className="text-sm">
+          <div key={item.id} className="text-sm text-gray-700">
             {item.perfume.name} (×{item.quantity})
             {index < order.items.length - 1 && <br />}
           </div>
         ))}
       </TableCell>
       
-      <TableCell className="font-semibold">
+      <TableCell className="font-semibold text-gray-900">
         AED {order.total}
       </TableCell>
       
@@ -74,7 +74,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
         </span>
       </TableCell>
       
-      <TableCell className="text-sm text-gray-400">
+      <TableCell className="text-sm text-gray-500">
         {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
       </TableCell>
       
