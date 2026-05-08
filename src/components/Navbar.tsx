@@ -56,8 +56,9 @@ const Navbar = () => {
       navigate(`/#${id}`);
     }
   };
-  return <nav className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 md:px-12', isScrolled ? 'py-2 bg-darker bg-opacity-95 backdrop-blur-sm' : 'py-4 bg-transparent')}>
-      <div className="flex items-center justify-between">
+  return <nav className={cn('fixed top-0 left-0 right-0 z-50 transition-all duration-300', isScrolled ? 'bg-darker bg-opacity-95 backdrop-blur-sm' : 'bg-transparent')}>
+      <RegionBanner />
+      <div className={cn('flex items-center justify-between px-6 md:px-12 transition-all duration-300', isScrolled ? 'py-2' : 'py-4')}>
         <Link to="/" className="text-2xl md:text-3xl font-serif tracking-wider text-white">
           SENTEUR
         </Link>
