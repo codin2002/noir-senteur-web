@@ -73,10 +73,25 @@ export const useAnalyticsData = () => {
         cur.orders += 1;
         revByMonth.set(k, cur);
       });
-      const sortedMonths = Array.from(revByMonth.keys()).sort();
+      // Fill missing months between first and last so X axis is continuous
+      const fillMonths = (keys: string[]): string[] => {
+        if (keys.length < 2) return keys;
+        const [sy, sm] = keys[0].split('-').map(Number);
+        const [ey, em] = keys[keys.length - 1].split('-').map(Number);
+        const out: string[] = [];
+        let y = sy, m = sm;
+        while (y < ey || (y === ey && m <= em)) {
+          out.push(`${y}-${String(m).padStart(2, '0')}`);
+          m++;
+          if (m > 12) { m = 1; y++; }
+        }
+        return out;
+      };
+
+      const sortedMonths = fillMonths(Array.from(revByMonth.keys()).sort());
       const monthlyRevenue: MonthlyRevenuePoint[] = sortedMonths.map((k, i) => {
-        const cur = revByMonth.get(k)!;
-        const prev = i > 0 ? revByMonth.get(sortedMonths[i - 1])!.revenue : null;
+        const cur = revByMonth.get(k) || { revenue: 0, orders: 0 };
+        const prev = i > 0 ? (revByMonth.get(sortedMonths[i - 1])?.revenue ?? 0) : null;
         const growthPct =
           prev && prev > 0 ? ((cur.revenue - prev) / prev) * 100 : null;
         return { month: k, label: monthLabel(k), revenue: cur.revenue, orders: cur.orders, growthPct };
@@ -92,11 +107,11 @@ export const useAnalyticsData = () => {
         else cur.stockOut += Math.abs(qty);
         movByMonth.set(k, cur);
       });
-      const movMonths = Array.from(movByMonth.keys()).sort();
+      const movMonths = fillMonths(Array.from(movByMonth.keys()).sort());
       const inventoryMovement: InventoryMovementPoint[] = movMonths.map((k) => ({
         month: k,
         label: monthLabel(k),
-        ...movByMonth.get(k)!,
+        ...(movByMonth.get(k) || { stockIn: 0, stockOut: 0 }),
       }));
 
       // ---- Product performance (by quantity sold via order_items) ----
