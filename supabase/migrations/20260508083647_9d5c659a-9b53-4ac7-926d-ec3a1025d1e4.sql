@@ -1,0 +1,2 @@
+ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS valid_order_status;
+ALTER TABLE public.orders ADD CONSTRAINT valid_order_status CHECK (status IN ('pending','processing','dispatched','delivered','cancelled','returned','refunded','preorder','awaiting_release','ready_to_ship','shipped','refund'));
