@@ -98,6 +98,27 @@
   content: "";
 }
 
+/* Force light theme inside admin pages */
+.admin-light input,
+.admin-light textarea,
+.admin-light select {
+  color: rgb(17 24 39);
+  background-color: #fff;
+}
+.admin-light input::placeholder,
+.admin-light textarea::placeholder {
+  color: rgb(156 163 175);
+}
+.admin-light label {
+  color: rgb(55 65 81);
+}
+.admin-light .text-muted-foreground {
+  color: rgb(107 114 128) !important;
+}
+.admin-light input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3);
+}
+
 .vertical-text {
   writing-mode: vertical-rl;
   text-orientation: mixed;
