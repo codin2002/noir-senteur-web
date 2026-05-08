@@ -23,25 +23,25 @@ const AdminAnalytics: React.FC = () => {
   if (!isAuthenticated) return <AdminAuth onAuthenticated={handleAuthenticated} />;
 
   return (
-    <div className="min-h-screen bg-dark p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
               to="/admin/orders"
-              className="flex items-center gap-1 text-sm text-gold/70 transition hover:text-gold"
+              className="flex items-center gap-1 text-sm text-gray-500 transition hover:text-gray-900"
             >
               <ArrowLeft size={16} /> Back to Orders
             </Link>
-            <h1 className="font-serif text-3xl text-gold">Analytics Dashboard</h1>
+            <h1 className="font-serif text-3xl text-gray-900">Analytics Dashboard</h1>
           </div>
-          <button onClick={handleLogout} className="text-sm text-gold hover:text-gold/70">
+          <button onClick={handleLogout} className="text-sm text-gray-500 hover:text-gray-700">
             Logout
           </button>
         </div>
 
         {isLoading || !data ? (
-          <div className="py-20 text-center text-gold">Loading analytics...</div>
+          <div className="py-20 text-center text-gray-600">Loading analytics...</div>
         ) : (
           <>
             {/* Row 1 — KPIs */}
@@ -95,7 +95,7 @@ const AdminAnalytics: React.FC = () => {
             {/* Row 4 — Top products full width */}
             <ProductPerformanceChart data={data.productPerformance} />
 
-            <div className="rounded-lg border border-gold/10 bg-dark/30 p-4 text-xs text-muted-foreground">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-xs text-muted-foreground">
               Note: Engagement tracking (opens, clicks, conversion) is not displayed because no
               tracking pixels or event-logging backend is wired up. To enable it, route outbound
               links through unique tracking IDs and log events to a new <code>engagement_events</code> table.

@@ -15,16 +15,16 @@ const ActivityHeatmap: React.FC<Props> = ({ data, peak }) => {
     data.find((c) => c.day === day && c.hour === hour)?.count ?? 0;
 
   return (
-    <div className="rounded-lg border border-gold/20 bg-darker p-5">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
       <div className="mb-3 flex items-start justify-between gap-2">
         <div>
-          <h3 className="font-serif text-xl text-gold">Activity Heatmap</h3>
+          <h3 className="font-serif text-xl text-gray-900">Activity Heatmap</h3>
           <p className="text-[11px] text-muted-foreground">Inventory events by weekday × hour</p>
         </div>
         {total > 0 && peak.busiestDay && peak.busiestHourBlock && (
-          <div className="rounded-md border border-gold/20 bg-dark/50 px-3 py-1.5 text-right">
-            <div className="text-[10px] uppercase tracking-wide text-gold/60">Peak window</div>
-            <div className="text-xs font-semibold text-gold">{peak.busiestDay.name} · {peak.busiestHourBlock}</div>
+          <div className="rounded-md border border-gray-200 bg-gray-100 px-3 py-1.5 text-right">
+            <div className="text-[10px] uppercase tracking-wide text-gray-400">Peak window</div>
+            <div className="text-xs font-semibold text-gray-900">{peak.busiestDay.name} · {peak.busiestHourBlock}</div>
           </div>
         )}
       </div>
@@ -38,14 +38,14 @@ const ActivityHeatmap: React.FC<Props> = ({ data, peak }) => {
               <div className="flex">
                 <div className="w-12" />
                 {Array.from({ length: 24 }, (_, h) => (
-                  <div key={h} className="w-6 text-center text-[10px] font-medium text-gold/70">
+                  <div key={h} className="w-6 text-center text-[10px] font-medium text-gray-500">
                     {h % 2 === 0 ? h : ''}
                   </div>
                 ))}
               </div>
               {DAYS.map((d, di) => (
                 <div key={d} className="flex items-center">
-                  <div className="w-12 pr-2 text-right text-xs font-semibold text-gold/85">{d}</div>
+                  <div className="w-12 pr-2 text-right text-xs font-semibold text-gray-700">{d}</div>
                   {Array.from({ length: 24 }, (_, h) => {
                     const v = cellAt(di, h);
                     const intensity = max > 0 ? v / max : 0;
@@ -65,7 +65,7 @@ const ActivityHeatmap: React.FC<Props> = ({ data, peak }) => {
               ))}
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between text-[11px] text-gold/60">
+          <div className="mt-4 flex items-center justify-between text-[11px] text-gray-400">
             <div>{total} total events tracked</div>
             <div className="flex items-center gap-2">
               <span>Less</span>

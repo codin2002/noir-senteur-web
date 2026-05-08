@@ -40,32 +40,32 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
   };
 
   return (
-    <div className="min-h-screen bg-dark flex items-center justify-center p-6">
-      <Card className="w-full max-w-md bg-darker border-gold/20">
+    <div className="min-h-screen bg-white flex items-center justify-center p-6">
+      <Card className="w-full max-w-md bg-white border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gold text-center">Admin Access</CardTitle>
+          <CardTitle className="text-gray-900 text-center">Admin Access</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block text-gold">Username</label>
+              <label className="text-sm font-medium mb-2 block text-gray-700">Username</label>
               <Input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="bg-dark border-gold/30"
+                className="bg-white border-gray-300"
                 placeholder="Enter username"
                 required
               />
             </div>
             
             <div>
-              <label className="text-sm font-medium mb-2 block text-gold">Password</label>
+              <label className="text-sm font-medium mb-2 block text-gray-700">Password</label>
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-dark border-gold/30"
+                className="bg-white border-gray-300"
                 placeholder="Enter password"
                 required
               />
@@ -74,7 +74,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gold text-darker hover:bg-gold/90"
+              className="w-full bg-gray-900 text-white hover:bg-gray-800"
             >
               {isLoading ? 'Authenticating...' : 'Access Admin Panel'}
             </Button>

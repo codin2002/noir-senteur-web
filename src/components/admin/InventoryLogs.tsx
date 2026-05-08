@@ -26,14 +26,14 @@ interface InventoryLog {
 }
 
 const CATEGORY_LABEL: Record<string, { label: string; cls: string }> = {
-  stock_in: { label: 'Stock In', cls: 'bg-green-500/20 text-green-300 border-green-500/40' },
-  stock_out: { label: 'Stock Out', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  damaged: { label: 'Damaged', cls: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
-  manual_correction: { label: 'Manual Correction', cls: 'bg-gold/20 text-gold border-gold/40' },
+  stock_in: { label: 'Stock In', cls: 'bg-green-500/20 text-green-700 border-green-500/40' },
+  stock_out: { label: 'Stock Out', cls: 'bg-red-500/20 text-red-700 border-red-500/40' },
+  damaged: { label: 'Damaged', cls: 'bg-orange-500/20 text-orange-700 border-orange-500/40' },
+  manual_correction: { label: 'Manual Correction', cls: 'bg-gray-100 text-gray-900 border-gray-300' },
   // legacy fallback
-  order_delivery: { label: 'Order Delivery', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  manual_adjustment: { label: 'Manual Adjustment', cls: 'bg-gold/20 text-gold border-gold/40' },
-  stock_addition: { label: 'Stock Addition', cls: 'bg-green-500/20 text-green-300 border-green-500/40' },
+  order_delivery: { label: 'Order Delivery', cls: 'bg-red-500/20 text-red-700 border-red-500/40' },
+  manual_adjustment: { label: 'Manual Adjustment', cls: 'bg-gray-100 text-gray-900 border-gray-300' },
+  stock_addition: { label: 'Stock Addition', cls: 'bg-green-500/20 text-green-700 border-green-500/40' },
 };
 
 const InventoryLogs: React.FC = () => {
@@ -81,30 +81,30 @@ const InventoryLogs: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-gray-50 border-gray-200">
         <CardContent className="p-6 text-center">Loading inventory logs...</CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-darker border-gold/20">
+    <Card className="bg-gray-50 border-gray-200">
       <CardHeader>
-        <CardTitle className="text-gold flex items-center gap-2">
+        <CardTitle className="text-gray-900 flex items-center gap-2">
           <Activity className="w-5 h-5" /> Inventory Activity Logs
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
           <Select value={productFilter} onValueChange={setProductFilter}>
-            <SelectTrigger className="bg-dark border-gold/30"><SelectValue placeholder="Product" /></SelectTrigger>
+            <SelectTrigger className="bg-white border-gray-300"><SelectValue placeholder="Product" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All products</SelectItem>
               {products.map(([id, name]) => <SelectItem key={id} value={id}>{name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={actionFilter} onValueChange={setActionFilter}>
-            <SelectTrigger className="bg-dark border-gold/30"><SelectValue placeholder="Action" /></SelectTrigger>
+            <SelectTrigger className="bg-white border-gray-300"><SelectValue placeholder="Action" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All actions</SelectItem>
               <SelectItem value="stock_in">Stock In</SelectItem>
@@ -114,23 +114,23 @@ const InventoryLogs: React.FC = () => {
               <SelectItem value="order_delivery">Order Delivery (legacy)</SelectItem>
             </SelectContent>
           </Select>
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-dark border-gold/30" />
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-dark border-gold/30" />
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-white border-gray-300" />
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-white border-gray-300" />
         </div>
 
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-gold/20">
-                <TableHead className="text-gold">Date</TableHead>
-                <TableHead className="text-gold">Product</TableHead>
-                <TableHead className="text-gold">Action</TableHead>
-                <TableHead className="text-gold">Before</TableHead>
-                <TableHead className="text-gold">Change</TableHead>
-                <TableHead className="text-gold">After</TableHead>
-                <TableHead className="text-gold">User</TableHead>
-                <TableHead className="text-gold">Reference</TableHead>
-                <TableHead className="text-gold">Reason</TableHead>
+              <TableRow className="border-gray-200">
+                <TableHead className="text-gray-900">Date</TableHead>
+                <TableHead className="text-gray-900">Product</TableHead>
+                <TableHead className="text-gray-900">Action</TableHead>
+                <TableHead className="text-gray-900">Before</TableHead>
+                <TableHead className="text-gray-900">Change</TableHead>
+                <TableHead className="text-gray-900">After</TableHead>
+                <TableHead className="text-gray-900">User</TableHead>
+                <TableHead className="text-gray-900">Reference</TableHead>
+                <TableHead className="text-gray-900">Reason</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,7 +138,7 @@ const InventoryLogs: React.FC = () => {
                 const cat = log.action_category || log.change_type;
                 const meta = CATEGORY_LABEL[cat] || { label: cat, cls: 'bg-muted/20' };
                 return (
-                  <TableRow key={log.id} className={`border-gold/10 ${log.is_unusual ? 'bg-yellow-500/5' : ''}`}>
+                  <TableRow key={log.id} className={`border-gray-200 ${log.is_unusual ? 'bg-yellow-500/5' : ''}`}>
                     <TableCell className="text-xs whitespace-nowrap">{new Date(log.created_at).toLocaleString()}</TableCell>
                     <TableCell className="font-medium">{log.perfumes?.name || '—'}</TableCell>
                     <TableCell>
@@ -151,7 +151,7 @@ const InventoryLogs: React.FC = () => {
                     <TableCell className={`font-mono text-sm ${log.quantity_change > 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {log.quantity_change > 0 ? '+' : ''}{log.quantity_change}
                     </TableCell>
-                    <TableCell className="font-mono text-sm font-semibold text-gold">{log.quantity_after}</TableCell>
+                    <TableCell className="font-mono text-sm font-semibold text-gray-900">{log.quantity_after}</TableCell>
                     <TableCell className="text-xs">{log.user_name || (log.order_id ? 'system' : '—')}</TableCell>
                     <TableCell className="text-xs">
                       {log.reference_id ? log.reference_id : log.order_id ? <span className="text-blue-400">#{log.order_id.substring(0, 8)}</span> : '—'}

@@ -10,8 +10,8 @@ import { ActionCategory } from '@/services/inventoryActionService';
 
 const statusBadge = (s: InventoryRow['status']) => {
   if (s === 'critical') return <Badge variant="destructive" className="text-[10px]">CRITICAL</Badge>;
-  if (s === 'low') return <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40 text-[10px]">REORDER SOON</Badge>;
-  return <Badge className="bg-green-500/20 text-green-300 border-green-500/40 text-[10px]">NORMAL</Badge>;
+  if (s === 'low') return <Badge className="bg-yellow-500/20 text-yellow-700 border-yellow-500/40 text-[10px]">REORDER SOON</Badge>;
+  return <Badge className="bg-green-500/20 text-green-700 border-green-500/40 text-[10px]">NORMAL</Badge>;
 };
 
 const InventoryManager: React.FC = () => {
@@ -24,7 +24,7 @@ const InventoryManager: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-gray-50 border-gray-200">
         <CardContent className="p-6 text-center">Loading inventory...</CardContent>
       </Card>
     );
@@ -32,9 +32,9 @@ const InventoryManager: React.FC = () => {
 
   return (
     <>
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gold flex items-center gap-2">
+          <CardTitle className="text-gray-900 flex items-center gap-2">
             <Package className="w-5 h-5" /> Inventory Management
           </CardTitle>
         </CardHeader>
@@ -45,7 +45,7 @@ const InventoryManager: React.FC = () => {
               className={`p-4 rounded-lg border ${
                 item.status === 'critical' ? 'border-red-500/40 bg-red-500/5' :
                 item.status === 'low' ? 'border-yellow-500/40 bg-yellow-500/5' :
-                'border-gold/20 bg-dark/30'
+                'border-gray-200 bg-gray-50'
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -56,8 +56,8 @@ const InventoryManager: React.FC = () => {
                     {item.status === 'critical' && <AlertTriangle className="w-4 h-4 text-red-400" />}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                    <span>Reorder pt: <span className="text-gold">{item.reorderPoint}</span></span>
-                    <span>Suggested qty: <span className="text-gold">{item.reorderQty}</span></span>
+                    <span>Reorder pt: <span className="text-gray-900">{item.reorderPoint}</span></span>
+                    <span>Suggested qty: <span className="text-gray-900">{item.reorderQty}</span></span>
                     <span>Lead: {item.lead_time_days}d</span>
                     <span>Safety: {item.safety_stock}</span>
                     <span>Avg/day: {item.avgDaily.toFixed(2)}</span>
@@ -69,25 +69,25 @@ const InventoryManager: React.FC = () => {
                 </div>
 
                 <div className="text-center px-3">
-                  <div className="text-3xl font-bold text-gold leading-none">{item.stock_quantity}</div>
+                  <div className="text-3xl font-bold text-gray-900 leading-none">{item.stock_quantity}</div>
                   <div className="text-[10px] uppercase text-muted-foreground tracking-wider mt-1">in stock</div>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-4">
-                <Button size="sm" onClick={() => openAction(item, 'stock_in')} className="bg-green-600/20 text-green-300 border border-green-500/40 hover:bg-green-600/30">
+                <Button size="sm" onClick={() => openAction(item, 'stock_in')} className="bg-green-600/20 text-green-700 border border-green-500/40 hover:bg-green-600/30">
                   <Plus className="w-3 h-3 mr-1" /> Stock In
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'stock_out')} className="bg-red-600/20 text-red-300 border border-red-500/40 hover:bg-red-600/30">
+                <Button size="sm" onClick={() => openAction(item, 'stock_out')} className="bg-red-600/20 text-red-700 border border-red-500/40 hover:bg-red-600/30">
                   <Minus className="w-3 h-3 mr-1" /> Stock Out
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-300 border border-orange-500/40 hover:bg-orange-600/30">
+                <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-700 border border-orange-500/40 hover:bg-orange-600/30">
                   <Trash2 className="w-3 h-3 mr-1" /> Damaged
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
+                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100">
                   <Pencil className="w-3 h-3 mr-1" /> Correct
                 </Button>
-                <Button size="sm" onClick={() => setReorderState({ open: true, row: item })} variant="outline" className="border-gold/20 text-muted-foreground hover:text-gold">
+                <Button size="sm" onClick={() => setReorderState({ open: true, row: item })} variant="outline" className="border-gray-200 text-muted-foreground hover:text-gray-900">
                   <Settings2 className="w-3 h-3 mr-1" /> Settings
                 </Button>
               </div>

@@ -42,7 +42,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
   const deliveryAddress = getDeliveryAddress(order);
 
   return (
-    <TableRow className="border-gold/10">
+    <TableRow className="border-gray-200">
       <TableCell className="font-mono text-sm">
         {order.id.split('-')[0]}...
       </TableCell>

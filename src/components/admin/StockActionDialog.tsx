@@ -96,15 +96,15 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-darker border-gold/20 text-foreground">
+      <DialogContent className="bg-gray-50 border-gray-200 text-foreground">
         <DialogHeader>
-          <DialogTitle className="text-gold">{meta.title}</DialogTitle>
-          <p className="text-sm text-muted-foreground">{perfumeName} — current stock: <span className="text-gold font-semibold">{currentStock}</span></p>
+          <DialogTitle className="text-gray-900">{meta.title}</DialogTitle>
+          <p className="text-sm text-muted-foreground">{perfumeName} — current stock: <span className="text-gray-900 font-semibold">{currentStock}</span></p>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
-            <Label className="text-gold/80">
+            <Label className="text-gray-600">
               {category === 'manual_correction' ? 'New Stock Value' : 'Quantity'}
             </Label>
             <Input
@@ -112,34 +112,34 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
               min={category === 'manual_correction' ? 0 : 1}
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
-              className="bg-dark border-gold/30 mt-1"
+              className="bg-white border-gray-300 mt-1"
             />
           </div>
 
           <div>
-            <Label className="text-gold/80">Reason</Label>
+            <Label className="text-gray-600">Reason</Label>
             <Textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
-              className="bg-dark border-gold/30 mt-1"
+              className="bg-white border-gray-300 mt-1"
             />
           </div>
 
           <div>
-            <Label className="text-gold/80">{meta.refLabel}</Label>
+            <Label className="text-gray-600">{meta.refLabel}</Label>
             <Input
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               placeholder="Optional"
-              className="bg-dark border-gold/30 mt-1"
+              className="bg-white border-gray-300 mt-1"
             />
           </div>
 
-          <div className="rounded-lg border border-gold/10 bg-dark/40 p-3 text-sm">
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Before</span><span className="font-mono">{currentStock}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Change</span><span className={`font-mono ${delta >= 0 ? 'text-green-400' : 'text-red-400'}`}>{delta >= 0 ? '+' : ''}{delta}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">After</span><span className={`font-mono ${wouldBeNegative ? 'text-red-400' : 'text-gold font-semibold'}`}>{projected}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">After</span><span className={`font-mono ${wouldBeNegative ? 'text-red-400' : 'text-gray-900 font-semibold'}`}>{projected}</span></div>
           </div>
 
           {unusual && (
@@ -155,7 +155,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
-          <Button onClick={handleSubmit} disabled={submitting || wouldBeNegative} className="bg-gold text-darker hover:bg-gold/90">
+          <Button onClick={handleSubmit} disabled={submitting || wouldBeNegative} className="bg-gray-900 text-white hover:bg-gray-800">
             {submitting ? 'Saving…' : confirming ? 'Confirm' : meta.verb}
           </Button>
         </DialogFooter>

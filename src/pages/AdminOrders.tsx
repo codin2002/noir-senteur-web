@@ -51,17 +51,17 @@ const AdminOrders = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-dark p-6">
+      <div className="min-h-screen bg-white p-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
-          <div className="text-center text-gold">Loading orders...</div>
+          <h1 className="text-3xl font-serif mb-8 text-gray-900">Admin Dashboard</h1>
+          <div className="text-center text-gray-600">Loading orders...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-dark p-6">
+    <div className="min-h-screen bg-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         <AdminOrdersHeader onLogout={handleLogout} />
         
