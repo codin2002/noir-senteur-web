@@ -112,7 +112,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
               min={category === 'manual_correction' ? 0 : 1}
               value={quantity}
               onChange={(e) => setQuantity(Number(e.target.value))}
-              className="bg-white border-gray-300 mt-1"
+              className="bg-white border-gray-300 mt-1 text-gray-900 placeholder:text-gray-400"
             />
           </div>
 
@@ -122,7 +122,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               rows={2}
-              className="bg-white border-gray-300 mt-1"
+              className="bg-white border-gray-300 mt-1 text-gray-900 placeholder:text-gray-400"
             />
           </div>
 
@@ -132,7 +132,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
               value={reference}
               onChange={(e) => setReference(e.target.value)}
               placeholder="Optional"
-              className="bg-white border-gray-300 mt-1"
+              className="bg-white border-gray-300 mt-1 text-gray-900 placeholder:text-gray-400"
             />
           </div>
 
