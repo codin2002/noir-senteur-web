@@ -7,14 +7,30 @@ const Hero = () => {
 
   useEffect(() => {
     const video = videoRef.current;
-    if (video) {
-      const handleCanPlay = () => {
-        setIsVideoLoaded(true);
-      };
+    if (!video) return;
 
-      video.addEventListener('canplay', handleCanPlay);
-      return () => video.removeEventListener('canplay', handleCanPlay);
-    }
+    const handleCanPlay = () => setIsVideoLoaded(true);
+    const tryPlay = () => {
+      video.muted = true;
+      const p = video.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    };
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') tryPlay();
+    };
+
+    video.addEventListener('canplay', handleCanPlay);
+    video.addEventListener('loadedmetadata', tryPlay);
+    video.addEventListener('pause', tryPlay);
+    document.addEventListener('visibilitychange', handleVisibility);
+    tryPlay();
+
+    return () => {
+      video.removeEventListener('canplay', handleCanPlay);
+      video.removeEventListener('loadedmetadata', tryPlay);
+      video.removeEventListener('pause', tryPlay);
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
   }, []);
 
   return (
