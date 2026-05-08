@@ -48,6 +48,8 @@ const Hero = () => {
         loop 
         muted 
         playsInline
+        controls={false}
+        disablePictureInPicture
         onLoadedData={() => setIsVideoLoaded(true)} 
         preload="auto" 
         style={{
