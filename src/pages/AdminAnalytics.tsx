@@ -12,6 +12,9 @@ import ProductPerformanceChart from '@/components/admin/analytics/ProductPerform
 import ActivityHeatmap from '@/components/admin/analytics/ActivityHeatmap';
 import AIInsights from '@/components/admin/analytics/AIInsights';
 
+const formatAed = (n: number) =>
+  n >= 1000 ? `AED ${(n / 1000).toFixed(1)}k` : `AED ${n.toFixed(0)}`;
+
 const AdminAnalytics: React.FC = () => {
   const { isAuthenticated, isCheckingAuth, handleAuthenticated, handleLogout } = useAdminAuth();
   const { data, isLoading } = useAnalyticsData();
@@ -21,7 +24,7 @@ const AdminAnalytics: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-dark p-6">
-      <div className="mx-auto max-w-7xl space-y-8">
+      <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link
@@ -41,42 +44,56 @@ const AdminAnalytics: React.FC = () => {
           <div className="py-20 text-center text-gold">Loading analytics...</div>
         ) : (
           <>
-            {/* KPI cards (real data only) */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* Row 1 — KPIs */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <MetricCard
-                label="Total Revenue"
-                value={`AED ${data.totals.totalRevenue.toFixed(2)}`}
+                label="Revenue"
+                value={formatAed(data.totals.totalRevenue)}
                 delta={data.totals.revenueGrowthPct}
+                prevValue={formatAed(data.totals.prevRevenue)}
+                spark={data.totals.revenueSpark}
               />
               <MetricCard
-                label="Total Orders"
+                label="Orders"
                 value={String(data.totals.totalOrders)}
-                hint="Completed payments"
+                delta={data.totals.ordersGrowthPct}
+                prevValue={String(data.totals.prevOrders)}
+                spark={data.totals.ordersSpark}
               />
               <MetricCard
                 label="Units Sold"
                 value={String(data.totals.totalUnitsSold)}
-                hint="Across all paid orders"
+                delta={data.totals.unitsGrowthPct}
+                prevValue={String(data.totals.prevUnits)}
+                spark={data.totals.unitsSpark}
               />
               <MetricCard
                 label="Avg Order Value"
-                value={
-                  data.totals.totalOrders > 0
-                    ? `AED ${(data.totals.totalRevenue / data.totals.totalOrders).toFixed(2)}`
-                    : '—'
-                }
+                value={data.totals.aov > 0 ? `AED ${data.totals.aov.toFixed(2)}` : '—'}
+                delta={data.totals.aovGrowthPct}
+                prevValue={data.totals.prevAov > 0 ? `AED ${data.totals.prevAov.toFixed(2)}` : undefined}
                 hint="Revenue ÷ orders"
               />
             </div>
 
-            <AIInsights data={data} />
-
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-              <RevenueChart data={data.monthlyRevenue} />
-              <InventoryMovementChart data={data.inventoryMovement} />
-              <ProductPerformanceChart data={data.productPerformance} />
-              <ActivityHeatmap data={data.heatmap} />
+            {/* Row 2 — Revenue (2/3) + Insights (1/3) */}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="lg:col-span-2">
+                <RevenueChart data={data.monthlyRevenue} />
+              </div>
+              <div className="lg:col-span-1">
+                <AIInsights data={data} />
+              </div>
             </div>
+
+            {/* Row 3 — Inventory + Heatmap */}
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+              <InventoryMovementChart data={data.inventoryMovement} />
+              <ActivityHeatmap data={data.heatmap} peak={data.peak} />
+            </div>
+
+            {/* Row 4 — Top products full width */}
+            <ProductPerformanceChart data={data.productPerformance} />
 
             <div className="rounded-lg border border-gold/10 bg-dark/30 p-4 text-xs text-muted-foreground">
               Note: Engagement tracking (opens, clicks, conversion) is not displayed because no
