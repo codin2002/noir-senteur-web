@@ -26,14 +26,14 @@ interface InventoryLog {
 }
 
 const CATEGORY_LABEL: Record<string, { label: string; cls: string }> = {
-  stock_in: { label: 'Stock In', cls: 'bg-green-500/20 text-green-300 border-green-500/40' },
-  stock_out: { label: 'Stock Out', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  damaged: { label: 'Damaged', cls: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
-  manual_correction: { label: 'Manual Correction', cls: 'bg-gold/20 text-gray-900 border-gray-300' },
+  stock_in: { label: 'Stock In', cls: 'bg-green-500/20 text-green-700 border-green-500/40' },
+  stock_out: { label: 'Stock Out', cls: 'bg-red-500/20 text-red-700 border-red-500/40' },
+  damaged: { label: 'Damaged', cls: 'bg-orange-500/20 text-orange-700 border-orange-500/40' },
+  manual_correction: { label: 'Manual Correction', cls: 'bg-gray-100 text-gray-900 border-gray-300' },
   // legacy fallback
-  order_delivery: { label: 'Order Delivery', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  manual_adjustment: { label: 'Manual Adjustment', cls: 'bg-gold/20 text-gray-900 border-gray-300' },
-  stock_addition: { label: 'Stock Addition', cls: 'bg-green-500/20 text-green-300 border-green-500/40' },
+  order_delivery: { label: 'Order Delivery', cls: 'bg-red-500/20 text-red-700 border-red-500/40' },
+  manual_adjustment: { label: 'Manual Adjustment', cls: 'bg-gray-100 text-gray-900 border-gray-300' },
+  stock_addition: { label: 'Stock Addition', cls: 'bg-green-500/20 text-green-700 border-green-500/40' },
 };
 
 const InventoryLogs: React.FC = () => {

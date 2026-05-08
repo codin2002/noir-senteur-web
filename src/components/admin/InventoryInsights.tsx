@@ -76,7 +76,7 @@ const InventoryInsights: React.FC = () => {
           {deadStock.map(r => (
             <div key={r.id} className="flex items-center justify-between text-sm">
               <span className="truncate pr-2">{r.perfumes?.name || '—'}</span>
-              <span className="font-mono text-blue-300">{r.daysSinceMovement === null ? '∞' : `${r.daysSinceMovement}d`}</span>
+              <span className="font-mono text-blue-700">{r.daysSinceMovement === null ? '∞' : `${r.daysSinceMovement}d`}</span>
             </div>
           ))}
         </CardContent>

@@ -75,13 +75,13 @@ const InventoryManager: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-4">
-                <Button size="sm" onClick={() => openAction(item, 'stock_in')} className="bg-green-600/20 text-green-300 border border-green-500/40 hover:bg-green-600/30">
+                <Button size="sm" onClick={() => openAction(item, 'stock_in')} className="bg-green-600/20 text-green-700 border border-green-500/40 hover:bg-green-600/30">
                   <Plus className="w-3 h-3 mr-1" /> Stock In
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'stock_out')} className="bg-red-600/20 text-red-300 border border-red-500/40 hover:bg-red-600/30">
+                <Button size="sm" onClick={() => openAction(item, 'stock_out')} className="bg-red-600/20 text-red-700 border border-red-500/40 hover:bg-red-600/30">
                   <Minus className="w-3 h-3 mr-1" /> Stock Out
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-300 border border-orange-500/40 hover:bg-orange-600/30">
+                <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-700 border border-orange-500/40 hover:bg-orange-600/30">
                   <Trash2 className="w-3 h-3 mr-1" /> Damaged
                 </Button>
                 <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100">

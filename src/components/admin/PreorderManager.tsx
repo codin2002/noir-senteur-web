@@ -181,7 +181,7 @@ const PreorderManager: React.FC = () => {
                   <Button
                     size="sm"
                     onClick={() => receiveStock(row)}
-                    className="bg-green-600/20 text-green-300 border border-green-500/40 hover:bg-green-600/30"
+                    className="bg-green-600/20 text-green-700 border border-green-500/40 hover:bg-green-600/30"
                   >
                     <PackagePlus className="w-3 h-3 mr-1" /> Receive & Fulfill
                   </Button>
