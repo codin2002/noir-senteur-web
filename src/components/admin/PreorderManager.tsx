@@ -104,7 +104,7 @@ const PreorderManager: React.FC = () => {
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className="font-semibold text-lg">{row.name}</h3>
                   {row.preorder_enabled && (
-                    <Badge className="bg-gold/20 text-gray-900 border-gray-300 text-[10px]">PREORDER ON</Badge>
+                    <Badge className="bg-gray-100 text-gray-900 border-gray-300 text-[10px]">PREORDER ON</Badge>
                   )}
                   <span className="text-xs text-muted-foreground">
                     {row.preorder_count} preordered

@@ -10,8 +10,8 @@ import { ActionCategory } from '@/services/inventoryActionService';
 
 const statusBadge = (s: InventoryRow['status']) => {
   if (s === 'critical') return <Badge variant="destructive" className="text-[10px]">CRITICAL</Badge>;
-  if (s === 'low') return <Badge className="bg-yellow-500/20 text-yellow-300 border-yellow-500/40 text-[10px]">REORDER SOON</Badge>;
-  return <Badge className="bg-green-500/20 text-green-300 border-green-500/40 text-[10px]">NORMAL</Badge>;
+  if (s === 'low') return <Badge className="bg-yellow-500/20 text-yellow-700 border-yellow-500/40 text-[10px]">REORDER SOON</Badge>;
+  return <Badge className="bg-green-500/20 text-green-700 border-green-500/40 text-[10px]">NORMAL</Badge>;
 };
 
 const InventoryManager: React.FC = () => {
