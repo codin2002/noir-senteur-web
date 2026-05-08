@@ -23,7 +23,7 @@ const AdminAnalytics: React.FC = () => {
   if (!isAuthenticated) return <AdminAuth onAuthenticated={handleAuthenticated} />;
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="admin-light min-h-screen bg-white p-6 text-gray-900">
       <div className="mx-auto max-w-7xl space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
