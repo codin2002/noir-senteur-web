@@ -66,7 +66,7 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
   };
 
   return (
-    <Card className="bg-darker border-gray-200">
+    <Card className="bg-gray-50 border-gray-200">
       <CardHeader>
         <CardTitle className="text-gray-900">Order Management</CardTitle>
       </CardHeader>

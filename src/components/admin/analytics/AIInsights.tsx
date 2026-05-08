@@ -84,10 +84,10 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
   const [expanded, setExpanded] = useState<number | null>(0);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-darker p-5">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
       <div className="mb-4 flex items-center gap-2">
         <Sparkles size={18} className="text-gray-900" />
-        <h3 className="font-serif text-xl text-gold">AI Insights</h3>
+        <h3 className="font-serif text-xl text-gray-900">AI Insights</h3>
         <span className="ml-auto text-[11px] text-muted-foreground">{insights.length} signals</span>
       </div>
       <ul className="space-y-2">
@@ -112,7 +112,7 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
                   {i.detail && <div className="text-gray-500">{i.detail}</div>}
                   {i.action && (
                     <div className="text-gold/90">
-                      <span className="font-semibold text-gold">→ Recommendation:</span> {i.action}
+                      <span className="font-semibold text-gray-900">→ Recommendation:</span> {i.action}
                     </div>
                   )}
                 </div>

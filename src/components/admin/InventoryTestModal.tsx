@@ -41,7 +41,7 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-darker border-gray-200">
+      <DialogContent className="bg-gray-50 border-gray-200">
         <DialogHeader>
           <DialogTitle className="text-gray-900">Test Inventory Reduction</DialogTitle>
         </DialogHeader>
@@ -59,7 +59,7 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
               value={testOrderId}
               onChange={(e) => setTestOrderId(e.target.value)}
               placeholder="Enter order ID (e.g., 123e4567-e89b-12d3-a456-426614174000)"
-              className="bg-dark border-gray-300"
+              className="bg-white border-gray-300"
             />
           </div>
           
@@ -73,7 +73,7 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
             <Button
               variant="outline"
               onClick={onClose}
-              className="border-gray-300 text-gold hover:bg-gray-100"
+              className="border-gray-300 text-gray-900 hover:bg-gray-100"
             >
               Cancel
             </Button>

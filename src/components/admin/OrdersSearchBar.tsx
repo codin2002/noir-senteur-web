@@ -14,13 +14,13 @@ const OrdersSearchBar: React.FC<OrdersSearchBarProps> = ({
 }) => {
   return (
     <div className="relative mb-6">
-      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gold h-4 w-4" />
+      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-900 h-4 w-4" />
       <Input
         type="text"
         placeholder="Search by customer name or order ID..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 bg-dark border-gray-300 text-white placeholder:text-gray-400 focus:border-gold"
+        className="pl-10 bg-white border-gray-300 text-white placeholder:text-gray-400 focus:border-gold"
       />
     </div>
   );

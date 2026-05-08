@@ -24,7 +24,7 @@ const InventoryManager: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardContent className="p-6 text-center">Loading inventory...</CardContent>
       </Card>
     );
@@ -32,9 +32,9 @@ const InventoryManager: React.FC = () => {
 
   return (
     <>
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader>
-          <CardTitle className="text-gold flex items-center gap-2">
+          <CardTitle className="text-gray-900 flex items-center gap-2">
             <Package className="w-5 h-5" /> Inventory Management
           </CardTitle>
         </CardHeader>
@@ -69,7 +69,7 @@ const InventoryManager: React.FC = () => {
                 </div>
 
                 <div className="text-center px-3">
-                  <div className="text-3xl font-bold text-gold leading-none">{item.stock_quantity}</div>
+                  <div className="text-3xl font-bold text-gray-900 leading-none">{item.stock_quantity}</div>
                   <div className="text-[10px] uppercase text-muted-foreground tracking-wider mt-1">in stock</div>
                 </div>
               </div>
@@ -84,7 +84,7 @@ const InventoryManager: React.FC = () => {
                 <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-300 border border-orange-500/40 hover:bg-orange-600/30">
                   <Trash2 className="w-3 h-3 mr-1" /> Damaged
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gray-300 text-gold hover:bg-gray-100">
+                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100">
                   <Pencil className="w-3 h-3 mr-1" /> Correct
                 </Button>
                 <Button size="sm" onClick={() => setReorderState({ open: true, row: item })} variant="outline" className="border-gray-200 text-muted-foreground hover:text-gray-900">

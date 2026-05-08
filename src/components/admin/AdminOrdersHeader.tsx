@@ -14,13 +14,13 @@ const AdminOrdersHeader: React.FC<AdminOrdersHeaderProps> = ({ onLogout }) => {
       <div className="flex items-center gap-4">
         <Link
           to="/admin/analytics"
-          className="flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gold transition hover:bg-gray-100"
+          className="flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 transition hover:bg-gray-100"
         >
           <BarChart3 size={14} /> Analytics
         </Link>
         <button
           onClick={onLogout}
-          className="text-gold hover:text-gray-500 text-sm"
+          className="text-gray-900 hover:text-gray-500 text-sm"
         >
           Logout
         </button>

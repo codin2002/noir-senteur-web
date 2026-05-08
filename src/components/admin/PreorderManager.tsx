@@ -82,16 +82,16 @@ const PreorderManager: React.FC = () => {
 
   if (loading) {
     return (
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardContent className="p-6 text-center">Loading preorder settings...</CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-darker border-gray-200">
+    <Card className="bg-gray-50 border-gray-200">
       <CardHeader>
-        <CardTitle className="text-gold flex items-center gap-2">
+        <CardTitle className="text-gray-900 flex items-center gap-2">
           <Clock className="w-5 h-5" /> Preorder Management
         </CardTitle>
       </CardHeader>
@@ -104,7 +104,7 @@ const PreorderManager: React.FC = () => {
                 <div className="flex items-center gap-3 flex-wrap">
                   <h3 className="font-semibold text-lg">{row.name}</h3>
                   {row.preorder_enabled && (
-                    <Badge className="bg-gold/20 text-gold border-gray-300 text-[10px]">PREORDER ON</Badge>
+                    <Badge className="bg-gold/20 text-gray-900 border-gray-300 text-[10px]">PREORDER ON</Badge>
                   )}
                   <span className="text-xs text-muted-foreground">
                     {row.preorder_count} preordered
@@ -128,7 +128,7 @@ const PreorderManager: React.FC = () => {
                     type="datetime-local"
                     value={toLocalInput(row.preorder_start_date)}
                     onChange={(e) => updateRow(row.id, { preorder_start_date: fromLocalInput(e.target.value) })}
-                    className="bg-dark border-gray-200"
+                    className="bg-white border-gray-200"
                   />
                 </div>
                 <div>
@@ -137,7 +137,7 @@ const PreorderManager: React.FC = () => {
                     type="datetime-local"
                     value={toLocalInput(row.preorder_end_date)}
                     onChange={(e) => updateRow(row.id, { preorder_end_date: fromLocalInput(e.target.value) })}
-                    className="bg-dark border-gray-200"
+                    className="bg-white border-gray-200"
                   />
                 </div>
                 <div>
@@ -146,7 +146,7 @@ const PreorderManager: React.FC = () => {
                     type="datetime-local"
                     value={toLocalInput(row.expected_shipping_date)}
                     onChange={(e) => updateRow(row.id, { expected_shipping_date: fromLocalInput(e.target.value) })}
-                    className="bg-dark border-gray-200"
+                    className="bg-white border-gray-200"
                   />
                 </div>
                 <div>
@@ -156,14 +156,14 @@ const PreorderManager: React.FC = () => {
                     min={0}
                     value={row.preorder_limit ?? ''}
                     onChange={(e) => updateRow(row.id, { preorder_limit: e.target.value ? parseInt(e.target.value, 10) : null })}
-                    className="bg-dark border-gray-200"
+                    className="bg-white border-gray-200"
                     placeholder="No limit"
                   />
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 items-end pt-2 border-t border-gray-200">
-                <Button size="sm" onClick={() => save(row)} disabled={savingId === row.id} className="bg-gray-900 text-white hover:bg-gold/80">
+                <Button size="sm" onClick={() => save(row)} disabled={savingId === row.id} className="bg-gray-900 text-white hover:bg-gray-800/80">
                   <Save className="w-3 h-3 mr-1" /> {savingId === row.id ? 'Saving...' : 'Save'}
                 </Button>
                 <div className="flex-1 flex items-end gap-2 min-w-[200px]">
@@ -174,7 +174,7 @@ const PreorderManager: React.FC = () => {
                       min={1}
                       value={receiveQty[row.id] || ''}
                       onChange={(e) => setReceiveQty((s) => ({ ...s, [row.id]: e.target.value }))}
-                      className="bg-dark border-gray-200"
+                      className="bg-white border-gray-200"
                       placeholder="e.g. 50"
                     />
                   </div>

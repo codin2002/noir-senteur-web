@@ -220,33 +220,33 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
   };
 
   return (
-    <Card className="bg-darker border-gray-200">
+    <Card className="bg-gray-50 border-gray-200">
       <CardHeader>
-        <CardTitle className="text-gold text-sm">Update Order Status</CardTitle>
+        <CardTitle className="text-gray-900 text-sm">Update Order Status</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
           <label className="text-sm font-medium mb-2 block text-gray-300">
-            Current: <span className="text-gold font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
+            Current: <span className="text-gray-900 font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
           </label>
           <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating}>
-            <SelectTrigger className="bg-dark border-gray-300 text-white">
+            <SelectTrigger className="bg-white border-gray-300 text-white">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
-            <SelectContent className="bg-dark border-gray-300">
-              <SelectItem value="processing" className="text-white hover:bg-gold/20">
+            <SelectContent className="bg-white border-gray-300">
+              <SelectItem value="processing" className="text-white hover:bg-gray-800/20">
                 Processing
               </SelectItem>
-              <SelectItem value="dispatched" className="text-white hover:bg-gold/20">
+              <SelectItem value="dispatched" className="text-white hover:bg-gray-800/20">
                 Dispatched
               </SelectItem>
-              <SelectItem value="delivered" className="text-white hover:bg-gold/20">
+              <SelectItem value="delivered" className="text-white hover:bg-gray-800/20">
                 Delivered
               </SelectItem>
-              <SelectItem value="returned" className="text-white hover:bg-gold/20">
+              <SelectItem value="returned" className="text-white hover:bg-gray-800/20">
                 Returned
               </SelectItem>
-              <SelectItem value="refunded" className="text-white hover:bg-gold/20">
+              <SelectItem value="refunded" className="text-white hover:bg-gray-800/20">
                 Refunded
               </SelectItem>
             </SelectContent>

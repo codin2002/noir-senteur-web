@@ -78,20 +78,20 @@ const OrderReturnManager: React.FC<OrderReturnManagerProps> = ({
           Return
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-darker border-gray-200">
+      <DialogContent className="bg-gray-50 border-gray-200">
         <DialogHeader>
           <DialogTitle className="text-gray-900">Process Order Return</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium mb-2 block text-gold">
+            <label className="text-sm font-medium mb-2 block text-gray-900">
               Return Reason
             </label>
             <Textarea
               value={returnReason}
               onChange={(e) => setReturnReason(e.target.value)}
               placeholder="Please provide a reason for the return..."
-              className="bg-dark border-gray-300 min-h-[100px]"
+              className="bg-white border-gray-300 min-h-[100px]"
             />
           </div>
           <div className="flex gap-2">

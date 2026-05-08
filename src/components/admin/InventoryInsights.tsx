@@ -32,9 +32,9 @@ const InventoryInsights: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-gold text-sm flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-yellow-400" /> Low / Critical Stock</CardTitle>
+          <CardTitle className="text-gray-900 text-sm flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-yellow-400" /> Low / Critical Stock</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {lowStock.length === 0 && <p className="text-xs text-muted-foreground">All products above reorder point.</p>}
@@ -42,7 +42,7 @@ const InventoryInsights: React.FC = () => {
             <div key={r.id} className="flex items-center justify-between text-sm">
               <span className="truncate pr-2">{r.perfumes?.name || '—'}</span>
               <div className="flex items-center gap-2">
-                <span className="font-mono text-gold">{r.stock_quantity}</span>
+                <span className="font-mono text-gray-900">{r.stock_quantity}</span>
                 <Badge variant={r.status === 'critical' ? 'destructive' : 'secondary'} className="text-[10px]">
                   {r.status === 'critical' ? 'CRITICAL' : 'REORDER'}
                 </Badge>
@@ -52,9 +52,9 @@ const InventoryInsights: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-gold text-sm flex items-center gap-2"><TrendingUp className="w-4 h-4 text-green-400" /> Fast-Moving (30d)</CardTitle>
+          <CardTitle className="text-gray-900 text-sm flex items-center gap-2"><TrendingUp className="w-4 h-4 text-green-400" /> Fast-Moving (30d)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {fastMoving.length === 0 && <p className="text-xs text-muted-foreground">No outgoing movement yet.</p>}
@@ -67,9 +67,9 @@ const InventoryInsights: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-gold text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> Dead Stock (30d+)</CardTitle>
+          <CardTitle className="text-gray-900 text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> Dead Stock (30d+)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {deadStock.length === 0 && <p className="text-xs text-muted-foreground">No stagnant inventory.</p>}
@@ -82,9 +82,9 @@ const InventoryInsights: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-gold text-sm flex items-center gap-2"><Zap className="w-4 h-4 text-orange-400" /> Unusual Activity (7d)</CardTitle>
+          <CardTitle className="text-gray-900 text-sm flex items-center gap-2"><Zap className="w-4 h-4 text-orange-400" /> Unusual Activity (7d)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {unusual.length === 0 && <p className="text-xs text-muted-foreground">No unusual changes.</p>}

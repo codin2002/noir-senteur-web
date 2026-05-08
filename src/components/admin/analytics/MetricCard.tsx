@@ -40,7 +40,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ label, value, delta, prevValue,
   const dotColor = positive ? 'bg-emerald-400' : negative ? 'bg-rose-400' : 'bg-muted';
 
   return (
-    <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-darker p-4 transition-all hover:border-gray-300">
+    <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-gray-50 p-4 transition-all hover:border-gray-300">
       <div className="flex items-start justify-between gap-2">
         <div className="text-[11px] font-medium uppercase tracking-wider text-gray-400">{label}</div>
         {showDelta && (
@@ -50,7 +50,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ label, value, delta, prevValue,
           </div>
         )}
       </div>
-      <div className="mt-2 text-2xl font-bold tracking-tight text-gold">{value}</div>
+      <div className="mt-2 text-2xl font-bold tracking-tight text-gray-900">{value}</div>
       <div className="mt-2 flex items-end justify-between gap-2">
         <div className="text-[11px] text-muted-foreground">
           {showDelta && prevValue ? (

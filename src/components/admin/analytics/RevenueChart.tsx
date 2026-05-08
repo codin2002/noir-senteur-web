@@ -22,10 +22,10 @@ const RevenueChart: React.FC<{ data: MonthlyRevenuePoint[] }> = ({ data }) => {
   }, [data]);
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-darker p-5">
+    <div className="rounded-lg border border-gray-200 bg-gray-50 p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h3 className="font-serif text-xl text-gold">Monthly Revenue</h3>
+          <h3 className="font-serif text-xl text-gray-900">Monthly Revenue</h3>
           <p className="text-[11px] text-muted-foreground">Bars = revenue · Line = 3-mo moving avg</p>
         </div>
         <div className="flex gap-1 rounded-md border border-gray-200 p-1">
@@ -34,7 +34,7 @@ const RevenueChart: React.FC<{ data: MonthlyRevenuePoint[] }> = ({ data }) => {
               key={m}
               onClick={() => setView(m)}
               className={`rounded px-3 py-1 text-xs font-medium capitalize transition ${
-                view === m ? 'bg-gold text-dark' : 'text-gray-500 hover:text-gold'
+                view === m ? 'bg-gray-900 text-dark' : 'text-gray-500 hover:text-gold'
               }`}
             >
               {m}

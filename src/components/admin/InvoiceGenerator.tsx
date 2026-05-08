@@ -130,7 +130,7 @@ Thank you for choosing Senteur! 🌹
           Invoice
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-darker border-gray-200 max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-gray-50 border-gray-200 max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-gray-900">Generate Invoice</DialogTitle>
         </DialogHeader>
@@ -142,22 +142,22 @@ Thank you for choosing Senteur! 🌹
         ) : orderDetails ? (
           <div className="space-y-6">
             {/* Invoice Preview */}
-            <div className="bg-dark border border-gray-200 rounded-lg p-6">
+            <div className="bg-white border border-gray-200 rounded-lg p-6">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-serif text-gold mb-2">SENTEUR</h2>
+                <h2 className="text-2xl font-serif text-gray-900 mb-2">SENTEUR</h2>
                 <p className="text-sm text-muted-foreground">Premium Fragrances</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
-                  <h3 className="font-semibold text-gold mb-2">Order Details</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Order Details</h3>
                   <p className="text-sm">Order ID: #{orderDetails.id.substring(0, 8)}</p>
                   <p className="text-sm">Date: {new Date(orderDetails.created_at).toLocaleDateString()}</p>
                   <p className="text-sm">Status: <span className="capitalize">{orderDetails.status}</span></p>
                 </div>
                 
                 <div>
-                  <h3 className="font-semibold text-gold mb-2">Customer Information</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Customer Information</h3>
                   {(() => {
                     const customer = getCustomerInfo();
                     return (
@@ -172,12 +172,12 @@ Thank you for choosing Senteur! 🌹
               </div>
 
               <div className="mb-6">
-                <h3 className="font-semibold text-gold mb-2">Delivery Address</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Delivery Address</h3>
                 <p className="text-sm">{getDeliveryAddress()}</p>
               </div>
 
               <div className="mb-6">
-                <h3 className="font-semibold text-gold mb-2">Items Ordered</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Items Ordered</h3>
                 <div className="space-y-2">
                   {orderDetails.items.map((item) => (
                     <div key={item.id} className="flex justify-between text-sm">
@@ -197,7 +197,7 @@ Thank you for choosing Senteur! 🌹
                   <span>Shipping:</span>
                   <span>AED {(orderDetails.total - orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)).toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between font-semibold text-gold">
+                <div className="flex justify-between font-semibold text-gray-900">
                   <span>Total:</span>
                   <span>AED {orderDetails.total.toFixed(2)}</span>
                 </div>

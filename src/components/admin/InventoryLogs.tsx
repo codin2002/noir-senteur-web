@@ -29,10 +29,10 @@ const CATEGORY_LABEL: Record<string, { label: string; cls: string }> = {
   stock_in: { label: 'Stock In', cls: 'bg-green-500/20 text-green-300 border-green-500/40' },
   stock_out: { label: 'Stock Out', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
   damaged: { label: 'Damaged', cls: 'bg-orange-500/20 text-orange-300 border-orange-500/40' },
-  manual_correction: { label: 'Manual Correction', cls: 'bg-gold/20 text-gold border-gray-300' },
+  manual_correction: { label: 'Manual Correction', cls: 'bg-gold/20 text-gray-900 border-gray-300' },
   // legacy fallback
   order_delivery: { label: 'Order Delivery', cls: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  manual_adjustment: { label: 'Manual Adjustment', cls: 'bg-gold/20 text-gold border-gray-300' },
+  manual_adjustment: { label: 'Manual Adjustment', cls: 'bg-gold/20 text-gray-900 border-gray-300' },
   stock_addition: { label: 'Stock Addition', cls: 'bg-green-500/20 text-green-300 border-green-500/40' },
 };
 
@@ -81,30 +81,30 @@ const InventoryLogs: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardContent className="p-6 text-center">Loading inventory logs...</CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="bg-darker border-gray-200">
+    <Card className="bg-gray-50 border-gray-200">
       <CardHeader>
-        <CardTitle className="text-gold flex items-center gap-2">
+        <CardTitle className="text-gray-900 flex items-center gap-2">
           <Activity className="w-5 h-5" /> Inventory Activity Logs
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
           <Select value={productFilter} onValueChange={setProductFilter}>
-            <SelectTrigger className="bg-dark border-gray-300"><SelectValue placeholder="Product" /></SelectTrigger>
+            <SelectTrigger className="bg-white border-gray-300"><SelectValue placeholder="Product" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All products</SelectItem>
               {products.map(([id, name]) => <SelectItem key={id} value={id}>{name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={actionFilter} onValueChange={setActionFilter}>
-            <SelectTrigger className="bg-dark border-gray-300"><SelectValue placeholder="Action" /></SelectTrigger>
+            <SelectTrigger className="bg-white border-gray-300"><SelectValue placeholder="Action" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All actions</SelectItem>
               <SelectItem value="stock_in">Stock In</SelectItem>
@@ -114,8 +114,8 @@ const InventoryLogs: React.FC = () => {
               <SelectItem value="order_delivery">Order Delivery (legacy)</SelectItem>
             </SelectContent>
           </Select>
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-dark border-gray-300" />
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-dark border-gray-300" />
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-white border-gray-300" />
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-white border-gray-300" />
         </div>
 
         <div className="overflow-x-auto">
@@ -151,7 +151,7 @@ const InventoryLogs: React.FC = () => {
                     <TableCell className={`font-mono text-sm ${log.quantity_change > 0 ? 'text-green-400' : 'text-red-400'}`}>
                       {log.quantity_change > 0 ? '+' : ''}{log.quantity_change}
                     </TableCell>
-                    <TableCell className="font-mono text-sm font-semibold text-gold">{log.quantity_after}</TableCell>
+                    <TableCell className="font-mono text-sm font-semibold text-gray-900">{log.quantity_after}</TableCell>
                     <TableCell className="text-xs">{log.user_name || (log.order_id ? 'system' : '—')}</TableCell>
                     <TableCell className="text-xs">
                       {log.reference_id ? log.reference_id : log.order_id ? <span className="text-blue-400">#{log.order_id.substring(0, 8)}</span> : '—'}

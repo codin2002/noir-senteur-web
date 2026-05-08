@@ -58,7 +58,7 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">Delivered Orders</CardTitle>
           <CheckCircle className="h-4 w-4 text-green-400" />
@@ -71,7 +71,7 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">Processing Orders</CardTitle>
           <Clock className="h-4 w-4 text-yellow-400" />
@@ -84,7 +84,7 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">Dispatched Orders</CardTitle>
           <Truck className="h-4 w-4 text-blue-400" />
@@ -97,7 +97,7 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">Returned Orders</CardTitle>
           <RotateCcw className="h-4 w-4 text-red-400" />
@@ -110,7 +110,7 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">Total Orders</CardTitle>
           <Package className="h-4 w-4 text-blue-400" />
@@ -123,10 +123,10 @@ const AdminDashboardSummary: React.FC<AdminDashboardSummaryProps> = ({ orders, o
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gray-200">
+      <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium text-gray-700">Quick Actions</CardTitle>
-          <Edit className="h-4 w-4 text-gold" />
+          <Edit className="h-4 w-4 text-gray-900" />
         </CardHeader>
         <CardContent>
           <Button
