@@ -1,0 +1,1 @@
+DELETE FROM perfume_images WHERE is_primary = false;
