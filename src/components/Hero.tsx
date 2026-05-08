@@ -19,20 +19,19 @@ const Hero = () => {
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-b from-cartier-red/40 to-cartier-red/70 z-0"></div>
+      {/* Black background while video loads */}
+      <div className="absolute inset-0 bg-black z-0"></div>
       
       {/* Video background */}
       <video 
         ref={videoRef} 
-        className={`absolute top-0 left-0 min-w-full min-h-full object-cover transition-opacity duration-700 ${
+        className={`absolute top-0 left-0 min-w-full min-h-full object-cover transition-opacity duration-300 ${
           isVideoLoaded ? 'opacity-100' : 'opacity-0'
         }`} 
         autoPlay 
         loop 
         muted 
         playsInline
-        poster="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?q=80&w=1887&auto=format&fit=crop" 
         onLoadedData={() => setIsVideoLoaded(true)} 
         preload="auto" 
         style={{
