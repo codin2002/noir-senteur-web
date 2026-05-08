@@ -7,7 +7,8 @@ export const PRICING = {
   PERFUME_PRICE: 100,
   CURRENCY: 'AED',
   CURRENCY_SYMBOL: 'AED ',
-  SHIPPING_COST: 4.99,
+  SHIPPING_COST: 14.99,
+  FREE_SHIPPING_THRESHOLD: 3,
 };
 
 // Perfume information constants
