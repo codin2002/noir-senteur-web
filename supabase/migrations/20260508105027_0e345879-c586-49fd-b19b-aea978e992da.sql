@@ -1,0 +1,2 @@
+UPDATE perfumes SET image = 'https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/perfume1/313.PNG' WHERE id = '890882bb-0dba-4712-a5a9-380cf9e7ff58';
+UPDATE perfumes SET image = 'https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/perfume2/424.png' WHERE id = '37b4d1ef-6589-4852-a74d-c4a10bc04302';
