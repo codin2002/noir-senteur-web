@@ -1,0 +1,2 @@
+UPDATE perfume_images SET image_url = 'https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/perfume1/313.PNG' WHERE perfume_id = '890882bb-0dba-4712-a5a9-380cf9e7ff58' AND is_primary = true;
+UPDATE perfume_images SET image_url = 'https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/perfume2/424.PNG' WHERE perfume_id = '37b4d1ef-6589-4852-a74d-c4a10bc04302' AND is_primary = true;
