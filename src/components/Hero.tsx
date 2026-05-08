@@ -10,6 +10,10 @@ const Hero = () => {
     if (!video) return;
 
     const handleCanPlay = () => setIsVideoLoaded(true);
+    const handleVideoReady = () => {
+      setIsVideoLoaded(true);
+      tryPlay();
+    };
     const tryPlay = () => {
       video.muted = true;
       video.defaultMuted = true;
@@ -22,22 +26,30 @@ const Hero = () => {
     };
 
     video.addEventListener('canplay', handleCanPlay);
-    video.addEventListener('loadeddata', tryPlay);
-    video.addEventListener('loadedmetadata', tryPlay);
+    video.addEventListener('loadeddata', handleVideoReady);
+    video.addEventListener('loadedmetadata', handleVideoReady);
+    video.addEventListener('playing', handleCanPlay);
+    video.addEventListener('timeupdate', handleCanPlay);
     video.addEventListener('pause', tryPlay);
     window.addEventListener('focus', tryPlay);
     window.addEventListener('pageshow', tryPlay);
+    window.addEventListener('click', tryPlay);
     window.addEventListener('touchstart', tryPlay, { passive: true });
     document.addEventListener('visibilitychange', handleVisibility);
     tryPlay();
+    const retryPlayback = window.setInterval(tryPlay, 1200);
 
     return () => {
+      window.clearInterval(retryPlayback);
       video.removeEventListener('canplay', handleCanPlay);
-      video.removeEventListener('loadeddata', tryPlay);
-      video.removeEventListener('loadedmetadata', tryPlay);
+      video.removeEventListener('loadeddata', handleVideoReady);
+      video.removeEventListener('loadedmetadata', handleVideoReady);
+      video.removeEventListener('playing', handleCanPlay);
+      video.removeEventListener('timeupdate', handleCanPlay);
       video.removeEventListener('pause', tryPlay);
       window.removeEventListener('focus', tryPlay);
       window.removeEventListener('pageshow', tryPlay);
+      window.removeEventListener('click', tryPlay);
       window.removeEventListener('touchstart', tryPlay);
       document.removeEventListener('visibilitychange', handleVisibility);
     };
@@ -57,7 +69,7 @@ const Hero = () => {
       <video
         ref={videoRef}
         className={`absolute top-0 left-0 min-w-full min-h-full object-cover pointer-events-none transition-opacity duration-300 ${
-          isVideoLoaded ? 'opacity-100' : 'opacity-0'
+          isVideoLoaded ? 'opacity-100' : 'opacity-95'
         }`}
         autoPlay
         loop
