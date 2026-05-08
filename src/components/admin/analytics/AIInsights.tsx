@@ -11,11 +11,11 @@ interface Insight {
 }
 
 const SEV: Record<Severity, { border: string; chip: string; icon: React.ReactNode; label: string }> = {
-  positive:    { border: 'border-l-emerald-400', chip: 'bg-emerald-400/15 text-emerald-300',  icon: <TrendingUp size={14} />,    label: 'Trend' },
-  warning:     { border: 'border-l-amber-400',   chip: 'bg-amber-400/15 text-amber-300',      icon: <AlertTriangle size={14} />, label: 'Warning' },
-  risk:        { border: 'border-l-rose-400',    chip: 'bg-rose-400/15 text-rose-300',        icon: <TrendingDown size={14} />,  label: 'Risk' },
-  opportunity: { border: 'border-l-gray-900',        chip: 'bg-gray-100 text-gold',                icon: <Lightbulb size={14} />,     label: 'Opportunity' },
-  info:        { border: 'border-l-slate-400',   chip: 'bg-slate-400/15 text-slate-300',      icon: <Sparkles size={14} />,      label: 'Info' },
+  positive:    { border: 'border-l-emerald-400', chip: 'bg-emerald-400/15 text-emerald-700',  icon: <TrendingUp size={14} />,    label: 'Trend' },
+  warning:     { border: 'border-l-amber-400',   chip: 'bg-amber-400/15 text-amber-700',      icon: <AlertTriangle size={14} />, label: 'Warning' },
+  risk:        { border: 'border-l-rose-400',    chip: 'bg-rose-400/15 text-rose-700',        icon: <TrendingDown size={14} />,  label: 'Risk' },
+  opportunity: { border: 'border-l-gray-900',    chip: 'bg-gray-100 text-gray-700',           icon: <Lightbulb size={14} />,     label: 'Opportunity' },
+  info:        { border: 'border-l-slate-400',   chip: 'bg-slate-400/15 text-slate-700',      icon: <Sparkles size={14} />,      label: 'Info' },
 };
 
 const buildInsights = (d: AnalyticsData): Insight[] => {
