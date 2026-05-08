@@ -52,36 +52,17 @@ export const useAnalyticsData = () => {
   return useQuery<AnalyticsData>({
     queryKey: ['analytics-data'],
     queryFn: async () => {
-      // Pull successful payments (revenue) joined with orders + items
-      const [paymentsRes, logsRes, perfumesRes] = await Promise.all([
-        supabase
-          .from('successful_payments')
-          .select('id, amount, created_at, order_id')
-          .eq('payment_status', 'completed')
-          .order('created_at', { ascending: true }),
-        supabase
-          .from('inventory_logs')
-          .select('id, perfume_id, change_type, quantity_change, created_at')
-          .order('created_at', { ascending: true })
-          .limit(5000),
-        supabase.from('perfumes').select('id, name, price_value'),
-      ]);
+      // Fetch via admin edge function (uses service role to bypass RLS)
+      const { data: result, error: fnError } = await supabase.functions.invoke('admin-analytics', {
+        headers: { 'x-admin-password': 'SenteurSAF@2025' },
+      });
+      if (fnError) throw fnError;
 
-      const payments = paymentsRes.data || [];
-      const logs = logsRes.data || [];
-      const perfumes = perfumesRes.data || [];
+      const payments = result?.payments || [];
+      const logs = result?.logs || [];
+      const perfumes = result?.perfumes || [];
+      const orderItems = result?.orderItems || [];
       const perfumeMap = new Map(perfumes.map((p: any) => [p.id, p]));
-
-      // Order items for product performance
-      const orderIds = Array.from(new Set(payments.map((p: any) => p.order_id).filter(Boolean)));
-      let orderItems: any[] = [];
-      if (orderIds.length) {
-        const { data: itemsData } = await supabase
-          .from('order_items')
-          .select('perfume_id, quantity, price, order_id')
-          .in('order_id', orderIds);
-        orderItems = itemsData || [];
-      }
 
       // ---- Monthly revenue ----
       const revByMonth = new Map<string, { revenue: number; orders: number }>();
