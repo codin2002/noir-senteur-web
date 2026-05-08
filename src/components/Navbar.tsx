@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { Heart, ShoppingCart, History, User } from 'lucide-react';
 import { useCartCount } from '@/hooks/useCartCount';
 import CartBadge from '@/components/ui/cart-badge';
+import RegionBanner from '@/components/RegionBanner';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
