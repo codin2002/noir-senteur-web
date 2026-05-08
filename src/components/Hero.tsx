@@ -48,9 +48,7 @@ const Hero = () => {
         loop 
         muted 
         playsInline
-        // @ts-expect-error iOS-specific attribute
-        webkit-playsinline="true"
-        x-webkit-airplay="deny"
+        {...({ 'webkit-playsinline': 'true', 'x-webkit-airplay': 'deny' } as any)}
         controls={false}
         disablePictureInPicture
         disableRemotePlayback
