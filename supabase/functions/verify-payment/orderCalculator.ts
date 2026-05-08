@@ -26,8 +26,8 @@ export function calculateOrderTotal(orderCartItems: any[]): OrderCalculation {
     };
   });
 
-  // Apply correct shipping logic - free shipping if 2+ items, otherwise 4.99 AED
-  const shippingCost = subtotal > 0 && totalQuantity < 2 ? 4.99 : 0;
+  // Apply correct shipping logic - free shipping if 3+ items, otherwise 14.99 AED
+  const shippingCost = subtotal > 0 && totalQuantity < 3 ? 14.99 : 0;
   const totalAmount = subtotal + shippingCost;
 
   console.log('Subtotal calculated:', subtotal);

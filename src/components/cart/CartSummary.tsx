@@ -28,8 +28,8 @@ const CartSummary: React.FC<CartSummaryProps> = ({
   const subtotal = calculateSubtotal();
   const totalQuantity = getTotalQuantity();
   
-  // Free shipping if 2 or more items, otherwise apply shipping cost
-  const shippingCost = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
+  // Free shipping if 3 or more items, otherwise apply shipping cost
+  const shippingCost = subtotal > 0 && totalQuantity < PRICING.FREE_SHIPPING_THRESHOLD ? PRICING.SHIPPING_COST : 0;
   const total = subtotal + shippingCost;
 
   return (
@@ -52,9 +52,13 @@ const CartSummary: React.FC<CartSummaryProps> = ({
         </span>
       </div>
       
-      {totalQuantity >= 2 && (
+      {totalQuantity >= PRICING.FREE_SHIPPING_THRESHOLD ? (
         <div className="text-xs text-green-400 text-center">
-          🎉 Free shipping on 2+ items!
+          🎉 Free shipping on 3+ items!
+        </div>
+      ) : (
+        <div className="text-xs text-muted-foreground text-center">
+          Add {PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity} more {PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity === 1 ? 'item' : 'items'} for free shipping
         </div>
       )}
       
