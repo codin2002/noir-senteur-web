@@ -10,17 +10,17 @@ interface AdminOrdersHeaderProps {
 const AdminOrdersHeader: React.FC<AdminOrdersHeaderProps> = ({ onLogout }) => {
   return (
     <div className="flex justify-between items-center">
-      <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
+      <h1 className="text-3xl font-serif mb-8 text-gray-900">Admin Dashboard</h1>
       <div className="flex items-center gap-4">
         <Link
           to="/admin/analytics"
-          className="flex items-center gap-1.5 rounded-md border border-gold/30 px-3 py-1.5 text-sm text-gold transition hover:bg-gold/10"
+          className="flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gold transition hover:bg-gray-100"
         >
           <BarChart3 size={14} /> Analytics
         </Link>
         <button
           onClick={onLogout}
-          className="text-gold hover:text-gold/70 text-sm"
+          className="text-gold hover:text-gray-500 text-sm"
         >
           Logout
         </button>

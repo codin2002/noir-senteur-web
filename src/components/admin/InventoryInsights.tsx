@@ -32,7 +32,7 @@ const InventoryInsights: React.FC = () => {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4">
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-darker border-gray-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-gold text-sm flex items-center gap-2"><AlertTriangle className="w-4 h-4 text-yellow-400" /> Low / Critical Stock</CardTitle>
         </CardHeader>
@@ -52,7 +52,7 @@ const InventoryInsights: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-darker border-gray-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-gold text-sm flex items-center gap-2"><TrendingUp className="w-4 h-4 text-green-400" /> Fast-Moving (30d)</CardTitle>
         </CardHeader>
@@ -67,7 +67,7 @@ const InventoryInsights: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-darker border-gray-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-gold text-sm flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> Dead Stock (30d+)</CardTitle>
         </CardHeader>
@@ -82,7 +82,7 @@ const InventoryInsights: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-darker border-gray-200">
         <CardHeader className="pb-2">
           <CardTitle className="text-gold text-sm flex items-center gap-2"><Zap className="w-4 h-4 text-orange-400" /> Unusual Activity (7d)</CardTitle>
         </CardHeader>

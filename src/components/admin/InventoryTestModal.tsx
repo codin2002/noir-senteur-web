@@ -41,9 +41,9 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-darker border-gold/20">
+      <DialogContent className="bg-darker border-gray-200">
         <DialogHeader>
-          <DialogTitle className="text-gold">Test Inventory Reduction</DialogTitle>
+          <DialogTitle className="text-gray-900">Test Inventory Reduction</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
@@ -53,13 +53,13 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="orderId" className="text-gold">Order ID</Label>
+            <Label htmlFor="orderId" className="text-gray-900">Order ID</Label>
             <Input
               id="orderId"
               value={testOrderId}
               onChange={(e) => setTestOrderId(e.target.value)}
               placeholder="Enter order ID (e.g., 123e4567-e89b-12d3-a456-426614174000)"
-              className="bg-dark border-gold/30"
+              className="bg-dark border-gray-300"
             />
           </div>
           
@@ -73,14 +73,14 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
             <Button
               variant="outline"
               onClick={onClose}
-              className="border-gold/30 text-gold hover:bg-gold/10"
+              className="border-gray-300 text-gold hover:bg-gray-100"
             >
               Cancel
             </Button>
             <Button
               onClick={handleTestInventory}
               disabled={isUpdating || !testOrderId.trim()}
-              className="bg-gold text-darker hover:bg-gold/90"
+              className="bg-gray-900 text-white hover:bg-gray-800"
             >
               {isUpdating ? 'Testing...' : 'Test Inventory Reduction'}
             </Button>

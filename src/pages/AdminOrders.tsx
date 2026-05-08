@@ -53,7 +53,7 @@ const AdminOrders = () => {
     return (
       <div className="min-h-screen bg-dark p-6">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl font-serif mb-8 text-gold">Admin Dashboard</h1>
+          <h1 className="text-3xl font-serif mb-8 text-gray-900">Admin Dashboard</h1>
           <div className="text-center text-gold">Loading orders...</div>
         </div>
       </div>

@@ -24,7 +24,7 @@ const InventoryManager: React.FC = () => {
 
   if (isLoading) {
     return (
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-darker border-gray-200">
         <CardContent className="p-6 text-center">Loading inventory...</CardContent>
       </Card>
     );
@@ -32,7 +32,7 @@ const InventoryManager: React.FC = () => {
 
   return (
     <>
-      <Card className="bg-darker border-gold/20">
+      <Card className="bg-darker border-gray-200">
         <CardHeader>
           <CardTitle className="text-gold flex items-center gap-2">
             <Package className="w-5 h-5" /> Inventory Management
@@ -45,7 +45,7 @@ const InventoryManager: React.FC = () => {
               className={`p-4 rounded-lg border ${
                 item.status === 'critical' ? 'border-red-500/40 bg-red-500/5' :
                 item.status === 'low' ? 'border-yellow-500/40 bg-yellow-500/5' :
-                'border-gold/20 bg-dark/30'
+                'border-gray-200 bg-gray-50'
               }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
@@ -56,8 +56,8 @@ const InventoryManager: React.FC = () => {
                     {item.status === 'critical' && <AlertTriangle className="w-4 h-4 text-red-400" />}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                    <span>Reorder pt: <span className="text-gold">{item.reorderPoint}</span></span>
-                    <span>Suggested qty: <span className="text-gold">{item.reorderQty}</span></span>
+                    <span>Reorder pt: <span className="text-gray-900">{item.reorderPoint}</span></span>
+                    <span>Suggested qty: <span className="text-gray-900">{item.reorderQty}</span></span>
                     <span>Lead: {item.lead_time_days}d</span>
                     <span>Safety: {item.safety_stock}</span>
                     <span>Avg/day: {item.avgDaily.toFixed(2)}</span>
@@ -84,10 +84,10 @@ const InventoryManager: React.FC = () => {
                 <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-300 border border-orange-500/40 hover:bg-orange-600/30">
                   <Trash2 className="w-3 h-3 mr-1" /> Damaged
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gold/40 text-gold hover:bg-gold/10">
+                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gray-300 text-gold hover:bg-gray-100">
                   <Pencil className="w-3 h-3 mr-1" /> Correct
                 </Button>
-                <Button size="sm" onClick={() => setReorderState({ open: true, row: item })} variant="outline" className="border-gold/20 text-muted-foreground hover:text-gold">
+                <Button size="sm" onClick={() => setReorderState({ open: true, row: item })} variant="outline" className="border-gray-200 text-muted-foreground hover:text-gray-900">
                   <Settings2 className="w-3 h-3 mr-1" /> Settings
                 </Button>
               </div>

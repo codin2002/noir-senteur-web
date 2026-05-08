@@ -84,9 +84,9 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
   const [expanded, setExpanded] = useState<number | null>(0);
 
   return (
-    <div className="rounded-lg border border-gold/20 bg-darker p-5">
+    <div className="rounded-lg border border-gray-200 bg-darker p-5">
       <div className="mb-4 flex items-center gap-2">
-        <Sparkles size={18} className="text-gold" />
+        <Sparkles size={18} className="text-gray-900" />
         <h3 className="font-serif text-xl text-gold">AI Insights</h3>
         <span className="ml-auto text-[11px] text-muted-foreground">{insights.length} signals</span>
       </div>
@@ -96,7 +96,7 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
           const isOpen = expanded === idx;
           const hasMore = !!(i.detail || i.action);
           return (
-            <li key={idx} className={`rounded-md border border-gold/10 border-l-[3px] ${meta.border} bg-dark/40 transition`}>
+            <li key={idx} className={`rounded-md border border-gray-200 border-l-[3px] ${meta.border} bg-dark/40 transition`}>
               <button
                 onClick={() => hasMore && setExpanded(isOpen ? null : idx)}
                 className="flex w-full items-start gap-3 px-3 py-2.5 text-left"
@@ -105,11 +105,11 @@ const AIInsights: React.FC<{ data: AnalyticsData }> = ({ data }) => {
                   {meta.icon} {meta.label}
                 </span>
                 <span className="flex-1 text-sm text-gold/95">{i.title}</span>
-                {hasMore && (isOpen ? <ChevronUp size={14} className="text-gold/50" /> : <ChevronDown size={14} className="text-gold/50" />)}
+                {hasMore && (isOpen ? <ChevronUp size={14} className="text-gray-400" /> : <ChevronDown size={14} className="text-gray-400" />)}
               </button>
               {isOpen && hasMore && (
-                <div className="space-y-1.5 border-t border-gold/10 px-3 py-2.5 pl-[88px] text-xs">
-                  {i.detail && <div className="text-gold/70">{i.detail}</div>}
+                <div className="space-y-1.5 border-t border-gray-200 px-3 py-2.5 pl-[88px] text-xs">
+                  {i.detail && <div className="text-gray-500">{i.detail}</div>}
                   {i.action && (
                     <div className="text-gold/90">
                       <span className="font-semibold text-gold">→ Recommendation:</span> {i.action}

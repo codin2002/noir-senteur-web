@@ -15,19 +15,19 @@ const ProductPerformanceChart: React.FC<{ data: ProductPerformance[] }> = ({ dat
   }));
 
   return (
-    <div className="rounded-lg border border-gold/20 bg-darker p-5">
+    <div className="rounded-lg border border-gray-200 bg-darker p-5">
       <div className="mb-3 flex items-center justify-between">
         <div>
           <h3 className="font-serif text-xl text-gold">Top Products</h3>
           <p className="text-[11px] text-muted-foreground">Revenue contribution & cumulative share</p>
         </div>
-        <div className="flex gap-1 rounded-md border border-gold/20 p-1">
+        <div className="flex gap-1 rounded-md border border-gray-200 p-1">
           {(['pareto', 'cards'] as const).map((m) => (
             <button
               key={m}
               onClick={() => setMode(m)}
               className={`rounded px-3 py-1 text-xs font-medium capitalize transition ${
-                mode === m ? 'bg-gold text-dark' : 'text-gold/70 hover:text-gold'
+                mode === m ? 'bg-gold text-dark' : 'text-gray-500 hover:text-gold'
               }`}
             >
               {m}
@@ -84,13 +84,13 @@ const ProductPerformanceChart: React.FC<{ data: ProductPerformance[] }> = ({ dat
       ) : (
         <div className="space-y-2">
           {top.map((p, i) => (
-            <div key={p.perfumeId} className="flex items-center gap-3 rounded-md border border-gold/10 bg-dark/40 p-3">
+            <div key={p.perfumeId} className="flex items-center gap-3 rounded-md border border-gray-200 bg-dark/40 p-3">
               <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold/15 text-sm font-bold text-gold">
                 #{i + 1}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="truncate text-sm font-medium text-gold" dir="auto">{p.name}</div>
-                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-dark">
+                <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white">
                   <div className="h-full bg-gradient-to-r from-gold/70 to-gold" style={{ width: `${p.revenueShare * 100}%` }} />
                 </div>
               </div>

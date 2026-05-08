@@ -220,7 +220,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
   };
 
   return (
-    <Card className="bg-darker border-gold/20">
+    <Card className="bg-darker border-gray-200">
       <CardHeader>
         <CardTitle className="text-gold text-sm">Update Order Status</CardTitle>
       </CardHeader>
@@ -230,10 +230,10 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             Current: <span className="text-gold font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
           </label>
           <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating}>
-            <SelectTrigger className="bg-dark border-gold/30 text-white">
+            <SelectTrigger className="bg-dark border-gray-300 text-white">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
-            <SelectContent className="bg-dark border-gold/30">
+            <SelectContent className="bg-dark border-gray-300">
               <SelectItem value="processing" className="text-white hover:bg-gold/20">
                 Processing
               </SelectItem>
@@ -256,7 +256,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         <Button
           onClick={handleStatusUpdate}
           disabled={isButtonDisabled}
-          className="w-full bg-gold text-darker hover:bg-gold/90 disabled:opacity-50 font-medium"
+          className="w-full bg-gray-900 text-white hover:bg-gray-800 disabled:opacity-50 font-medium"
         >
           {isUpdating ? 'Updating Status...' : 
            selectedStatus === currentStatus ? `Already ${getStatusLabel(selectedStatus)}` :

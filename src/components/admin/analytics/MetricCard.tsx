@@ -40,11 +40,11 @@ const MetricCard: React.FC<MetricCardProps> = ({ label, value, delta, prevValue,
   const dotColor = positive ? 'bg-emerald-400' : negative ? 'bg-rose-400' : 'bg-muted';
 
   return (
-    <div className="group relative overflow-hidden rounded-lg border border-gold/15 bg-darker p-4 transition-all hover:border-gold/40">
+    <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-darker p-4 transition-all hover:border-gray-300">
       <div className="flex items-start justify-between gap-2">
-        <div className="text-[11px] font-medium uppercase tracking-wider text-gold/60">{label}</div>
+        <div className="text-[11px] font-medium uppercase tracking-wider text-gray-400">{label}</div>
         {showDelta && (
-          <div className={`flex items-center gap-1 rounded-full bg-dark/60 px-2 py-0.5 text-[11px] font-semibold ${color}`}>
+          <div className={`flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-semibold ${color}`}>
             <Icon size={11} strokeWidth={2.5} />
             {Math.abs(delta!).toFixed(1)}%
           </div>
@@ -54,7 +54,7 @@ const MetricCard: React.FC<MetricCardProps> = ({ label, value, delta, prevValue,
       <div className="mt-2 flex items-end justify-between gap-2">
         <div className="text-[11px] text-muted-foreground">
           {showDelta && prevValue ? (
-            <>vs <span className="text-gold/70">{prevValue}</span> last month</>
+            <>vs <span className="text-gray-500">{prevValue}</span> last month</>
           ) : hint ? (
             hint
           ) : null}

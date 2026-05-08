@@ -130,9 +130,9 @@ Thank you for choosing Senteur! 🌹
           Invoice
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-darker border-gold/20 max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="bg-darker border-gray-200 max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-gold">Generate Invoice</DialogTitle>
+          <DialogTitle className="text-gray-900">Generate Invoice</DialogTitle>
         </DialogHeader>
         
         {isLoading ? (
@@ -142,7 +142,7 @@ Thank you for choosing Senteur! 🌹
         ) : orderDetails ? (
           <div className="space-y-6">
             {/* Invoice Preview */}
-            <div className="bg-dark border border-gold/10 rounded-lg p-6">
+            <div className="bg-dark border border-gray-200 rounded-lg p-6">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-serif text-gold mb-2">SENTEUR</h2>
                 <p className="text-sm text-muted-foreground">Premium Fragrances</p>
@@ -188,7 +188,7 @@ Thank you for choosing Senteur! 🌹
                 </div>
               </div>
 
-              <div className="border-t border-gold/20 pt-4">
+              <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between text-sm mb-1">
                   <span>Subtotal:</span>
                   <span>AED {(orderDetails.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)).toFixed(2)}</span>
@@ -216,7 +216,7 @@ Thank you for choosing Senteur! 🌹
               <Button
                 variant="outline"
                 onClick={copyInvoice}
-                className="border-gold/30"
+                className="border-gray-300"
               >
                 Copy Invoice Text
               </Button>

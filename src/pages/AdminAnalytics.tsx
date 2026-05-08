@@ -29,13 +29,13 @@ const AdminAnalytics: React.FC = () => {
           <div className="flex items-center gap-4">
             <Link
               to="/admin/orders"
-              className="flex items-center gap-1 text-sm text-gold/70 transition hover:text-gold"
+              className="flex items-center gap-1 text-sm text-gray-500 transition hover:text-gray-900"
             >
               <ArrowLeft size={16} /> Back to Orders
             </Link>
             <h1 className="font-serif text-3xl text-gold">Analytics Dashboard</h1>
           </div>
-          <button onClick={handleLogout} className="text-sm text-gold hover:text-gold/70">
+          <button onClick={handleLogout} className="text-sm text-gold hover:text-gray-500">
             Logout
           </button>
         </div>
@@ -95,7 +95,7 @@ const AdminAnalytics: React.FC = () => {
             {/* Row 4 — Top products full width */}
             <ProductPerformanceChart data={data.productPerformance} />
 
-            <div className="rounded-lg border border-gold/10 bg-dark/30 p-4 text-xs text-muted-foreground">
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 text-xs text-muted-foreground">
               Note: Engagement tracking (opens, clicks, conversion) is not displayed because no
               tracking pixels or event-logging backend is wired up. To enable it, route outbound
               links through unique tracking IDs and log events to a new <code>engagement_events</code> table.

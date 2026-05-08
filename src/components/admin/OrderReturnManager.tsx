@@ -78,9 +78,9 @@ const OrderReturnManager: React.FC<OrderReturnManagerProps> = ({
           Return
         </Button>
       </DialogTrigger>
-      <DialogContent className="bg-darker border-gold/20">
+      <DialogContent className="bg-darker border-gray-200">
         <DialogHeader>
-          <DialogTitle className="text-gold">Process Order Return</DialogTitle>
+          <DialogTitle className="text-gray-900">Process Order Return</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div>
@@ -91,7 +91,7 @@ const OrderReturnManager: React.FC<OrderReturnManagerProps> = ({
               value={returnReason}
               onChange={(e) => setReturnReason(e.target.value)}
               placeholder="Please provide a reason for the return..."
-              className="bg-dark border-gold/30 min-h-[100px]"
+              className="bg-dark border-gray-300 min-h-[100px]"
             />
           </div>
           <div className="flex gap-2">
@@ -105,7 +105,7 @@ const OrderReturnManager: React.FC<OrderReturnManagerProps> = ({
             <Button
               variant="outline"
               onClick={() => setIsOpen(false)}
-              className="border-gold/30"
+              className="border-gray-300"
             >
               Cancel
             </Button>
