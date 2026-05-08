@@ -30,8 +30,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     
-    // Free shipping if 2 or more items, otherwise apply shipping cost
-    const shippingCost = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
+    // Free shipping if 3 or more items, otherwise apply shipping cost
+    const shippingCost = subtotal > 0 && totalQuantity < 3 ? PRICING.SHIPPING_COST : 0;
     return subtotal + shippingCost;
   };
 

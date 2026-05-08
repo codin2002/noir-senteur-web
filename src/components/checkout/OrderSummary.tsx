@@ -15,8 +15,8 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
   const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
-  // Free shipping if 2 or more items, otherwise apply shipping cost
-  const shipping = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
+  // Free shipping if 3 or more items, otherwise apply shipping cost
+  const shipping = subtotal > 0 && totalQuantity < 3 ? PRICING.SHIPPING_COST : 0;
 
   return (
     <div className="bg-darker/80 border border-gold/20 rounded-xl p-6 backdrop-blur-sm">
@@ -68,9 +68,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
           </span>
         </div>
         
-        {totalQuantity >= 2 && (
+        {totalQuantity >= 3 ? (
           <div className="text-xs text-green-400 text-center">
-            🎉 Free shipping on 2+ items!
+            🎉 Free shipping on 3+ items!
+          </div>
+        ) : (
+          <div className="text-xs text-gold/70 text-center">
+            Add {3 - totalQuantity} more item{3 - totalQuantity === 1 ? '' : 's'} for free shipping
           </div>
         )}
         
