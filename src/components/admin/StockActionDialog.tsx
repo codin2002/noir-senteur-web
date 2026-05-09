@@ -96,7 +96,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-gray-50 border-gray-200 text-foreground">
+      <DialogContent className="bg-gray-50 border-gray-200 text-gray-900">
         <DialogHeader>
           <DialogTitle className="text-gray-900">{meta.title}</DialogTitle>
           <p className="text-sm text-muted-foreground">{perfumeName} — current stock: <span className="text-gray-900 font-semibold">{currentStock}</span></p>
@@ -143,7 +143,7 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
           </div>
 
           {unusual && (
-            <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-200">
+            <div className="flex items-start gap-2 rounded-md border border-yellow-500/40 bg-yellow-50 p-3 text-sm text-yellow-900">
               <AlertTriangle className="w-4 h-4 mt-0.5" />
               <div>
                 Unusual change detected (large absolute or % movement).
