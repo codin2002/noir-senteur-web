@@ -77,7 +77,7 @@ const AdminOrders = () => {
           <InventoryLogs />
         </div>
 
-        <PreorderManager />
+        <ButtonModeToggle />
         
         <AdminOrdersTable 
           orders={orders || []} 
