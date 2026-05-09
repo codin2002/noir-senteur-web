@@ -97,15 +97,15 @@ const InventoryLogs: React.FC = () => {
       <CardContent>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
           <Select value={productFilter} onValueChange={setProductFilter}>
-            <SelectTrigger className="bg-white border-gray-300"><SelectValue placeholder="Product" /></SelectTrigger>
-            <SelectContent>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900"><SelectValue placeholder="Product" /></SelectTrigger>
+            <SelectContent className="bg-white border-gray-300 text-gray-900">
               <SelectItem value="all">All products</SelectItem>
               {products.map(([id, name]) => <SelectItem key={id} value={id}>{name}</SelectItem>)}
             </SelectContent>
           </Select>
           <Select value={actionFilter} onValueChange={setActionFilter}>
-            <SelectTrigger className="bg-white border-gray-300"><SelectValue placeholder="Action" /></SelectTrigger>
-            <SelectContent>
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900"><SelectValue placeholder="Action" /></SelectTrigger>
+            <SelectContent className="bg-white border-gray-300 text-gray-900">
               <SelectItem value="all">All actions</SelectItem>
               <SelectItem value="stock_in">Stock In</SelectItem>
               <SelectItem value="stock_out">Stock Out</SelectItem>
@@ -114,8 +114,8 @@ const InventoryLogs: React.FC = () => {
               <SelectItem value="order_delivery">Order Delivery (legacy)</SelectItem>
             </SelectContent>
           </Select>
-          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-white border-gray-300" />
-          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-white border-gray-300" />
+          <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="bg-white border-gray-300 text-gray-900" />
+          <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="bg-white border-gray-300 text-gray-900" />
         </div>
 
         <div className="overflow-x-auto">
