@@ -41,13 +41,13 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-gray-50 border-gray-200">
+      <DialogContent className="bg-gray-50 border-gray-200 text-gray-900">
         <DialogHeader>
           <DialogTitle className="text-gray-900">Test Inventory Reduction</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
-          <div className="text-sm text-gray-300">
+          <div className="text-sm text-gray-700">
             This will test the inventory reduction system by processing an existing order's items.
             Enter an order ID to simulate inventory reduction for delivered orders.
           </div>
@@ -59,12 +59,12 @@ const InventoryTestModal: React.FC<InventoryTestModalProps> = ({ isOpen, onClose
               value={testOrderId}
               onChange={(e) => setTestOrderId(e.target.value)}
               placeholder="Enter order ID (e.g., 123e4567-e89b-12d3-a456-426614174000)"
-              className="bg-white border-gray-300"
+              className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
             />
           </div>
           
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3">
-            <p className="text-amber-400 text-sm">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+            <p className="text-amber-900 text-sm">
               <strong>Note:</strong> This will actually reduce inventory counts. Only use with real order IDs that should have their inventory reduced.
             </p>
           </div>
