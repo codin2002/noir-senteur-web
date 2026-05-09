@@ -20,7 +20,7 @@ const OrdersSearchBar: React.FC<OrdersSearchBarProps> = ({
         placeholder="Search by customer name or order ID..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="pl-10 bg-white border-gray-300 text-white placeholder:text-gray-400 focus:border-gold"
+        className="pl-10 bg-white border-gray-300 text-gray-900 placeholder:text-gray-400 focus:border-gold"
       />
     </div>
   );
