@@ -167,6 +167,18 @@ body:has(.admin-light) [role="listbox"] .text-gray-300,
 body:has(.admin-light) [role="listbox"] .text-gray-400 {
   color: rgb(55 65 81) !important;
 }
+.admin-light .text-green-400,
+body:has(.admin-light) [role="dialog"] .text-green-400 { color: rgb(21 128 61) !important; }
+.admin-light .text-red-400,
+body:has(.admin-light) [role="dialog"] .text-red-400 { color: rgb(185 28 28) !important; }
+.admin-light .text-blue-400,
+body:has(.admin-light) [role="dialog"] .text-blue-400 { color: rgb(29 78 216) !important; }
+.admin-light .text-yellow-400,
+body:has(.admin-light) [role="dialog"] .text-yellow-400 { color: rgb(161 98 7) !important; }
+.admin-light .text-orange-400,
+body:has(.admin-light) [role="dialog"] .text-orange-400 { color: rgb(194 65 12) !important; }
+.admin-light .text-amber-400,
+body:has(.admin-light) [role="dialog"] .text-amber-400 { color: rgb(180 83 9) !important; }
 .admin-light input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 .admin-light input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.3);
