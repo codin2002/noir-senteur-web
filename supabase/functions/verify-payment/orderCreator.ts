@@ -37,16 +37,29 @@ export async function createOrder(
   console.log('Order total saved to database:', orderCalculation.totalAmount);
 
   // ===== PREORDER DETECTION =====
-  // Look up perfume product_type / preorder_enabled for each item
+  // An item is a preorder if: admin flagged it (product_type/preorder_enabled) OR stock is insufficient
   const perfumeIds = orderCalculation.orderItems.map((i: any) => i.perfume_id);
   const { data: perfumesMeta } = await supabaseService
     .from('perfumes')
     .select('id, product_type, preorder_enabled')
     .in('id', perfumeIds);
+  const { data: inventoryMeta } = await supabaseService
+    .from('inventory')
+    .select('perfume_id, stock_quantity')
+    .in('perfume_id', perfumeIds);
+
+  const flagMap = new Map<string, boolean>();
+  (perfumesMeta || []).forEach((p: any) => {
+    flagMap.set(p.id, p.product_type === 'preorder' || p.preorder_enabled === true);
+  });
+  const stockMap = new Map<string, number>();
+  (inventoryMeta || []).forEach((i: any) => stockMap.set(i.perfume_id, i.stock_quantity ?? 0));
 
   const preorderMap = new Map<string, boolean>();
-  (perfumesMeta || []).forEach((p: any) => {
-    preorderMap.set(p.id, p.product_type === 'preorder' || p.preorder_enabled === true);
+  orderCalculation.orderItems.forEach((i: any) => {
+    const flagged = flagMap.get(i.perfume_id) === true;
+    const stock = stockMap.get(i.perfume_id) ?? 0;
+    preorderMap.set(i.perfume_id, flagged || stock < i.quantity);
   });
 
   const preorderItems = orderCalculation.orderItems.filter((i: any) => preorderMap.get(i.perfume_id));
