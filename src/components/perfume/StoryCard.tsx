@@ -3,7 +3,7 @@ import React from 'react';
 const StoryCard: React.FC = () => {
   return (
     <div className="story-card-wrapper">
-      <div className="story-card group relative overflow-hidden rounded-[20px] px-6 py-8 md:px-10 md:py-10 text-center">
+      <div className="story-card group relative overflow-hidden rounded-none px-6 py-8 md:px-10 md:py-10 text-center">
         {/* Ambient glow */}
         <div className="pointer-events-none absolute inset-0 opacity-60"
           style={{
@@ -19,7 +19,7 @@ const StoryCard: React.FC = () => {
           }}
         />
         {/* Shine sweep */}
-        <div className="story-shine pointer-events-none absolute inset-0 rounded-[20px]" />
+        <div className="story-shine pointer-events-none absolute inset-0 rounded-none" />
 
         <div className="relative z-10 flex flex-col items-center gap-5">
           {/* Heading */}
