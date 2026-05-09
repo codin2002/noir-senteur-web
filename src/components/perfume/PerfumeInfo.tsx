@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { PRICING } from '@/utils/constants';
+import { PRICING, PERFUMES } from '@/utils/constants';
+import StoryCard from './StoryCard';
 
 interface Perfume {
   id: string;
