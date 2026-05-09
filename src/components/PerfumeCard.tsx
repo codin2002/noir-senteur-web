@@ -33,7 +33,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   const navigate = useNavigate();
   const { primaryImage } = usePerfumeImages(id);
   const isOutOfStock = stockQuantity !== undefined && stockQuantity <= 0;
-  const isPreorder = productType === 'preorder' || preorderEnabled === true;
+  const isPreorder = isOutOfStock || productType === 'preorder' || preorderEnabled === true;
   const buttonLabel = isPreorder ? 'PREORDER' : 'BUY';
 
   const handleExplore = () => {
