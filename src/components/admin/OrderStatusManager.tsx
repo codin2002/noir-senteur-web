@@ -230,23 +230,23 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
             Current: <span className="text-gray-900 font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
           </label>
           <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating}>
-            <SelectTrigger className="bg-white border-gray-300 text-white">
+            <SelectTrigger className="bg-white border-gray-300 text-gray-900">
               <SelectValue placeholder="Select new status" />
             </SelectTrigger>
-            <SelectContent className="bg-white border-gray-300">
-              <SelectItem value="processing" className="text-white hover:bg-gray-800/20">
+            <SelectContent className="bg-white border-gray-300 z-50">
+              <SelectItem value="processing" className="text-gray-900 focus:bg-gray-100 focus:text-gray-900">
                 Processing
               </SelectItem>
-              <SelectItem value="dispatched" className="text-white hover:bg-gray-800/20">
+              <SelectItem value="dispatched" className="text-gray-900 focus:bg-gray-100 focus:text-gray-900">
                 Dispatched
               </SelectItem>
-              <SelectItem value="delivered" className="text-white hover:bg-gray-800/20">
+              <SelectItem value="delivered" className="text-gray-900 focus:bg-gray-100 focus:text-gray-900">
                 Delivered
               </SelectItem>
-              <SelectItem value="returned" className="text-white hover:bg-gray-800/20">
+              <SelectItem value="returned" className="text-gray-900 focus:bg-gray-100 focus:text-gray-900">
                 Returned
               </SelectItem>
-              <SelectItem value="refunded" className="text-white hover:bg-gray-800/20">
+              <SelectItem value="refunded" className="text-gray-900 focus:bg-gray-100 focus:text-gray-900">
                 Refunded
               </SelectItem>
             </SelectContent>

@@ -136,10 +136,10 @@ const StockActionDialog: React.FC<Props> = ({ open, onOpenChange, perfumeId, per
             />
           </div>
 
-          <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm">
-            <div className="flex justify-between"><span className="text-muted-foreground">Before</span><span className="font-mono">{currentStock}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">Change</span><span className={`font-mono ${delta >= 0 ? 'text-green-400' : 'text-red-400'}`}>{delta >= 0 ? '+' : ''}{delta}</span></div>
-            <div className="flex justify-between"><span className="text-muted-foreground">After</span><span className={`font-mono ${wouldBeNegative ? 'text-red-400' : 'text-gray-900 font-semibold'}`}>{projected}</span></div>
+          <div className="rounded-lg border border-gray-200 bg-white p-3 text-sm">
+            <div className="flex justify-between"><span className="text-gray-600">Before</span><span className="font-mono text-gray-900 font-semibold">{currentStock}</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">Change</span><span className={`font-mono font-semibold ${delta >= 0 ? 'text-green-600' : 'text-red-600'}`}>{delta >= 0 ? '+' : ''}{delta}</span></div>
+            <div className="flex justify-between"><span className="text-gray-600">After</span><span className={`font-mono font-semibold ${wouldBeNegative ? 'text-red-600' : 'text-gray-900'}`}>{projected}</span></div>
           </div>
 
           {unusual && (
