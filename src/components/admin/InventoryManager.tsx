@@ -84,7 +84,7 @@ const InventoryManager: React.FC = () => {
                 <Button size="sm" onClick={() => openAction(item, 'damaged')} className="bg-orange-600/20 text-orange-700 border border-orange-500/40 hover:bg-orange-600/30">
                   <Trash2 className="w-3 h-3 mr-1" /> Damaged
                 </Button>
-                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} variant="outline" className="border-gray-300 text-gray-900 hover:bg-gray-100">
+                <Button size="sm" onClick={() => openAction(item, 'manual_correction')} className="bg-white text-gray-900 border border-gray-300 hover:bg-gray-100">
                   <Pencil className="w-3 h-3 mr-1" /> Correct
                 </Button>
                 <Button size="sm" onClick={() => setReorderState({ open: true, row: item })} variant="outline" className="border-gray-200 text-muted-foreground hover:text-gray-900">
