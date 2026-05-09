@@ -46,7 +46,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
       style={{ animationDelay: `${delay}ms` }}
       onClick={handleExplore}
     >
-      <div className="relative aspect-square overflow-hidden rounded-lg bg-secondary/30">
+      <div className="relative aspect-square overflow-hidden bg-transparent [filter:drop-shadow(0_25px_30px_rgba(0,0,0,0.55))_drop-shadow(0_0_18px_rgba(212,175,55,0.08))]">
         <ProductImage
           src={primaryImage || image}
           alt={name}
