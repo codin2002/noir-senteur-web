@@ -76,6 +76,8 @@ const Collection = () => {
                 image={perfume.image}
                 price={perfume.price}
                 stockQuantity={(perfume as any).stock_quantity}
+                productType={(perfume as any).product_type}
+                preorderEnabled={(perfume as any).preorder_enabled}
                 delay={index * 200}
               />
             ))}
