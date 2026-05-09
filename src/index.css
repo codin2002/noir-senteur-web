@@ -244,41 +244,44 @@ body:has(.admin-light) [role="option"][data-highlighted] {
 .story-card {
   background:
     linear-gradient(135deg, rgba(20,20,20,0.9) 0%, rgba(11,11,11,0.95) 50%, rgba(18,15,10,0.92) 100%);
-  border: 1px solid rgba(212,175,122,0.2);
+  border: 1px solid rgba(212,175,122,0.18);
   box-shadow:
-    0 30px 80px -30px rgba(0,0,0,0.8),
-    0 0 60px -20px rgba(212,175,122,0.12),
-    inset 0 1px 0 rgba(212,175,122,0.05);
+    0 25px 70px -25px rgba(0,0,0,0.8),
+    0 0 50px -20px rgba(212,175,122,0.10),
+    inset 0 1px 0 rgba(212,175,122,0.04);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   transition: box-shadow 700ms cubic-bezier(0.22,1,0.36,1), transform 700ms cubic-bezier(0.22,1,0.36,1);
 }
 .story-card:hover {
   box-shadow:
-    0 40px 100px -30px rgba(0,0,0,0.9),
-    0 0 80px -15px rgba(212,175,122,0.2),
-    inset 0 1px 0 rgba(212,175,122,0.08);
+    0 35px 90px -25px rgba(0,0,0,0.9),
+    0 0 70px -15px rgba(212,175,122,0.16),
+    inset 0 1px 0 rgba(212,175,122,0.07);
+  transform: translateY(-2px);
 }
 
 .story-card-wrapper {
-  animation: storyFadeUp 900ms cubic-bezier(0.22,1,0.36,1) both;
+  animation: storyFadeUp 800ms cubic-bezier(0.22,1,0.36,1) both;
 }
 
 @keyframes storyFadeUp {
-  0%   { opacity: 0; transform: translateY(24px); }
+  0%   { opacity: 0; transform: translateY(20px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 
-.story-numeral {
+.story-heading {
   opacity: 0;
-  animation: storyFadeUp 900ms cubic-bezier(0.22,1,0.36,1) 200ms both;
+  animation: storyFadeUp 700ms cubic-bezier(0.22,1,0.36,1) 150ms both;
 }
-.story-line {
+.story-body {
   opacity: 0;
-  animation: storyFadeUp 800ms cubic-bezier(0.22,1,0.36,1) 600ms both;
+  animation: storyFadeUp 700ms cubic-bezier(0.22,1,0.36,1) 400ms both;
 }
-.story-delay-1 { animation-delay: 850ms; }
-.story-delay-2 { animation-delay: 1100ms; }
+.story-tagline {
+  opacity: 0;
+  animation: storyFadeUp 700ms cubic-bezier(0.22,1,0.36,1) 650ms both;
+}
 
 .story-shine::before {
   content: "";
@@ -286,14 +289,14 @@ body:has(.admin-light) [role="option"][data-highlighted] {
   inset: -1px;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(115deg, transparent 30%, rgba(212,175,122,0.5) 50%, transparent 70%);
+  background: linear-gradient(115deg, transparent 30%, rgba(212,175,122,0.45) 50%, transparent 70%);
   background-size: 250% 100%;
   background-position: 200% 0;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
   animation: storyShine 6s ease-in-out infinite;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 @keyframes storyShine {
   0%, 60% { background-position: 200% 0; }
