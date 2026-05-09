@@ -40,7 +40,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-6">
+    <div className="admin-light min-h-screen bg-white flex items-center justify-center p-6 text-gray-900">
       <Card className="w-full max-w-md bg-white border-gray-200">
         <CardHeader>
           <CardTitle className="text-gray-900 text-center">Admin Access</CardTitle>
@@ -53,7 +53,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="bg-white border-gray-300"
+                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 placeholder="Enter username"
                 required
               />
@@ -65,7 +65,7 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="bg-white border-gray-300"
+                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
                 placeholder="Enter password"
                 required
               />

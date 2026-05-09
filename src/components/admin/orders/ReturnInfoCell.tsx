@@ -22,9 +22,9 @@ const ReturnInfoCell: React.FC<ReturnInfoCellProps> = ({ order }) => {
             </span>
           </div>
           {order.notes && order.notes.includes('Return Reason:') && (
-            <div className="text-xs text-red-300">
+            <div className="text-xs text-red-700">
               <div className="font-medium mb-1">Reason:</div>
-              <div className="text-gray-300">
+              <div className="text-gray-700">
                 {order.notes.replace('Return Reason: ', '')}
               </div>
             </div>

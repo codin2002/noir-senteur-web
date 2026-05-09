@@ -54,14 +54,14 @@ const InventoryInsights: React.FC = () => {
 
       <Card className="bg-gray-50 border-gray-200">
         <CardHeader className="pb-2">
-          <CardTitle className="text-gray-900 text-sm flex items-center gap-2"><TrendingUp className="w-4 h-4 text-green-400" /> Fast-Moving (30d)</CardTitle>
+          <CardTitle className="text-gray-900 text-sm flex items-center gap-2"><TrendingUp className="w-4 h-4 text-green-700" /> Fast-Moving (30d)</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {fastMoving.length === 0 && <p className="text-xs text-muted-foreground">No outgoing movement yet.</p>}
           {fastMoving.map(r => (
             <div key={r.id} className="flex items-center justify-between text-sm">
               <span className="truncate pr-2">{r.perfumes?.name || '—'}</span>
-              <span className="font-mono text-green-400">{r.avgDaily.toFixed(2)}/day</span>
+              <span className="font-mono text-green-700">{r.avgDaily.toFixed(2)}/day</span>
             </div>
           ))}
         </CardContent>
@@ -92,7 +92,7 @@ const InventoryInsights: React.FC = () => {
             <div key={u.id} className="text-xs border border-orange-500/20 bg-orange-500/5 rounded p-2">
               <div className="flex justify-between font-medium">
                 <span className="truncate pr-2">{u.perfumes?.name || '—'}</span>
-                <span className={u.quantity_change > 0 ? 'text-green-400' : 'text-red-400'}>
+                <span className={u.quantity_change > 0 ? 'text-green-700' : 'text-red-700'}>
                   {u.quantity_change > 0 ? '+' : ''}{u.quantity_change}
                 </span>
               </div>
