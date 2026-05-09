@@ -159,6 +159,14 @@ body:has(.admin-light) [role="dialog"] label {
 body:has(.admin-light) [role="dialog"] .text-muted-foreground {
   color: rgb(107 114 128) !important;
 }
+.admin-light .text-gray-300,
+.admin-light .text-gray-400,
+body:has(.admin-light) [role="dialog"] .text-gray-300,
+body:has(.admin-light) [role="dialog"] .text-gray-400,
+body:has(.admin-light) [role="listbox"] .text-gray-300,
+body:has(.admin-light) [role="listbox"] .text-gray-400 {
+  color: rgb(55 65 81) !important;
+}
 .admin-light input[type="datetime-local"]::-webkit-calendar-picker-indicator,
 .admin-light input[type="date"]::-webkit-calendar-picker-indicator {
   filter: invert(0.3);
