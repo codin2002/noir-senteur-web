@@ -69,7 +69,7 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
         <p className="text-sm text-accent font-light mt-1">
           {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>
-        <p className={`text-[10px] uppercase tracking-widest text-gold mt-1 ${isOutOfStock && !isPreorder ? '' : 'invisible'}`}>Out of stock</p>
+        <p className={`text-[10px] uppercase tracking-widest text-gold mt-1 ${isOutOfStock ? '' : 'invisible'}`}>Out of stock</p>
         <button className="btn-outline mt-3 text-[10px] py-2 px-4" onClick={(e) => { e.stopPropagation(); handleExplore(); }}>
           {buttonLabel}
         </button>
