@@ -226,7 +226,7 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <label className="text-sm font-medium mb-2 block text-gray-300">
+          <label className="text-sm font-medium mb-2 block text-gray-700">
             Current: <span className="text-gray-900 font-semibold capitalize">{getStatusLabel(currentStatus)}</span>
           </label>
           <Select value={selectedStatus} onValueChange={setSelectedStatus} disabled={isUpdating}>
@@ -264,10 +264,10 @@ const OrderStatusManager: React.FC<OrderStatusManagerProps> = ({
         </Button>
 
         {selectedStatus !== currentStatus && (
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs text-gray-700 text-center">
             This will change the order from "{getStatusLabel(currentStatus)}" to "{getStatusLabel(selectedStatus)}"
             {selectedStatus === 'delivered' && (
-              <span className="text-green-400"> (inventory was reduced when order was placed)</span>
+              <span className="text-green-700"> (inventory was reduced when order was placed)</span>
             )}
           </p>
         )}
