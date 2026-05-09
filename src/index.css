@@ -98,8 +98,11 @@
   content: "";
 }
 
-/* Force light theme inside admin pages */
-.admin-light {
+/* Force light theme inside admin pages and their Radix portal overlays */
+.admin-light,
+body:has(.admin-light) [role="dialog"],
+body:has(.admin-light) [data-radix-popper-content-wrapper],
+body:has(.admin-light) [role="listbox"] {
   color: rgb(17 24 39);
 }
 .admin-light h1,
@@ -113,23 +116,47 @@
 .admin-light div,
 .admin-light td,
 .admin-light th,
-.admin-light li {
+.admin-light li,
+body:has(.admin-light) [role="dialog"] h1,
+body:has(.admin-light) [role="dialog"] h2,
+body:has(.admin-light) [role="dialog"] h3,
+body:has(.admin-light) [role="dialog"] h4,
+body:has(.admin-light) [role="dialog"] h5,
+body:has(.admin-light) [role="dialog"] h6,
+body:has(.admin-light) [role="dialog"] p,
+body:has(.admin-light) [role="dialog"] span,
+body:has(.admin-light) [role="dialog"] div,
+body:has(.admin-light) [role="dialog"] td,
+body:has(.admin-light) [role="dialog"] th,
+body:has(.admin-light) [role="dialog"] li,
+body:has(.admin-light) [role="listbox"] span,
+body:has(.admin-light) [role="option"] {
   color: inherit;
 }
 .admin-light input,
 .admin-light textarea,
-.admin-light select {
+.admin-light select,
+body:has(.admin-light) [role="dialog"] input,
+body:has(.admin-light) [role="dialog"] textarea,
+body:has(.admin-light) [role="dialog"] select,
+body:has(.admin-light) [role="combobox"],
+body:has(.admin-light) [cmdk-input] {
   color: rgb(17 24 39);
   background-color: #fff;
 }
 .admin-light input::placeholder,
-.admin-light textarea::placeholder {
+.admin-light textarea::placeholder,
+body:has(.admin-light) [role="dialog"] input::placeholder,
+body:has(.admin-light) [role="dialog"] textarea::placeholder,
+body:has(.admin-light) [cmdk-input]::placeholder {
   color: rgb(156 163 175);
 }
-.admin-light label {
+.admin-light label,
+body:has(.admin-light) [role="dialog"] label {
   color: rgb(55 65 81);
 }
-.admin-light .text-muted-foreground {
+.admin-light .text-muted-foreground,
+body:has(.admin-light) [role="dialog"] .text-muted-foreground {
   color: rgb(107 114 128) !important;
 }
 .admin-light input[type="datetime-local"]::-webkit-calendar-picker-indicator,
@@ -142,7 +169,18 @@
   background-color: #fff;
 }
 .admin-light [role="combobox"] [data-placeholder],
-.admin-light [role="combobox"] > span {
+.admin-light [role="combobox"] > span,
+body:has(.admin-light) [role="combobox"] [data-placeholder],
+body:has(.admin-light) [role="combobox"] > span {
+  color: rgb(17 24 39);
+}
+body:has(.admin-light) [role="listbox"] {
+  background-color: #fff;
+  border-color: rgb(209 213 219);
+}
+body:has(.admin-light) [role="option"]:focus,
+body:has(.admin-light) [role="option"][data-highlighted] {
+  background-color: rgb(243 244 246);
   color: rgb(17 24 39);
 }
 /* Outline buttons */
