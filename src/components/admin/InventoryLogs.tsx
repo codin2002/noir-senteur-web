@@ -148,13 +148,13 @@ const InventoryLogs: React.FC = () => {
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">{log.quantity_before}</TableCell>
-                    <TableCell className={`font-mono text-sm ${log.quantity_change > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    <TableCell className={`font-mono text-sm ${log.quantity_change > 0 ? 'text-green-700' : 'text-red-700'}`}>
                       {log.quantity_change > 0 ? '+' : ''}{log.quantity_change}
                     </TableCell>
                     <TableCell className="font-mono text-sm font-semibold text-gray-900">{log.quantity_after}</TableCell>
                     <TableCell className="text-xs">{log.user_name || (log.order_id ? 'system' : '—')}</TableCell>
                     <TableCell className="text-xs">
-                      {log.reference_id ? log.reference_id : log.order_id ? <span className="text-blue-400">#{log.order_id.substring(0, 8)}</span> : '—'}
+                      {log.reference_id ? log.reference_id : log.order_id ? <span className="text-blue-700">#{log.order_id.substring(0, 8)}</span> : '—'}
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground max-w-[220px] truncate" title={log.reason}>{log.reason}</TableCell>
                   </TableRow>
