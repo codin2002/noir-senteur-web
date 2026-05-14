@@ -2,6 +2,7 @@
 import React from 'react';
 import { PRICING, PERFUMES } from '@/utils/constants';
 import StoryCard from './StoryCard';
+import StoryCard424 from './StoryCard424';
 
 interface Perfume {
   id: string;
@@ -19,10 +20,12 @@ interface PerfumeInfoProps {
 
 const PerfumeInfo: React.FC<PerfumeInfoProps> = ({ perfume }) => {
   const isThreeOneThree = perfume.name === PERFUMES.THREE_ONE_THREE.NAME;
+  const isFourTwoFour = perfume.name === PERFUMES.FOUR_TWO_FOUR.NAME;
 
   return (
     <div className="space-y-6">
       {isThreeOneThree && <StoryCard />}
+      {isFourTwoFour && <StoryCard424 />}
       <div>
         <h1 className="text-3xl md:text-4xl font-serif mb-4">{perfume.name}</h1>
         <div className="text-2xl font-bold text-gold mb-6">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</div>
