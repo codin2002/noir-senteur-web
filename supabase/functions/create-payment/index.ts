@@ -9,7 +9,8 @@ const corsHeaders = {
 
 // Constants to match frontend pricing
 const PRICING = {
-  SHIPPING_COST: 4.99,
+  SHIPPING_COST: 12.99,
+  FREE_SHIPPING_THRESHOLD: 3,
 };
 
 serve(async (req) => {
