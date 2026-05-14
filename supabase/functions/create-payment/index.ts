@@ -70,8 +70,8 @@ serve(async (req) => {
       totalQuantity += quantity;
     });
 
-    // Apply correct shipping logic - free shipping if 2+ items, otherwise 4.99 AED
-    const shipping = subtotal > 0 && totalQuantity < 2 ? PRICING.SHIPPING_COST : 0;
+    // Apply correct shipping logic - free shipping above threshold, otherwise SHIPPING_COST AED
+    const shipping = subtotal > 0 && totalQuantity < PRICING.FREE_SHIPPING_THRESHOLD ? PRICING.SHIPPING_COST : 0;
     const total = subtotal + shipping;
 
     console.log("Calculated subtotal:", subtotal, "shipping:", shipping, "total:", total);
