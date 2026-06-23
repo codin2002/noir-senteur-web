@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { cartRestoreService } from '@/services/cartRestoreService';
 import { useAuthOperations } from '@/hooks/useAuthOperations';
 import { AuthContextType } from '@/types/auth';
+import { fbqAdvancedMatch } from '@/utils/metaPixel';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
