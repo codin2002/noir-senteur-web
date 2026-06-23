@@ -185,20 +185,17 @@ export const useCheckout = () => {
       
       console.log('Payment verification successful:', data);
 
-      // Meta Pixel: Purchase
+      // Meta Pixel: Advanced Matching first (so Purchase is enriched), then Purchase.
       try {
+        if (user?.email) {
+          fbqAdvancedMatch({ email: user.email, externalId: user.id });
+        }
         const snapshot = localStorage.getItem('pixel_pending_purchase');
         if (snapshot && data?.orderId) {
           const { items, value } = JSON.parse(snapshot);
-          fbqPurchase({ orderId: data.orderId, items, value });
-          localStorage.removeItem('pixel_pending_purchase');
+          const fired = fbqPurchase({ orderId: data.orderId, items, value });
+          if (fired) localStorage.removeItem('pixel_pending_purchase');
         }
-        // Advanced Matching using available customer info
-        const addr = data?.deliveryAddress || {};
-        fbqAdvancedMatch({
-          email: user?.email || addr?.email,
-          phone: addr?.phone,
-        });
       } catch (e) {
         console.warn('Pixel purchase tracking failed', e);
       }
