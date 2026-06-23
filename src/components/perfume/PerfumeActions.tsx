@@ -9,6 +9,7 @@ import { Heart, ShoppingCart } from 'lucide-react';
 import { useCartCount } from '@/hooks/useCartCount';
 import { usePreorderInfo } from '@/hooks/usePreorderInfo';
 import PreorderBadge from './PreorderBadge';
+import { fbqAddToCart } from '@/utils/metaPixel';
 
 interface Perfume {
   id: string;
@@ -148,6 +149,8 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
         refreshCartCount();
       }
+
+      fbqAddToCart({ id: perfume.id, name: perfume.name, price: perfume.price_value, quantity: 1 });
 
       // Redirect to cart page after successful addition
       navigate('/cart');
