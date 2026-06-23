@@ -82,6 +82,11 @@ export const usePerfumeDetail = () => {
 
   useEffect(() => {
     document.title = perfume ? `${perfume.name} | Senteur Fragrances` : "Perfume Details | Senteur Fragrances";
+    if (perfume) {
+      import('@/utils/metaPixel').then(({ fbqViewContent }) =>
+        fbqViewContent({ id: perfume.id, name: perfume.name, price: perfume.price_value })
+      );
+    }
   }, [perfume]);
 
   return {

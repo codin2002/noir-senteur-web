@@ -9,6 +9,7 @@ import { Heart, ShoppingCart } from 'lucide-react';
 import { useCartCount } from '@/hooks/useCartCount';
 import { usePreorderInfo } from '@/hooks/usePreorderInfo';
 import PreorderBadge from './PreorderBadge';
+import { fbqAddToCart } from '@/utils/metaPixel';
 
 interface Perfume {
   id: string;
