@@ -33,7 +33,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         setIsContextLoading(false);
-        
+
+        if (session?.user?.email) {
+          fbqAdvancedMatch({ email: session.user.email, externalId: session.user.id });
+        }
+
         // Restore cart from localStorage on successful sign-in/sign-up
         if (_event === 'SIGNED_IN' && session?.user) {
           setTimeout(() => {
@@ -49,6 +53,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       setIsContextLoading(false);
+      if (session?.user?.email) {
+        fbqAdvancedMatch({ email: session.user.email, externalId: session.user.id });
+      }
     });
 
     return () => {
