@@ -184,6 +184,25 @@ export const useCheckout = () => {
       window.dispatchEvent(new Event('cartUpdated'));
       
       console.log('Payment verification successful:', data);
+
+      // Meta Pixel: Purchase
+      try {
+        const snapshot = localStorage.getItem('pixel_pending_purchase');
+        if (snapshot && data?.orderId) {
+          const { items, value } = JSON.parse(snapshot);
+          fbqPurchase({ orderId: data.orderId, items, value });
+          localStorage.removeItem('pixel_pending_purchase');
+        }
+        // Advanced Matching using available customer info
+        const addr = data?.deliveryAddress || {};
+        fbqAdvancedMatch({
+          email: user?.email || addr?.email,
+          phone: addr?.phone,
+        });
+      } catch (e) {
+        console.warn('Pixel purchase tracking failed', e);
+      }
+
       return data;
     } catch (error: any) {
       console.error('Payment verification failed:', error);
