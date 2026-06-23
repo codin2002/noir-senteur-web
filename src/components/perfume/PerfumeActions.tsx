@@ -150,6 +150,8 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
         refreshCartCount();
       }
 
+      fbqAddToCart({ id: perfume.id, name: perfume.name, price: perfume.price_value, quantity: 1 });
+
       // Redirect to cart page after successful addition
       navigate('/cart');
     } catch (error: any) {

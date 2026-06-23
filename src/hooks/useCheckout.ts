@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
+import { fbqInitiateCheckout, fbqPurchase, fbqAdvancedMatch } from '@/utils/metaPixel';
 
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
