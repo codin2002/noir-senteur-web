@@ -81,7 +81,18 @@ export const useCheckout = () => {
       if (isGuest) {
         localStorage.setItem('checkout_cart_items', JSON.stringify(itemsToProcess));
       }
-      
+
+      // Meta Pixel: InitiateCheckout
+      const pixelItems = itemsToProcess.map((it: any) => ({
+        id: it.perfume?.id ?? it.perfume_id,
+        quantity: it.quantity,
+        price: Number(it.perfume?.price_value ?? 0),
+      }));
+      const pixelTotal = pixelItems.reduce((s, i) => s + i.price * i.quantity, 0);
+      fbqInitiateCheckout(pixelItems, pixelTotal);
+      // Save snapshot for Purchase event after redirect
+      localStorage.setItem('pixel_pending_purchase', JSON.stringify({ items: pixelItems, value: pixelTotal }));
+
       // Redirect to Ziina payment page
       window.location.href = data.payment_url;
       
