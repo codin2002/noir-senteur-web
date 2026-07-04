@@ -47,7 +47,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
           {shippingCost > 0 ? (
             `${currencySymbol}${shippingCost.toFixed(2)}`
           ) : (
-            <span className="text-green-400">Free</span>
+            <span className="text-green-400">Free delivery</span>
           )}
         </span>
       </div>
