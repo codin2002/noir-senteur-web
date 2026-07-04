@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
-const QATAR_URL = 'https://www.aurabelleperfumes.com/category/senteur';
+const QATAR_URL = 'https://www.aurabelleperfumes.com/products/313?variant=48760269177051';
 
 const RegionBanner: React.FC = () => {
   const [dismissed, setDismissed] = useState(
