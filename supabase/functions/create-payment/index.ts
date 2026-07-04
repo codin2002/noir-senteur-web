@@ -9,8 +9,8 @@ const corsHeaders = {
 
 // Constants to match frontend pricing
 const PRICING = {
-  SHIPPING_COST: 12.99,
-  FREE_SHIPPING_THRESHOLD: 3,
+  SHIPPING_COST: 0,
+  FREE_SHIPPING_THRESHOLD: 1,
 };
 
 serve(async (req) => {
@@ -61,7 +61,7 @@ serve(async (req) => {
     
     itemsToProcess.forEach(item => {
       const perfume = item.perfume || item;
-      const price = perfume.price_value || 100;
+      const price = perfume.price_value || 125;
       const quantity = item.quantity || 1;
       
       console.log(`Item: ${perfume.name}, price: ${price}, quantity: ${quantity}`);
