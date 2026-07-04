@@ -68,15 +68,6 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
           </span>
         </div>
         
-        {totalQuantity >= PRICING.FREE_SHIPPING_THRESHOLD ? (
-          <div className="text-xs text-green-400 text-center">
-            🎉 Free shipping on {PRICING.FREE_SHIPPING_THRESHOLD}+ items!
-          </div>
-        ) : (
-          <div className="text-xs text-gold/70 text-center">
-            Add {PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity} more item{PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity === 1 ? '' : 's'} for free shipping
-          </div>
-        )}
         
         <Separator className="bg-gold/20" />
         
