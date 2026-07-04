@@ -50,7 +50,7 @@ export function createConfirmationEmailTemplate(
             <tr>
               <td colspan="2"></td>
               <td style="padding: 8px 0; color: #333; font-weight: bold;">Total:</td>
-              <td style="padding: 8px 0; color: #E53E3E; font-weight: bold;">AED ${order.total.toFixed(2)} (includes shipping)</td>
+              <td style="padding: 8px 0; color: #E53E3E; font-weight: bold;">AED ${order.total.toFixed(2)} (free delivery)</td>
             </tr>
           </table>
         </div>
