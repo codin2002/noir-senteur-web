@@ -52,15 +52,6 @@ const CartSummary: React.FC<CartSummaryProps> = ({
         </span>
       </div>
       
-      {totalQuantity >= PRICING.FREE_SHIPPING_THRESHOLD ? (
-        <div className="text-xs text-green-400 text-center">
-          🎉 Free shipping on 3+ items!
-        </div>
-      ) : (
-        <div className="text-xs text-muted-foreground text-center">
-          Add {PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity} more {PRICING.FREE_SHIPPING_THRESHOLD - totalQuantity === 1 ? 'item' : 'items'} for free shipping
-        </div>
-      )}
       
       <div className="border-t border-gold/20 pt-4 flex justify-between font-medium">
         <span>Total</span>
