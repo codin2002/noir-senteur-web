@@ -14,7 +14,7 @@ export function calculateOrderTotal(orderCartItems: any[]): OrderCalculation {
   let totalQuantity = 0;
   const orderItems = orderCartItems.map(item => {
     const perfume = item.perfume || item;
-    const price = perfume.price_value || 100;
+    const price = perfume.price_value || 125;
     const quantity = item.quantity || 1;
     subtotal += price * quantity;
     totalQuantity += quantity;
@@ -26,8 +26,8 @@ export function calculateOrderTotal(orderCartItems: any[]): OrderCalculation {
     };
   });
 
-  // Apply correct shipping logic - free shipping if 3+ items, otherwise 12.99 AED
-  const shippingCost = subtotal > 0 && totalQuantity < 3 ? 12.99 : 0;
+  // Free shipping always
+  const shippingCost = 0;
   const totalAmount = subtotal + shippingCost;
 
   console.log('Subtotal calculated:', subtotal);
