@@ -57,7 +57,7 @@ serve(async (req) => {
     const orderCartItems = await getCartItems(isGuest, cartItems, actualUserId, supabaseService);
 
     // Calculate order totals
-    const orderCalculation = calculateOrderTotal(orderCartItems);
+    const orderCalculation = await calculateOrderTotal(orderCartItems, supabaseService);
 
     // Extract customer information
     const customerInfo = await extractCustomerInfo(isGuest, actualUserId, deliveryAddress, supabaseService);
