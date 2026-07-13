@@ -55,17 +55,28 @@ serve(async (req) => {
       throw new Error('No items in cart');
     }
 
-    // Calculate totals with correct shipping logic
+    // SECURITY: Always fetch authoritative prices from the DB — never trust client-supplied prices.
+    const perfumeIds = Array.from(new Set(itemsToProcess.map((it: any) => (it.perfume?.id ?? it.perfume_id)).filter(Boolean)));
+    const { data: dbPerfumes, error: perfErr } = await supabaseClient
+      .from('perfumes')
+      .select('id, name, price_value')
+      .in('id', perfumeIds);
+    if (perfErr) {
+      console.error('Failed to load perfumes for pricing:', perfErr);
+      throw new Error('Failed to load product pricing');
+    }
+    const priceMap = new Map((dbPerfumes || []).map((p: any) => [p.id, Number(p.price_value)]));
+
     let subtotal = 0;
     let totalQuantity = 0;
-    
-    itemsToProcess.forEach(item => {
-      const perfume = item.perfume || item;
-      const price = perfume.price_value || 125;
-      const quantity = item.quantity || 1;
-      
-      console.log(`Item: ${perfume.name}, price: ${price}, quantity: ${quantity}`);
-      
+    itemsToProcess.forEach((item: any) => {
+      const pid = item.perfume?.id ?? item.perfume_id;
+      const price = priceMap.get(pid);
+      if (!price || price <= 0) {
+        throw new Error(`Invalid price for product ${pid}`);
+      }
+      const quantity = Math.max(1, Number(item.quantity) || 1);
+      console.log(`Item: ${pid}, DB price: ${price}, quantity: ${quantity}`);
       subtotal += price * quantity;
       totalQuantity += quantity;
     });
