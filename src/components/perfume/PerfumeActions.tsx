@@ -291,7 +291,10 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
           <Button
             variant="outline"
             className="border-gold/50 text-gold hover:bg-gold/10"
-            onClick={() => setShowCartConfirmation(false)}
+            onClick={() => {
+              setShowCartConfirmation(false);
+              navigate('/#collection');
+            }}
           >
             Continue Shopping
           </Button>
