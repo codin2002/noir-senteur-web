@@ -13,10 +13,10 @@ const SignatureDuoCard: React.FC<SignatureDuoCardProps> = ({ products }) => {
 
   return (
     <article
-      className="group col-span-1 flex cursor-pointer flex-col"
+      className="group col-span-2 flex cursor-pointer flex-col md:col-span-1"
       onClick={() => navigate('/offers/signature-duo')}
     >
-      <div className="relative aspect-square overflow-hidden">
+      <div className="relative aspect-[2/1] overflow-hidden md:aspect-square">
         <img
           src="/images/signature-duo-together.png"
           alt="Senteur 313 and 424 Signature Duo"
