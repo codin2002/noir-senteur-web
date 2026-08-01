@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { useCheckout } from '@/hooks/useCheckout';
 import PaymentVerificationLoader from './payment/PaymentVerificationLoader';
 import PaymentVerificationError from './payment/PaymentVerificationError';
@@ -8,7 +8,6 @@ import PaymentSuccessContent from './payment/PaymentSuccessContent';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [orderDetails, setOrderDetails] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +28,7 @@ const PaymentSuccess = () => {
       
       // FIXED: Look for the correct parameter name as per Ziina docs
       const paymentIntentId = searchParams.get('payment_intent_id');
+      const checkoutToken = searchParams.get('checkout_token');
       
       console.log('Payment Intent ID found:', paymentIntentId);
 
@@ -42,7 +42,7 @@ const PaymentSuccess = () => {
 
       try {
         console.log('Starting payment verification with ID:', paymentIntentId);
-        const result = await verifyPayment(paymentIntentId);
+        const result = await verifyPayment(paymentIntentId, checkoutToken);
         
         console.log('Verification result received:', result);
         
@@ -63,16 +63,6 @@ const PaymentSuccess = () => {
 
     verifyAndProcessPayment();
   }, [searchParams, verifyPayment]);
-
-  // Auto-redirect to cart after 10 seconds if there's an error
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        navigate('/cart');
-      }, 10000);
-      return () => clearTimeout(timer);
-    }
-  }, [error, navigate]);
 
   if (isLoading) {
     return <PaymentVerificationLoader />;

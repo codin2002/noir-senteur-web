@@ -1,8 +1,4 @@
-/**
- * Central storage for application constants
- */
-
-// Pricing constants
+/** Central storage for application constants. */
 export const PRICING = {
   PERFUME_PRICE: 125,
   CURRENCY: 'AED',
@@ -11,35 +7,45 @@ export const PRICING = {
   FREE_SHIPPING_THRESHOLD: 1,
 };
 
-// Perfume information constants
 export const PERFUMES = {
   THREE_ONE_THREE: {
-    ID: "313",
-    NAME: "٣١٣", // Changed to match database Arabic name
-    DISPLAY_NAME: "٣١٣", // Arabic "313"
-    NOTES: "Amber, Oud, Vanilla",
-    DESCRIPTION: "Our signature perfume with complex notes of amber and oud, finished with a touch of vanilla for a sophisticated, long-lasting aroma.",
-    SHORT_DESCRIPTION: "A sophisticated blend of amber and oud with vanilla undertones.",
-    // Images now fetched from database
+    ID: '890882bb-0dba-4712-a5a9-380cf9e7ff58',
+    NAME: '\u0663\u0661\u0663',
+    DISPLAY_NAME: '\u0663\u0661\u0663',
+    NOTES: 'Amber, Oud, Vanilla',
+    DESCRIPTION: 'Our signature perfume with complex notes of amber and oud, finished with a touch of vanilla for a sophisticated, long-lasting aroma.',
+    SHORT_DESCRIPTION: 'A sophisticated blend of amber and oud with vanilla undertones.',
   },
   FOUR_TWO_FOUR: {
-    ID: "424",
-    NAME: "٤٢٤",
-    DISPLAY_NAME: "٤٢٤",
-    NOTES: "Amber, Oud, Cashmere",
-    DESCRIPTION: "٤٢٤ starts off with a slight warm and spicy nutmeg scent and then the middle note is carried forward by a fresh violet flower and then the most interesting part of a perfume is the base note which is Amber, oud and cashmere",
-    SHORT_DESCRIPTION: "A warm and spicy blend with amber, oud and cashmere.",
-  }
+    ID: '37b4d1ef-6589-4852-a74d-c4a10bc04302',
+    NAME: '\u0664\u0662\u0664',
+    DISPLAY_NAME: '\u0664\u0662\u0664',
+    NOTES: 'Amber, Oud, Cashmere',
+    DESCRIPTION: '424 opens with a sweet blend of cotton candy and raspberry, creating an irresistible first impression. As it settles, a soft floral heart adds elegance, before revealing its signature base of musk, leather, and patchouli, leaving behind a warm & sensual trail.',
+    SHORT_DESCRIPTION: 'A warm and spicy blend with amber, oud and cashmere.',
+  },
 };
 
-/**
- * Helper function to get perfume display name
- * @param perfume - Perfume object from database
- * @returns Correct display name for the perfume
- */
-export const getPerfumeDisplayName = (perfume: { name: string }) => {
-  if (perfume.name === PERFUMES.THREE_ONE_THREE.NAME) {
+export const OFFERS = {
+  SIGNATURE_DUO: {
+    ID: 'signature-duo-313-424',
+    NAME: 'The Senteur Signature Duo',
+    PRICE: 215,
+    REGULAR_PRICE: 250,
+    SAVINGS: 35,
+    PRODUCT_IDS: [
+      '890882bb-0dba-4712-a5a9-380cf9e7ff58',
+      '37b4d1ef-6589-4852-a74d-c4a10bc04302',
+    ],
+  },
+} as const;
+
+export const getPerfumeDisplayName = (perfume: { id?: string; name: string }) => {
+  if (perfume.id === PERFUMES.THREE_ONE_THREE.ID || perfume.name === PERFUMES.THREE_ONE_THREE.NAME) {
     return PERFUMES.THREE_ONE_THREE.DISPLAY_NAME;
+  }
+  if (perfume.id === PERFUMES.FOUR_TWO_FOUR.ID || perfume.name === PERFUMES.FOUR_TWO_FOUR.NAME) {
+    return PERFUMES.FOUR_TWO_FOUR.DISPLAY_NAME;
   }
   return perfume.name;
 };

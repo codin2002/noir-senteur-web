@@ -43,6 +43,7 @@ const WishlistItem: React.FC<WishlistItemProps> = ({
       <div className="p-4">
         <h3 className="text-sm uppercase tracking-widest text-gold">{item.perfume.notes}</h3>
         <h2 className="text-xl font-serif mb-2">{getPerfumeDisplayName(item.perfume)}</h2>
+        <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-white/45">100 ml</p>
         <p className="text-muted-foreground text-sm line-clamp-2 mb-3">
           {item.perfume.description}
         </p>

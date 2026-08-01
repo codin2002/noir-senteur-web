@@ -7,7 +7,6 @@ import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import OrderDetailsCard from './OrderDetailsCard';
-import NextStepsCard from './NextStepsCard';
 
 interface PaymentSuccessContentProps {
   orderDetails: any;
@@ -15,6 +14,7 @@ interface PaymentSuccessContentProps {
 
 const PaymentSuccessContent: React.FC<PaymentSuccessContentProps> = ({ orderDetails }) => {
   const { user } = useAuth();
+  const isTestPayment = orderDetails?.test === true;
 
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col">
@@ -23,12 +23,14 @@ const PaymentSuccessContent: React.FC<PaymentSuccessContentProps> = ({ orderDeta
         <div className="max-w-4xl mx-auto text-center">
           <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
           
-          <h1 className="text-4xl font-serif mb-4">Payment Successful!</h1>
+          <h1 className="text-4xl font-serif mb-4">{isTestPayment ? 'Test Payment Confirmed' : 'Payment Successful!'}</h1>
           <p className="text-xl text-muted-foreground mb-8">
-            Thank you for your purchase. Your order has been confirmed.
+            {isTestPayment
+              ? 'Ziina and the secure webhook both confirmed this test payment. No order, stock, email, or live purchase record was created.'
+              : 'Thank you for your purchase. Your order has been confirmed.'}
           </p>
 
-          <OrderDetailsCard orderDetails={orderDetails} />
+          {!isTestPayment && <OrderDetailsCard orderDetails={orderDetails} />}
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/">
@@ -48,7 +50,6 @@ const PaymentSuccessContent: React.FC<PaymentSuccessContentProps> = ({ orderDeta
             )}
           </div>
 
-          <NextStepsCard />
         </div>
       </div>
       <Footer />

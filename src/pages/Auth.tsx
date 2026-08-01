@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { FcGoogle } from 'react-icons/fc';
-import { AlertTriangle } from 'lucide-react';
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useCheckout } from '@/hooks/useCheckout';
+import { OFFERS } from '@/utils/constants';
 
 // Define validation schemas
 const loginSchema = z.object({
@@ -39,10 +39,7 @@ interface GuestDetails {
   email: string;
   phoneNumber: string;
   buildingName: string;
-  floorNumber: string;
-  roomNumber: string;
   area: string;
-  landmark: string;
   emirate: string;
 }
 
@@ -56,29 +53,30 @@ const Auth = () => {
   // Check if user came here for checkout
   const isCheckoutFlow = location.state?.isCheckout;
   const cartItems = location.state?.cartItems || [];
+  const offerId = location.state?.offerId as string | undefined;
+  const isSignatureDuo = offerId === OFFERS.SIGNATURE_DUO.ID;
+  const regularCheckoutTotal = cartItems.reduce((sum: number, item: any) => sum + Number(item.perfume?.price_value || 0) * Number(item.quantity || 1), 0);
+  const checkoutTotal = isSignatureDuo ? OFFERS.SIGNATURE_DUO.PRICE : regularCheckoutTotal;
   
   // Get the path to return to after successful login
   const from = location.state?.from || '/';
   
   // If user is already logged in, redirect to requested page or home page
   useEffect(() => {
-    if (user && !isLoading) {
+    if (user && !isLoading && !isCheckoutFlow) {
       // Check if there's a cart in localStorage to determine redirect
       const hasCart = localStorage.getItem('cartItems');
       const redirectPath = hasCart ? '/cart' : from;
       navigate(redirectPath, { replace: true });
     }
-  }, [user, isLoading, navigate, from]);
+  }, [user, isLoading, isCheckoutFlow, navigate, from]);
 
   const [guestDetails, setGuestDetails] = useState<GuestDetails>({
     name: '',
     email: '',
     phoneNumber: '',
     buildingName: '',
-    floorNumber: '',
-    roomNumber: '',
     area: '',
-    landmark: '',
     emirate: ''
   });
 
@@ -119,21 +117,20 @@ const Auth = () => {
     // Format the guest address for payment processing
     const addressParts = [
       guestDetails.buildingName,
-      guestDetails.floorNumber,
-      guestDetails.roomNumber,
       guestDetails.area,
-      guestDetails.landmark,
       guestDetails.emirate
     ].filter(Boolean);
     
     const guestAddress = `${addressParts.join(', ')} | Contact: ${guestDetails.name} | Email: ${guestDetails.email} | Phone: ${guestDetails.phoneNumber}`;
     
-    await processPayment(cartItems, guestAddress);
+    await processPayment(cartItems, guestAddress, {
+      preserveCart: Boolean(location.state?.preserveCart),
+      offerId,
+    });
   };
 
   const isGuestFormValid = () => {
     return guestDetails.name.trim() && 
-           guestDetails.email.trim() && 
            guestDetails.phoneNumber.trim() &&
            guestDetails.buildingName.trim() &&
            guestDetails.area.trim() &&
@@ -191,10 +188,37 @@ const Auth = () => {
             <p className="text-white/70 text-lg">Complete your purchase</p>
           </div>
             
-          <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 relative">
+          <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto mb-8 rounded-xl border border-gold/20 bg-darker/70 p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="font-serif text-xl text-gold">Your order</h2>
+                  {isSignatureDuo && <p className="text-xs text-white/55">The Senteur Signature Duo</p>}
+                </div>
+                <span className="text-gold font-semibold">AED {checkoutTotal.toFixed(2)}</span>
+              </div>
+              <div className="space-y-3">
+                {cartItems.map((item: any) => (
+                  <div key={item.id ?? item.perfume?.id} className="flex items-center gap-3 text-left">
+                    {item.perfume?.image && <img src={item.perfume.image} alt={item.perfume.name} className="h-12 w-12 rounded object-cover" />}
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm text-white">{item.perfume?.name}</p>
+                      <p className="text-xs text-white/60">100 ml · Quantity: {item.quantity || 1}</p>
+                    </div>
+                    <span className="text-sm text-gold">AED {(Number(item.perfume?.price_value || 0) * Number(item.quantity || 1)).toFixed(2)}</span>
+                  </div>
+                ))}
+                {isSignatureDuo && (
+                  <div className="flex items-center justify-between border-t border-gold/15 pt-3 text-sm">
+                    <span className="text-green-300">Bundle savings</span>
+                    <span className="font-medium text-green-300">- AED {OFFERS.SIGNATURE_DUO.SAVINGS.toFixed(2)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="relative">
               {/* Guest Checkout Box */}
-              <div className="group min-h-[600px] flex">
+              <div className="group flex">
                 <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl w-full">
                   <div className="text-center pb-8 mb-8 border-b border-gold/20">
                     <div className="w-16 h-16 bg-gradient-to-br from-gold/20 to-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -227,7 +251,7 @@ const Auth = () => {
                           </div>
 
                           <div>
-                            <Label htmlFor="guest_email" className="text-sm text-white/80 mb-2 block">Email Address *</Label>
+                            <Label htmlFor="guest_email" className="text-sm text-white/80 mb-2 block">Email Address (optional)</Label>
                             <Input
                               id="guest_email"
                               type="email"
@@ -235,7 +259,6 @@ const Auth = () => {
                               onChange={handleInputChange('email')}
                               className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
                               placeholder="your.email@example.com"
-                              required
                             />
                           </div>
 
@@ -260,7 +283,7 @@ const Auth = () => {
                           <h4 className="font-medium text-white text-lg">Delivery Address</h4>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                           <div>
                             <Label htmlFor="guest_building" className="text-sm text-white/80 mb-2 block">Building Name *</Label>
                             <Input
@@ -274,28 +297,6 @@ const Auth = () => {
                           </div>
 
                           <div>
-                            <Label htmlFor="guest_floor" className="text-sm text-white/80 mb-2 block">Floor Number</Label>
-                            <Input
-                              id="guest_floor"
-                              value={guestDetails.floorNumber}
-                              onChange={handleInputChange('floorNumber')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="e.g., 6"
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="guest_room" className="text-sm text-white/80 mb-2 block">Room/Office Number</Label>
-                            <Input
-                              id="guest_room"
-                              value={guestDetails.roomNumber}
-                              onChange={handleInputChange('roomNumber')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="e.g., 911"
-                            />
-                          </div>
-
-                          <div>
                             <Label htmlFor="guest_area" className="text-sm text-white/80 mb-2 block">Area/Locality *</Label>
                             <Input
                               id="guest_area"
@@ -304,17 +305,6 @@ const Auth = () => {
                               className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
                               placeholder="e.g., Nad Hessa"
                               required
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="guest_landmark" className="text-sm text-white/80 mb-2 block">Landmark (Optional)</Label>
-                            <Input
-                              id="guest_landmark"
-                              value={guestDetails.landmark}
-                              onChange={handleInputChange('landmark')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="e.g., Near SIT"
                             />
                           </div>
 
@@ -333,14 +323,6 @@ const Auth = () => {
                       </div>
                     </div>
 
-                    {/* Important Payment Note */}
-                    <div className="flex items-start gap-2 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                      <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                      <p className="text-xs text-red-300 leading-relaxed">
-                        <strong>NOTE:</strong> Kindly wait until you are redirected back to the website after payment; do not close the tab or exit the website or your order will not be processed
-                      </p>
-                    </div>
-
                     <div className="pt-6">
                       <Button
                         type="submit"
@@ -353,7 +335,7 @@ const Auth = () => {
                             <span>Processing...</span>
                           </div>
                         ) : (
-                          'Continue to Payment'
+                          `Pay AED ${checkoutTotal.toFixed(2)} securely`
                         )}
                       </Button>
                     </div>
@@ -367,54 +349,21 @@ const Auth = () => {
                         <span className="bg-darker px-3 text-muted-foreground font-medium">or</span>
                       </div>
                     </div>
-                  </form>
-                </div>
-              </div>
-
-              {/* Sign In with Google Box */}
-              <div className="group min-h-[600px] flex">
-                <div className="bg-gradient-to-br from-darker/80 to-dark/60 backdrop-blur-sm p-8 lg:p-10 rounded-2xl shadow-2xl border border-gold/10 hover:border-gold/20 transition-all duration-500 hover:shadow-gold/5 hover:shadow-2xl h-full flex flex-col justify-center w-full">
-                  <div className="text-center pb-8 mb-8 border-b border-gold/20">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <FcGoogle className="w-8 h-8" />
-                    </div>
-                    <h3 className="text-2xl font-serif text-gold mb-3">Sign In with Google</h3>
-                    <p className="text-white/60 leading-relaxed">Continue with your Google account for faster checkout and to stay connected and informed</p>
-                  </div>
-
-                  <div className="space-y-8 flex-1 flex flex-col justify-center">
-                    <div className="space-y-6">
-                      <Button 
-                        type="button" 
+                    <div className="text-center">
+                      <p className="mb-3 text-sm text-white/50">Already have an account?</p>
+                      <Button
+                        type="button"
+                        variant="outline"
                         onClick={signInWithGoogle}
-                        className="w-full bg-white text-dark hover:bg-gray-50 h-14 text-lg font-medium rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-white/10"
+                        className="w-full border-gold/30 text-white hover:bg-gold/10 h-12"
                         disabled={isLoading}
                       >
-                        <FcGoogle className="mr-3 h-6 w-6" />
+                        <FcGoogle className="mr-2 h-5 w-5" />
                         Continue with Google
                       </Button>
                     </div>
-
-                    <div className="text-center pt-6">
-                      <p className="text-xs text-white/40 leading-relaxed">
-                        By continuing, you agree to our terms of service and privacy policy
-                      </p>
-                    </div>
-                  </div>
+                  </form>
                 </div>
-              </div>
-            </div>
-
-            {/* OR Divider - Mobile */}
-            <div className="lg:hidden flex items-center justify-center my-8">
-              <div className="flex items-center w-full max-w-md mx-auto">
-                <div className="flex-1 h-px bg-gradient-to-r from-transparent to-gold/40"></div>
-                <div className="px-6">
-                  <div className="bg-gradient-to-br from-darker/95 to-dark/90 backdrop-blur-sm px-6 py-3 rounded-full border border-gold/30 shadow-xl">
-                    <span className="text-gold font-semibold text-lg">OR</span>
-                  </div>
-                </div>
-                <div className="flex-1 h-px bg-gradient-to-l from-transparent to-gold/40"></div>
               </div>
             </div>
           </div>

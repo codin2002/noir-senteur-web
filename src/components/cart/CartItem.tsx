@@ -127,6 +127,7 @@ const CartItem: React.FC<CartItemProps> = ({
           )}
         </div>
         <p className="text-sm text-muted-foreground">{item.perfume.notes}</p>
+        <p className="mt-1 text-[10px] uppercase tracking-[0.18em] text-white/45">100 ml</p>
         <p className="font-medium mt-1">{item.perfume.price}</p>
         {isPreorder && preorderInfo?.expected_shipping_date && (
           <p className="text-xs text-gold mt-1">

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { PRICING, PERFUMES } from '@/utils/constants';
+import { getPerfumeDisplayName, PRICING, PERFUMES } from '@/utils/constants';
 import StoryCard from './StoryCard';
 import StoryCard424 from './StoryCard424';
 
@@ -21,6 +21,9 @@ interface PerfumeInfoProps {
 const PerfumeInfo: React.FC<PerfumeInfoProps> = ({ perfume }) => {
   const isThreeOneThree = perfume.name === PERFUMES.THREE_ONE_THREE.NAME;
   const isFourTwoFour = perfume.name === PERFUMES.FOUR_TWO_FOUR.NAME;
+  const description = isFourTwoFour
+    ? PERFUMES.FOUR_TWO_FOUR.DESCRIPTION
+    : perfume.description.replace(/^(?:\?{2,}|�{2,})\s*/, `${getPerfumeDisplayName(perfume)} `);
 
   return (
     <div className="space-y-6">
@@ -28,8 +31,9 @@ const PerfumeInfo: React.FC<PerfumeInfoProps> = ({ perfume }) => {
       {isFourTwoFour && <StoryCard424 />}
       <div>
         <h1 className="text-3xl md:text-4xl font-serif mb-4">{perfume.name}</h1>
+        <p className="mb-2 text-xs uppercase tracking-[0.2em] text-gray-400">100 ml</p>
         <div className="text-2xl font-bold text-gold mb-6">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</div>
-        <p className="text-gray-300 leading-relaxed mb-6">{perfume.description}</p>
+        <p className="text-gray-300 leading-relaxed mb-6">{description}</p>
         
         {perfume.notes && (
           <div className="border-t border-gold/30 pt-6">

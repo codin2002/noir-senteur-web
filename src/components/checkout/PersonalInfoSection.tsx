@@ -49,7 +49,7 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
         <div className="space-y-2">
           <Label htmlFor="guest_email" className="text-sm font-medium text-white flex items-center gap-2">
             <Mail className="w-4 h-4 text-muted-foreground" />
-            Email Address *
+            Email Address (optional)
           </Label>
           <Input
             id="guest_email"
@@ -58,7 +58,6 @@ const PersonalInfoSection: React.FC<PersonalInfoSectionProps> = ({
             onChange={handleInputChange('email')}
             className="bg-dark/80 border-gold/30 focus:border-gold focus:ring-gold/20 text-white placeholder:text-muted-foreground"
             placeholder="your.email@example.com"
-            required
           />
         </div>
 

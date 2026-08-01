@@ -10,8 +10,8 @@ const OrderTableHeader: React.FC = () => {
         <TableHead className="text-gray-900">Customer Type</TableHead>
         <TableHead className="text-gray-900">Customer Info</TableHead>
         <TableHead className="text-gray-900">Contact Details</TableHead>
-        <TableHead className="text-gray-900">Delivery Address</TableHead>
-        <TableHead className="text-gray-900">Items</TableHead>
+        <TableHead className="text-gray-900">Emirate</TableHead>
+        <TableHead className="text-gray-900">Products ordered</TableHead>
         <TableHead className="text-gray-900">Total</TableHead>
         <TableHead className="text-gray-900">Status</TableHead>
         <TableHead className="text-gray-900">Date</TableHead>

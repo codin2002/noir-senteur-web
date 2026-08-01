@@ -31,6 +31,7 @@ const PerfumeSliderItem: React.FC<PerfumeSliderItemProps> = ({ perfume, onExplor
       <div className="flex-1 flex flex-col p-2">
         <h4 className="text-sm uppercase tracking-widest text-gold">{perfume.notes}</h4>
         <h3 className="text-xl font-serif mb-2">{getPerfumeDisplayName(perfume)}</h3>
+        <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-white/45">100 ml</p>
         <p className="text-white/70 text-sm mb-4 line-clamp-3">{perfume.description}</p>
         <p className="text-gold font-light mb-4 mt-auto">{PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}</p>
         <button 

@@ -62,11 +62,6 @@ export const usePerfumeDetail = () => {
     setIsInWishlist(status);
   };
 
-  const refreshAnalytics = () => {
-    console.log('Refreshing classification data');
-    loadClassificationData();
-  };
-
   useEffect(() => {
     console.log('Effect triggered - ID:', id, 'User:', user?.id, 'Auth loading:', authLoading);
     
@@ -97,7 +92,6 @@ export const usePerfumeDetail = () => {
     isInWishlist,
     setIsInWishlist,
     classificationData,
-    isLoadingClassification,
-    refreshAnalytics
+    isLoadingClassification
   };
 };

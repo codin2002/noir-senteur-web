@@ -2,31 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-
-interface OrderItem {
-  id: string;
-  perfume_id: string;
-  quantity: number;
-  price: number;
-  perfume: {
-    name: string;
-    price: string;
-  };
-}
-
-interface Order {
-  id: string;
-  user_id: string | null;
-  total: number;
-  status: string;
-  created_at: string;
-  guest_name: string | null;
-  guest_email: string | null;
-  guest_phone: string | null;
-  delivery_address: string | null;
-  notes: string | null;
-  items: OrderItem[];
-}
+import { AdminOrder, AdminOrderItem, ProductAudience } from '@/types/adminOrder';
 
 export const useAdminOrders = (isAuthenticated: boolean) => {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -60,7 +36,33 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
 
       console.log('✅ Fetched orders successfully:', data?.length, 'orders');
       
-      const transformedOrders: Order[] = (data || []).map(order => {
+      const perfumeIds = Array.from(new Set((data || []).flatMap((order) =>
+        (Array.isArray(order.items) ? order.items : [])
+          .map((item: unknown) => (item as { perfume_id?: string }).perfume_id)
+          .filter((id): id is string => Boolean(id))
+      )));
+      const audienceByPerfume = new Map<string, ProductAudience>();
+
+      if (perfumeIds.length > 0) {
+        const { data: classifications, error: classificationError } = await supabase
+          .from('perfume_classifications')
+          .select('perfume_id, audience_masculine, audience_feminine')
+          .in('perfume_id', perfumeIds);
+
+        if (classificationError) {
+          console.warn('Unable to load product audience classifications:', classificationError);
+        } else {
+          classifications?.forEach((classification) => {
+            const difference = classification.audience_masculine - classification.audience_feminine;
+            audienceByPerfume.set(
+              classification.perfume_id,
+              Math.abs(difference) <= 5 ? 'Unisex' : difference > 0 ? 'Men' : 'Women'
+            );
+          });
+        }
+      }
+
+      const transformedOrders: AdminOrder[] = (data || []).map(order => {
         console.log(`📦 Order ${order.id}:`, {
           user_id: order.user_id,
           guest_name: order.guest_name,
@@ -72,7 +74,12 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
         return {
           ...order,
           notes: order.notes || null,
-          items: Array.isArray(order.items) ? (order.items as unknown as OrderItem[]) : []
+          items: Array.isArray(order.items)
+            ? (order.items as unknown as AdminOrderItem[]).map((item) => ({
+                ...item,
+                audience: audienceByPerfume.get(item.perfume_id) || 'Unisex'
+              }))
+            : []
         };
       });
       

@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { RefreshCw } from 'lucide-react';
 import PerfumeImageSlider from '@/components/perfume/PerfumeImageSlider';
 import PerfumeClassification from '@/components/perfume/PerfumeClassification';
 import PerfumeInfo from '@/components/perfume/PerfumeInfo';
@@ -14,10 +12,7 @@ interface PerfumeDetailContentProps {
   isInWishlist: boolean;
   setIsInWishlist: (value: boolean) => void;
   classificationData: PerfumeClassificationData | null;
-  ratingsData: any;
   isLoadingClassification: boolean;
-  isLoadingRatings: boolean;
-  refreshAnalytics: () => void;
 }
 
 const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
@@ -26,8 +21,7 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
   isInWishlist,
   setIsInWishlist,
   classificationData,
-  isLoadingClassification,
-  refreshAnalytics
+  isLoadingClassification
 }) => {
   return (
     <div className="max-w-7xl mx-auto">
@@ -55,18 +49,8 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
       
       {/* Classification Only */}
       <div className="mt-16 border-t border-gold/30 pt-12">
-        <div className="flex justify-between items-center mb-8">
+        <div className="mb-8">
           <h2 className="text-2xl font-serif">Fragrance Profile</h2>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refreshAnalytics}
-            className="border-gold/50 text-gold hover:bg-gold/10"
-            disabled={isLoadingClassification}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingClassification ? 'animate-spin' : ''}`} />
-            Refresh Data
-          </Button>
         </div>
         
         <div className="w-full">

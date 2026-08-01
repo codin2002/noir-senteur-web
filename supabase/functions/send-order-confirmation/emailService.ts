@@ -27,6 +27,10 @@ export async function sendEmail(
     html: emailTemplate.html,
   });
 
+  if (emailResult.error) {
+    throw new Error(`Email provider rejected the message: ${emailResult.error.message}`);
+  }
+
   console.log('Email sent successfully:', emailResult);
   return emailResult;
 }

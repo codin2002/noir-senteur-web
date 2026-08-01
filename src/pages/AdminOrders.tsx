@@ -1,14 +1,9 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import AdminAuth from '@/components/admin/AdminAuth';
 import AdminOrdersHeader from '@/components/admin/AdminOrdersHeader';
-import AdminDashboardSummary from '@/components/admin/AdminDashboardSummary';
-import InventoryManager from '@/components/admin/InventoryManager';
-import InventoryLogs from '@/components/admin/InventoryLogs';
-import InventoryInsights from '@/components/admin/InventoryInsights';
-import ButtonModeToggle from '@/components/admin/ButtonModeToggle';
+import AdminOrderAnalytics from '@/components/admin/AdminOrderAnalytics';
 import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
-import InventoryTestModal from '@/components/admin/InventoryTestModal';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useAdminOrders } from '@/hooks/useAdminOrders';
@@ -16,12 +11,6 @@ import { useAdminOrders } from '@/hooks/useAdminOrders';
 const AdminOrders = () => {
   const { isAuthenticated, isCheckingAuth, handleAuthenticated, handleLogout } = useAdminAuth();
   const { orders, isLoading, forceRefresh } = useAdminOrders(isAuthenticated);
-  const [isInventoryTestOpen, setIsInventoryTestOpen] = useState(false);
-
-  const handleInventoryTest = () => {
-    setIsInventoryTestOpen(true);
-  };
-
   const handleOrderUpdate = async () => {
     console.log('🔄 Order updated - forcing immediate refresh with extended delays...');
     
@@ -61,32 +50,13 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="admin-light min-h-screen bg-white p-6 text-gray-900">
-      <div className="max-w-7xl mx-auto space-y-8">
+    <div className="admin-light min-h-screen bg-stone-50 px-4 py-6 text-gray-900 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-[1600px] space-y-6">
         <AdminOrdersHeader onLogout={handleLogout} />
-        
-        <AdminDashboardSummary 
-          orders={orders || []} 
-          onInventoryTest={handleInventoryTest}
-        />
-        
-        <InventoryInsights />
-
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          <InventoryManager />
-          <InventoryLogs />
-        </div>
-
-        <ButtonModeToggle />
-        
+        <AdminOrderAnalytics orders={orders || []} />
         <AdminOrdersTable 
           orders={orders || []} 
           onRefresh={handleOrderUpdate} 
-        />
-
-        <InventoryTestModal 
-          isOpen={isInventoryTestOpen} 
-          onClose={() => setIsInventoryTestOpen(false)} 
         />
       </div>
     </div>

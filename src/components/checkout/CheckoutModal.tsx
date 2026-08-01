@@ -84,7 +84,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     Processing...
                   </>
                 ) : (
-                  'Proceed to Payment'
+                  `Pay AED ${calculateTotal().toFixed(2)} securely`
                 )}
               </Button>
             </div>

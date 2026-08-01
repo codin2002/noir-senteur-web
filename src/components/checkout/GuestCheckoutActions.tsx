@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, UserPlus, ShoppingBag, AlertTriangle } from 'lucide-react';
+import { CreditCard, UserPlus } from 'lucide-react';
 
 interface GuestCheckoutActionsProps {
   onGuestCheckout: () => void;
@@ -24,13 +24,6 @@ const GuestCheckoutActions: React.FC<GuestCheckoutActionsProps> = ({
 
   return (
     <div className="space-y-4 pt-6 border-t border-gold/20">
-      <div className="flex items-start gap-2 mb-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-        <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-        <p className="text-xs text-red-300 leading-relaxed">
-          <strong>NOTE:</strong> Kindly wait until you are redirected back to the website after payment; do not close the tab or exit the website or your order will not be processed
-        </p>
-      </div>
-
       <Button
         onClick={onGuestCheckout}
         disabled={isCheckoutDisabled || isLoading}
@@ -44,28 +37,14 @@ const GuestCheckoutActions: React.FC<GuestCheckoutActionsProps> = ({
         ) : (
           <div className="flex items-center justify-center gap-2">
             <CreditCard className="w-5 h-5" />
-            Complete Order
+            Pay securely
           </div>
         )}
       </Button>
       
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-gold/20" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-darker px-3 text-muted-foreground font-medium">or</span>
-        </div>
-      </div>
-      
-      <Button
-        onClick={handleSignInClick}
-        variant="outline"
-        className="w-full border-gold/40 text-gold hover:bg-gold/10 hover:border-gold transition-all duration-200"
-      >
-        <UserPlus className="w-4 h-4 mr-2" />
-        Sign In with Google
-      </Button>
+      <button onClick={handleSignInClick} type="button" className="mx-auto flex items-center gap-1 text-sm text-muted-foreground hover:text-gold">
+        <UserPlus className="h-4 w-4" /> Already have an account? Sign in
+      </button>
       
       <p className="text-xs text-muted-foreground text-center leading-relaxed">
         By completing your order, you agree to our terms and conditions. 

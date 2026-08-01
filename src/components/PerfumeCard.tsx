@@ -65,7 +65,8 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
 
       <div className="mt-4 flex flex-col items-center text-center flex-1">
         <h3 className="text-xs uppercase tracking-widest text-accent min-h-[2.5rem] flex items-center justify-center">{notes}</h3>
-        <h2 className="text-lg md:text-xl font-serif text-foreground mt-1">{getPerfumeDisplayName({ name })}</h2>
+        <h2 className="text-lg md:text-xl font-serif text-foreground mt-1">{getPerfumeDisplayName({ id, name })}</h2>
+        <p className="mt-1 text-[10px] uppercase tracking-[0.2em] text-white/45">100 ml</p>
         <p className="text-sm text-accent font-light mt-1">
           {PRICING.CURRENCY_SYMBOL}{PRICING.PERFUME_PRICE}
         </p>

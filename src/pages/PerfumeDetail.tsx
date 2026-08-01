@@ -18,8 +18,7 @@ const PerfumeDetail = () => {
     isInWishlist,
     setIsInWishlist,
     classificationData,
-    isLoadingClassification,
-    refreshAnalytics
+    isLoadingClassification
   } = usePerfumeDetail();
 
   console.log('PerfumeDetail render - Perfume:', perfume, 'Loading:', loading);
@@ -75,10 +74,7 @@ const PerfumeDetail = () => {
           isInWishlist={isInWishlist}
           setIsInWishlist={setIsInWishlist}
           classificationData={classificationData}
-          ratingsData={null}
           isLoadingClassification={isLoadingClassification}
-          isLoadingRatings={false}
-          refreshAnalytics={refreshAnalytics}
         />
       </div>
       <Footer />

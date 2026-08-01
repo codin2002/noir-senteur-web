@@ -6,6 +6,8 @@ interface DeliveryInfo {
   address: string;
 }
 
+const UAE_EMIRATES = ['Abu Dhabi', 'Dubai', 'Sharjah', 'Ajman', 'Umm Al Quwain', 'Ras Al Khaimah', 'Fujairah'];
+
 interface CustomerInfo {
   name: string;
   email: string;
@@ -152,6 +154,21 @@ export const getDeliveryAddress = (order: Order): string => {
   }
   
   return order.delivery_address || 'Address on file';
+};
+
+export const getOrderEmirate = (order: Pick<Order, 'delivery_address'>): string => {
+  const address = (order.delivery_address || '').toLowerCase().replace(/[-_]/g, ' ');
+  const aliases: Record<string, string[]> = {
+    'Abu Dhabi': ['abu dhabi'],
+    Dubai: ['dubai'],
+    Sharjah: ['sharjah'],
+    Ajman: ['ajman'],
+    'Umm Al Quwain': ['umm al quwain', 'uaq'],
+    'Ras Al Khaimah': ['ras al khaimah', 'rak'],
+    Fujairah: ['fujairah']
+  };
+
+  return UAE_EMIRATES.find((emirate) => aliases[emirate].some((alias) => address.includes(alias))) || 'Not specified';
 };
 
 export const getStatusBadgeClasses = (status: string): string => {

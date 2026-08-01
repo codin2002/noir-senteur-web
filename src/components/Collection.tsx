@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import PerfumeCard from './PerfumeCard';
+import SignatureDuoCard from './SignatureDuoCard';
 import { supabase } from '@/integrations/supabase/client';
 import { Perfume } from '@/types/perfume';
-import { Loader } from 'lucide-react';
 import LoadingSpinner from './common/LoadingSpinner';
+import { OFFERS } from '@/utils/constants';
 
 const Collection = () => {
   const [perfumes, setPerfumes] = useState<Perfume[]>([]);
@@ -43,8 +44,11 @@ const Collection = () => {
     fetchPerfumes();
   }, []);
 
-  // Display only the first 3 perfumes in the main section
+  // Display the two individual fragrances plus their bundle offer.
   const featuredPerfumes = perfumes.slice(0, 2);
+  const duoProducts = OFFERS.SIGNATURE_DUO.PRODUCT_IDS
+    .map((id) => perfumes.find((perfume) => perfume.id === id))
+    .filter(Boolean) as Perfume[];
 
   return (
     <section id="collection" className="section bg-black">
@@ -81,6 +85,7 @@ const Collection = () => {
                 delay={index * 200}
               />
             ))}
+            {duoProducts.length === 2 && <SignatureDuoCard products={duoProducts} />}
           </div>
         )}
       </div>

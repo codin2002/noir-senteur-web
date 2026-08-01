@@ -5,16 +5,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { fbqInitiateCheckout, fbqPurchase, fbqAdvancedMatch } from '@/utils/metaPixel';
+import { OFFERS } from '@/utils/constants';
 
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const checkoutV2Enabled = import.meta.env.VITE_CHECKOUT_V2 === 'true';
 
-  const processPayment = async (cartItems: any[], deliveryAddress: string) => {
+  const processPayment = async (
+    cartItems: any[],
+    deliveryAddress: string,
+    options?: { preserveCart?: boolean; offerId?: string }
+  ) => {
     setIsLoading(true);
 
     try {
+      if (options?.offerId && !checkoutV2Enabled) {
+        toast.error('This bundle is not available in the current checkout yet.');
+        return;
+      }
       console.log('Processing payment with delivery address:', deliveryAddress);
       console.log('User authenticated:', !!user);
       
@@ -38,7 +48,12 @@ export const useCheckout = () => {
         cartItems: itemsToProcess,
         deliveryAddress: deliveryAddress.trim(),
         isGuest: isGuest,
-        userId: user?.id || null
+        userId: user?.id || null,
+        offerId: options?.offerId,
+        meta: checkoutV2Enabled ? {
+          fbp: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbp='))?.split('=').slice(1).join('='),
+          fbc: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbc='))?.split('=').slice(1).join('='),
+        } : undefined,
       };
 
       console.log('Sending payment request:', { 
@@ -47,8 +62,8 @@ export const useCheckout = () => {
         hasDeliveryAddress: !!deliveryAddress.trim() 
       });
 
-      // Call the create-payment edge function
-      const { data, error } = await supabase.functions.invoke('create-payment', {
+      // The new webhook-confirmed flow is opt-in during local/staging testing.
+      const { data, error } = await supabase.functions.invoke(checkoutV2Enabled ? 'create-payment-v2' : 'create-payment', {
         body: requestBody,
         headers: isGuest ? {} : undefined // Don't send auth headers for guest checkout
       });
@@ -64,7 +79,7 @@ export const useCheckout = () => {
       if (!data.success) {
         console.error('Payment creation failed:', data.error);
         toast.error('Payment creation failed', {
-          description: data.error?.message || 'Unknown error occurred'
+          description: data.message || data.error?.message || 'Unknown error occurred'
         });
         return;
       }
@@ -78,17 +93,23 @@ export const useCheckout = () => {
       
       // Store guest flag and cart items for verification
       localStorage.setItem('checkout_is_guest', isGuest ? 'true' : 'false');
+      localStorage.setItem('checkout_preserve_cart', options?.preserveCart ? 'true' : 'false');
       if (isGuest) {
         localStorage.setItem('checkout_cart_items', JSON.stringify(itemsToProcess));
       }
 
       // Meta Pixel: InitiateCheckout
-      const pixelItems = itemsToProcess.map((it: any) => ({
+      let pixelItems = itemsToProcess.map((it: any) => ({
         id: it.perfume?.id ?? it.perfume_id,
         quantity: it.quantity,
         price: Number(it.perfume?.price_value ?? 0),
       }));
-      const pixelTotal = pixelItems.reduce((s, i) => s + i.price * i.quantity, 0);
+      let pixelTotal = pixelItems.reduce((s, i) => s + i.price * i.quantity, 0);
+      if (options?.offerId === OFFERS.SIGNATURE_DUO.ID && pixelItems.length > 0) {
+        const allocatedPrice = OFFERS.SIGNATURE_DUO.PRICE / pixelItems.length;
+        pixelItems = pixelItems.map((item) => ({ ...item, price: allocatedPrice }));
+        pixelTotal = OFFERS.SIGNATURE_DUO.PRICE;
+      }
       fbqInitiateCheckout(pixelItems, pixelTotal);
       // Save snapshot for Purchase event after redirect
       localStorage.setItem('pixel_pending_purchase', JSON.stringify({ items: pixelItems, value: pixelTotal }));
@@ -106,7 +127,7 @@ export const useCheckout = () => {
     }
   };
 
-  const verifyPayment = async (paymentIntentId: string) => {
+  const verifyPayment = async (paymentIntentId: string, checkoutToken?: string | null) => {
     console.log('=== PAYMENT VERIFICATION STARTED ===');
     console.log('Payment Intent ID:', paymentIntentId);
     console.log('Current user:', user?.id || 'No user');
@@ -124,6 +145,45 @@ export const useCheckout = () => {
     }
     
     try {
+      if (checkoutV2Enabled) {
+        if (!checkoutToken) return { success: false, message: 'The secure checkout token is missing. Please contact support if you were charged.' };
+        // This endpoint only reads the webhook-confirmed order. It never creates
+        // an order, records a payment, or changes stock from the browser.
+        let result: any = null;
+        for (let attempt = 0; attempt < 15; attempt += 1) {
+          const { data, error } = await supabase.functions.invoke('get-checkout-status-v2', {
+            body: { paymentIntentId, checkoutToken },
+          });
+          if (!error) {
+            result = data;
+            if (data?.confirmed || data?.status === 'failed') break;
+          } else {
+            console.warn('Confirmed order lookup will be retried', error);
+          }
+          await new Promise((resolve) => window.setTimeout(resolve, 1000));
+        }
+        if (!result?.confirmed) return { success: false, message: 'Payment confirmation is still processing. Please refresh this page shortly.' };
+
+        localStorage.removeItem('checkout_delivery_address');
+        localStorage.removeItem('checkout_is_guest');
+        localStorage.removeItem('checkout_cart_items');
+        const preserveCart = localStorage.getItem('checkout_preserve_cart') === 'true';
+        if (!preserveCart) localStorage.removeItem('cartItems');
+        localStorage.removeItem('checkout_preserve_cart');
+        window.dispatchEvent(new Event('cartUpdated'));
+        try {
+          if (user?.email) fbqAdvancedMatch({ email: user.email, externalId: user.id });
+          const snapshot = localStorage.getItem('pixel_pending_purchase');
+          if (snapshot && result.orderId) {
+            const { items, value } = JSON.parse(snapshot);
+            if (fbqPurchase({ orderId: result.orderId, items, value })) localStorage.removeItem('pixel_pending_purchase');
+          }
+        } catch (pixelError) {
+          console.warn('Pixel purchase tracking failed', pixelError);
+        }
+        return result;
+      }
+
       // Get stored delivery address
       const deliveryAddress = localStorage.getItem('checkout_delivery_address') || '';
       

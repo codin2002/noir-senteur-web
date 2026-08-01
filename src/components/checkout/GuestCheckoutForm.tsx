@@ -59,7 +59,6 @@ const GuestCheckoutForm: React.FC<GuestCheckoutFormProps> = ({
 
   const isFormValid = (): boolean => {
     return !!(guestDetails.name.trim() && 
-           guestDetails.email.trim() && 
            guestDetails.phoneNumber.trim() &&
            guestDetails.buildingName.trim() &&
            guestDetails.area.trim() &&

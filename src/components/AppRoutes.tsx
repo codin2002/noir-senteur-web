@@ -17,6 +17,7 @@ import NotFound from '@/pages/NotFound';
 import AdminOrders from '@/pages/AdminOrders';
 import AdminAnalytics from '@/pages/AdminAnalytics';
 import PaymentSuccess from '@/components/PaymentSuccess';
+import SignatureDuo from '@/pages/SignatureDuo';
 
 const AppRoutes = () => {
   return (
@@ -27,6 +28,7 @@ const AppRoutes = () => {
       <Route path="/cart" element={<Cart />} />
       <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/perfume/:id" element={<PerfumeDetail />} />
+      <Route path="/offers/signature-duo" element={<SignatureDuo />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />
       <Route path="/auth/callback" element={<AuthCallback />} />

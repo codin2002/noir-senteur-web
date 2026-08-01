@@ -32,10 +32,12 @@ const newEventId = (prefix: string, key?: string) => {
 
 const track = (event: string, params: Record<string, any>, eventID: string) => {
   try {
-    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return false;
     window.fbq('track', event, params, { eventID });
+    return true;
   } catch (e) {
     console.warn(`Meta Pixel ${event} failed`, e);
+    return false;
   }
 };
 
@@ -51,6 +53,22 @@ export const fbqViewContent = (p: { id: string; name: string; price: number }) =
       currency: CURRENCY,
     },
     newEventId('vc', p.id),
+  );
+};
+
+export const fbqViewBundle = (bundle: { id: string; name: string; price: number; productIds: readonly string[] }) => {
+  const allocatedPrice = bundle.price / bundle.productIds.length;
+  track(
+    'ViewContent',
+    {
+      content_ids: [...bundle.productIds],
+      content_name: bundle.name,
+      content_type: 'product_group',
+      contents: bundle.productIds.map((id) => ({ id, quantity: 1, item_price: round2(allocatedPrice) })),
+      value: round2(bundle.price),
+      currency: CURRENCY,
+    },
+    newEventId('vc', bundle.id),
   );
 };
 
@@ -93,7 +111,7 @@ export const fbqPurchase = (p: { orderId: string; items: PixelItem[]; value: num
   try {
     const sent = JSON.parse(localStorage.getItem(PURCHASED_ORDERS_KEY) || '[]') as string[];
     if (sent.includes(p.orderId)) return false;
-    track(
+    const tracked = track(
       'Purchase',
       {
         content_ids: p.items.map((i) => i.id),
@@ -107,6 +125,7 @@ export const fbqPurchase = (p: { orderId: string; items: PixelItem[]; value: num
       // Stable per-order event_id — Meta CAPI can dedup against the pixel using this.
       newEventId('purchase', p.orderId),
     );
+    if (!tracked) return false;
     sent.push(p.orderId);
     // Cap the stored list so it doesn't grow unbounded
     const trimmed = sent.slice(-200);
