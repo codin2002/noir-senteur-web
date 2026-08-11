@@ -40,6 +40,17 @@ export const OFFERS = {
   },
 } as const;
 
+export const isSignatureDuoCart = (items: Array<{ perfume?: { id?: string }; quantity?: number }>) => {
+  const quantities = new Map<string, number>();
+  for (const item of items) {
+    const productId = item.perfume?.id;
+    if (!productId) return false;
+    quantities.set(productId, (quantities.get(productId) || 0) + Number(item.quantity || 0));
+  }
+  return quantities.size === OFFERS.SIGNATURE_DUO.PRODUCT_IDS.length
+    && OFFERS.SIGNATURE_DUO.PRODUCT_IDS.every((productId) => quantities.get(productId) === 1);
+};
+
 export const getPerfumeDisplayName = (perfume: { id?: string; name: string }) => {
   if (perfume.id === PERFUMES.THREE_ONE_THREE.ID || perfume.name === PERFUMES.THREE_ONE_THREE.NAME) {
     return PERFUMES.THREE_ONE_THREE.DISPLAY_NAME;

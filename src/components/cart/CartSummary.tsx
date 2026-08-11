@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CartItemType } from './CartItem';
-import { PRICING } from '@/utils/constants';
+import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
 
 interface CartSummaryProps {
   cartItems: CartItemType[];
@@ -16,6 +16,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
   currencySymbol = 'AED '
 }) => {
   const calculateSubtotal = () => {
+    if (isSignatureDuoCart(cartItems)) return OFFERS.SIGNATURE_DUO.PRICE;
     return cartItems.reduce((sum, item) => 
       sum + (item.perfume.price_value * item.quantity), 0
     );

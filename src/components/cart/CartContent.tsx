@@ -9,7 +9,7 @@ import CartSummary from './CartSummary';
 import CartEmpty from './CartEmpty';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
-import { PRICING } from '@/utils/constants';
+import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
 
 interface CartContentProps {
   cartItems: CartItemType[];
@@ -65,6 +65,7 @@ const CartContent: React.FC<CartContentProps> = ({
         state: { 
           isCheckout: true, 
           cartItems: cartItems,
+          offerId: isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined,
           from: '/cart' 
         } 
       });
@@ -72,6 +73,7 @@ const CartContent: React.FC<CartContentProps> = ({
   };
 
   const calculateTotal = () => {
+    if (isSignatureDuoCart(cartItems)) return OFFERS.SIGNATURE_DUO.PRICE;
     const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     

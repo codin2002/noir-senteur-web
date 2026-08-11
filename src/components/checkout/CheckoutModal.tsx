@@ -7,7 +7,7 @@ import AddressSelection from './AddressSelection';
 import OrderSummary from './OrderSummary';
 import { useCheckout } from '@/hooks/useCheckout';
 import { toast } from 'sonner';
-import { PRICING } from '@/utils/constants';
+import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const { processPayment, isLoading } = useCheckout();
 
   const calculateTotal = () => {
+    if (isSignatureDuoCart(cartItems)) return OFFERS.SIGNATURE_DUO.PRICE;
     const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     
@@ -46,7 +47,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       return;
     }
 
-    await processPayment(cartItems, selectedAddress);
+    await processPayment(cartItems, selectedAddress, {
+      offerId: isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined,
+    });
   };
 
   return (

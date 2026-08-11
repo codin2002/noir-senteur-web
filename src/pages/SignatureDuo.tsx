@@ -9,6 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { OFFERS, getPerfumeDisplayName } from '@/utils/constants';
 import { fbqViewBundle } from '@/utils/metaPixel';
 import { PerfumeClassificationData } from '@/types/perfumeDetail';
+import { useAuth } from '@/context/AuthContext';
+import { useCartCount } from '@/hooks/useCartCount';
+import { toast } from 'sonner';
 
 interface BundleProduct {
   id: string;
@@ -27,6 +30,8 @@ const DUO_SCENT_DESCRIPTIONS: Record<string, string> = {
 
 const SignatureDuo = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { refresh: refreshCartCount } = useCartCount(user?.id);
   const [products, setProducts] = useState<BundleProduct[]>([]);
   const [classificationById, setClassificationById] = useState<Record<string, PerfumeClassificationData | null>>({});
   const [loading, setLoading] = useState(true);
@@ -110,6 +115,42 @@ const SignatureDuo = () => {
     });
   };
 
+  const addToCart = async () => {
+    if (checkoutItems.length !== 2) return;
+
+    try {
+      if (user) {
+        for (const item of checkoutItems) {
+          const { data: existing, error: lookupError } = await supabase
+            .from('cart')
+            .select('id, quantity')
+            .eq('user_id', user.id)
+            .eq('perfume_id', item.perfume.id)
+            .maybeSingle();
+          if (lookupError) throw lookupError;
+
+          const { error } = existing
+            ? await supabase.from('cart').update({ quantity: existing.quantity + 1 }).eq('id', existing.id)
+            : await supabase.from('cart').insert({ user_id: user.id, perfume_id: item.perfume.id, quantity: 1 });
+          if (error) throw error;
+        }
+      } else {
+        const storedItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        for (const item of checkoutItems) {
+          const existing = storedItems.find((stored: any) => stored.perfume?.id === item.perfume.id);
+          if (existing) existing.quantity += 1;
+          else storedItems.push({ id: `duo-${Date.now()}-${item.perfume.id}`, quantity: 1, perfume: item.perfume });
+        }
+        localStorage.setItem('cartItems', JSON.stringify(storedItems));
+      }
+      window.dispatchEvent(new Event('cartUpdated'));
+      refreshCartCount();
+      toast.success('313 + 424 added to your cart', { description: 'The Signature Duo price is AED 220.' });
+    } catch (error: any) {
+      toast.error('Could not add the Signature Duo to your cart', { description: error.message });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-dark text-white flex flex-col">
@@ -184,8 +225,8 @@ const SignatureDuo = () => {
               </div>
 
               <div className="space-y-4">
-                <Button onClick={buyNow} className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6">
-                  <ShoppingCart className="h-5 w-5 mr-2" />Buy the Signature Duo
+                <Button onClick={addToCart} className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6">
+                  <ShoppingCart className="h-5 w-5 mr-2" />Add the Signature Duo to Cart
                 </Button>
                 <Button onClick={buyNow} variant="outline" className="w-full border-gold/50 text-gold hover:bg-gold/10">
                   Buy now AED {OFFERS.SIGNATURE_DUO.PRICE.toFixed(2)}
