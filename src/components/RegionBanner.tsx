@@ -22,6 +22,8 @@ const RegionBanner: React.FC = () => {
           Currently shopping: <span className="text-white font-medium">🇦🇪 UAE</span>
         </span>
         <span className="hidden sm:inline text-muted-foreground">·</span>
+        <span className="text-gold font-medium tracking-wide">Free delivery across the UAE</span>
+        <span className="hidden sm:inline text-muted-foreground">·</span>
         <span className="text-muted-foreground hidden sm:inline">Shopping from Qatar?</span>
         <a
           href={QATAR_URL}
