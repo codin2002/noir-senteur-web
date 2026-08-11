@@ -10,7 +10,7 @@ const json = (body: unknown, status = 200) => Response.json(body, { status, head
 const offers = {
   "signature-duo-313-424": {
     name: "The Senteur Signature Duo",
-    amount: 215,
+    amount: 220,
     productIds: [
       "890882bb-0dba-4712-a5a9-380cf9e7ff58",
       "37b4d1ef-6589-4852-a74d-c4a10bc04302",

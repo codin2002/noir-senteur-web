@@ -30,9 +30,9 @@ export const OFFERS = {
   SIGNATURE_DUO: {
     ID: 'signature-duo-313-424',
     NAME: 'The Senteur Signature Duo',
-    PRICE: 215,
+    PRICE: 220,
     REGULAR_PRICE: 250,
-    SAVINGS: 35,
+    SAVINGS: 30,
     PRODUCT_IDS: [
       '890882bb-0dba-4712-a5a9-380cf9e7ff58',
       '37b4d1ef-6589-4852-a74d-c4a10bc04302',

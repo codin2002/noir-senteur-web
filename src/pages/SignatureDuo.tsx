@@ -35,7 +35,7 @@ const SignatureDuo = () => {
 
   useEffect(() => {
     document.title = '313 + 424 Signature Duo | Senteur Fragrances';
-    const description = 'Senteur 313 and 424 together for AED 215. Two full-size 100 ml fragrances with free UAE delivery.';
+    const description = 'Senteur 313 and 424 together for AED 220. Two full-size 100 ml fragrances with free UAE delivery.';
     let meta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!meta) {
       meta = document.createElement('meta');
