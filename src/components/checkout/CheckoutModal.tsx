@@ -7,7 +7,7 @@ import AddressSelection from './AddressSelection';
 import OrderSummary from './OrderSummary';
 import { useCheckout } from '@/hooks/useCheckout';
 import { toast } from 'sonner';
-import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
+import { PRICING, OFFERS, getCartSubtotal, isSignatureDuoCart } from '@/utils/constants';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -27,8 +27,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const { processPayment, isLoading } = useCheckout();
 
   const calculateTotal = () => {
-    if (isSignatureDuoCart(cartItems)) return OFFERS.SIGNATURE_DUO.PRICE;
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
+    const subtotal = getCartSubtotal(cartItems);
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     
     // Free shipping above the threshold, otherwise apply shipping cost

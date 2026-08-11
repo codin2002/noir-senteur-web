@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { useCheckout } from '@/hooks/useCheckout';
-import { OFFERS } from '@/utils/constants';
+import { OFFERS, getCartSubtotal, getSignatureDuoSavings } from '@/utils/constants';
 
 // Define validation schemas
 const loginSchema = z.object({
@@ -55,8 +55,8 @@ const Auth = () => {
   const cartItems = location.state?.cartItems || [];
   const offerId = location.state?.offerId as string | undefined;
   const isSignatureDuo = offerId === OFFERS.SIGNATURE_DUO.ID;
-  const regularCheckoutTotal = cartItems.reduce((sum: number, item: any) => sum + Number(item.perfume?.price_value || 0) * Number(item.quantity || 1), 0);
-  const checkoutTotal = isSignatureDuo ? OFFERS.SIGNATURE_DUO.PRICE : regularCheckoutTotal;
+  const checkoutTotal = getCartSubtotal(cartItems);
+  const duoSavings = getSignatureDuoSavings(cartItems);
   
   // Get the path to return to after successful login
   const from = location.state?.from || '/';
@@ -208,10 +208,10 @@ const Auth = () => {
                     <span className="text-sm text-gold">AED {(Number(item.perfume?.price_value || 0) * Number(item.quantity || 1)).toFixed(2)}</span>
                   </div>
                 ))}
-                {isSignatureDuo && (
+                {duoSavings > 0 && (
                   <div className="flex items-center justify-between border-t border-gold/15 pt-3 text-sm">
                     <span className="text-green-300">Bundle savings</span>
-                    <span className="font-medium text-green-300">- AED {OFFERS.SIGNATURE_DUO.SAVINGS.toFixed(2)}</span>
+                    <span className="font-medium text-green-300">- AED {duoSavings.toFixed(2)}</span>
                   </div>
                 )}
               </div>

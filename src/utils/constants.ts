@@ -40,15 +40,28 @@ export const OFFERS = {
   },
 } as const;
 
-export const isSignatureDuoCart = (items: Array<{ perfume?: { id?: string }; quantity?: number }>) => {
+export const getSignatureDuoQuantity = (items: Array<{ perfume?: { id?: string }; quantity?: number }>) => {
   const quantities = new Map<string, number>();
   for (const item of items) {
     const productId = item.perfume?.id;
-    if (!productId) return false;
+    if (!productId) continue;
     quantities.set(productId, (quantities.get(productId) || 0) + Number(item.quantity || 0));
   }
-  return quantities.size === OFFERS.SIGNATURE_DUO.PRODUCT_IDS.length
-    && OFFERS.SIGNATURE_DUO.PRODUCT_IDS.every((productId) => quantities.get(productId) === 1);
+  return Math.min(...OFFERS.SIGNATURE_DUO.PRODUCT_IDS.map((productId) => quantities.get(productId) || 0));
+};
+
+export const isSignatureDuoCart = (items: Array<{ perfume?: { id?: string }; quantity?: number }>) =>
+  getSignatureDuoQuantity(items) > 0;
+
+export const getSignatureDuoSavings = (items: Array<{ perfume?: { id?: string }; quantity?: number }>) =>
+  getSignatureDuoQuantity(items) * OFFERS.SIGNATURE_DUO.SAVINGS;
+
+export const getCartSubtotal = (items: Array<{ perfume?: { price_value?: number }; quantity?: number }>) => {
+  const regularSubtotal = items.reduce(
+    (sum, item) => sum + Number(item.perfume?.price_value || 0) * Number(item.quantity || 0),
+    0,
+  );
+  return regularSubtotal - getSignatureDuoSavings(items);
 };
 
 export const getPerfumeDisplayName = (perfume: { id?: string; name: string }) => {

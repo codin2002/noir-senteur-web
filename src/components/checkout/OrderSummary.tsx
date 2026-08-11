@@ -3,7 +3,7 @@ import React from 'react';
 import { Separator } from '@/components/ui/separator';
 import { CartItemType } from '@/components/cart/CartItem';
 import { Package2, Truck, ShieldCheck } from 'lucide-react';
-import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
+import { PRICING, getCartSubtotal, getSignatureDuoSavings } from '@/utils/constants';
 
 interface OrderSummaryProps {
   cartItems: CartItemType[];
@@ -12,9 +12,8 @@ interface OrderSummaryProps {
 }
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, total }) => {
-  const regularSubtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
-  const isSignatureDuo = isSignatureDuoCart(cartItems);
-  const subtotal = isSignatureDuo ? OFFERS.SIGNATURE_DUO.PRICE : regularSubtotal;
+  const subtotal = getCartSubtotal(cartItems);
+  const duoSavings = getSignatureDuoSavings(cartItems);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   
   // Free shipping above the threshold, otherwise apply shipping cost
@@ -55,10 +54,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
           <span className="text-muted-foreground">Subtotal</span>
           <span className="text-white font-medium">{currencySymbol}{subtotal.toFixed(2)}</span>
         </div>
-        {isSignatureDuo && (
+        {duoSavings > 0 && (
           <div className="flex justify-between items-center text-green-300">
             <span>Signature Duo saving</span>
-            <span>- {currencySymbol}{OFFERS.SIGNATURE_DUO.SAVINGS.toFixed(2)}</span>
+            <span>- {currencySymbol}{duoSavings.toFixed(2)}</span>
           </div>
         )}
         

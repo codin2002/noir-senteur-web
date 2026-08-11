@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { CartItemType } from './CartItem';
-import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
+import { PRICING, getCartSubtotal, getSignatureDuoSavings } from '@/utils/constants';
 
 interface CartSummaryProps {
   cartItems: CartItemType[];
@@ -15,19 +15,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({
   onCheckout, 
   currencySymbol = 'AED '
 }) => {
-  const calculateSubtotal = () => {
-    if (isSignatureDuoCart(cartItems)) return OFFERS.SIGNATURE_DUO.PRICE;
-    return cartItems.reduce((sum, item) => 
-      sum + (item.perfume.price_value * item.quantity), 0
-    );
-  };
-
   const getTotalQuantity = () => {
     return cartItems.reduce((sum, item) => sum + item.quantity, 0);
   };
 
-  const subtotal = calculateSubtotal();
-  const isSignatureDuo = isSignatureDuoCart(cartItems);
+  const subtotal = getCartSubtotal(cartItems);
+  const duoSavings = getSignatureDuoSavings(cartItems);
   const totalQuantity = getTotalQuantity();
   
   // Free shipping if 3 or more items, otherwise apply shipping cost
@@ -42,10 +35,10 @@ const CartSummary: React.FC<CartSummaryProps> = ({
         <span>Subtotal</span>
         <span>{currencySymbol}{subtotal.toFixed(2)}</span>
       </div>
-      {isSignatureDuo && (
+      {duoSavings > 0 && (
         <div className="flex justify-between text-sm text-green-300">
           <span>Signature Duo saving</span>
-          <span>- {currencySymbol}{OFFERS.SIGNATURE_DUO.SAVINGS.toFixed(2)}</span>
+          <span>- {currencySymbol}{duoSavings.toFixed(2)}</span>
         </div>
       )}
       

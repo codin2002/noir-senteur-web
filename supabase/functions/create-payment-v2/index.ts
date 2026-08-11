@@ -11,6 +11,7 @@ const offers = {
   "signature-duo-313-424": {
     name: "The Senteur Signature Duo",
     amount: 220,
+    saving: 30,
     productIds: [
       "890882bb-0dba-4712-a5a9-380cf9e7ff58",
       "37b4d1ef-6589-4852-a74d-c4a10bc04302",
@@ -52,13 +53,17 @@ Deno.serve(async (request) => {
     let items: Array<{ perfume_id: string; quantity: number; price: number }>;
     let amount: number;
     if (offer) {
-      const isExactOfferCart = quantities.size === offer.productIds.length
-        && offer.productIds.every((productId) => quantities.get(productId) === 1);
-      if (!isExactOfferCart) throw new Error("The bundle must contain one 313 and one 424.");
+      const bundleQuantity = Math.min(...offer.productIds.map((productId) => quantities.get(productId) ?? 0));
+      if (bundleQuantity < 1) throw new Error("The bundle must contain one 313 and one 424.");
 
-      const allocatedPrice = offer.amount / offer.productIds.length;
-      items = offer.productIds.map((perfume_id) => ({ perfume_id, quantity: 1, price: allocatedPrice }));
-      amount = offer.amount;
+      const regularAmount = ids.reduce((sum, perfumeId) => sum + prices.get(perfumeId)! * quantities.get(perfumeId)!, 0);
+      amount = regularAmount - (offer.saving * bundleQuantity);
+      items = ids.map((perfume_id) => {
+        const quantity = quantities.get(perfume_id)!;
+        const discountedUnits = offer.productIds.includes(perfume_id as typeof offer.productIds[number]) ? bundleQuantity : 0;
+        const lineTotal = prices.get(perfume_id)! * quantity - (offer.saving / 2) * discountedUnits;
+        return { perfume_id, quantity, price: lineTotal / quantity };
+      });
     } else {
       items = ids.map((perfume_id) => ({ perfume_id, quantity: quantities.get(perfume_id)!, price: prices.get(perfume_id)! }));
       amount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);

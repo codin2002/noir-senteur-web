@@ -9,7 +9,7 @@ import CartSummary from './CartSummary';
 import CartEmpty from './CartEmpty';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
-import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
+import { PRICING, OFFERS, getCartSubtotal, getSignatureDuoQuantity, isSignatureDuoCart } from '@/utils/constants';
 import { ShieldCheck, ShoppingBag, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -31,7 +31,14 @@ const CartContent: React.FC<CartContentProps> = ({
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
   const navigate = useNavigate();
-  const isSignatureDuo = isSignatureDuoCart(cartItems);
+  const duoQuantity = getSignatureDuoQuantity(cartItems);
+  const isSignatureDuo = duoQuantity > 0;
+  const duoProductIds = new Set<string>(OFFERS.SIGNATURE_DUO.PRODUCT_IDS);
+  const remainingItems = cartItems.flatMap((item) => {
+    const reservedQuantity = duoProductIds.has(item.perfume.id) ? duoQuantity : 0;
+    const displayQuantity = item.quantity - reservedQuantity;
+    return displayQuantity > 0 ? [{ item, displayQuantity, reservedQuantity }] : [];
+  });
 
   React.useEffect(() => {
     if (user) {
@@ -76,8 +83,7 @@ const CartContent: React.FC<CartContentProps> = ({
   };
 
   const calculateTotal = () => {
-    if (isSignatureDuo) return OFFERS.SIGNATURE_DUO.PRICE;
-    const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
+    const subtotal = getCartSubtotal(cartItems);
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     
     // Free shipping if 3 or more items, otherwise apply shipping cost
@@ -87,13 +93,27 @@ const CartContent: React.FC<CartContentProps> = ({
 
   const removeSignatureDuo = async () => {
     try {
-      if (user) {
-        const { error } = await supabase.from('cart').delete().in('id', cartItems.map((item) => item.id));
-        if (error) throw error;
-      } else {
-        localStorage.setItem('cartItems', JSON.stringify([]));
+      const duoItems = cartItems.filter((item) => duoProductIds.has(item.perfume.id));
+      for (const item of duoItems) {
+        const remainingQuantity = item.quantity - duoQuantity;
+        if (user) {
+          const { error } = remainingQuantity > 0
+            ? await supabase.from('cart').update({ quantity: remainingQuantity }).eq('id', item.id)
+            : await supabase.from('cart').delete().eq('id', item.id);
+          if (error) throw error;
+        }
+        if (remainingQuantity > 0) onItemUpdate({ ...item, quantity: remainingQuantity });
+        else onItemRemove(item.id);
       }
-      cartItems.forEach((item) => onItemRemove(item.id));
+      if (!user) {
+        const duoIds = new Set(duoItems.map((item) => item.id));
+        const updatedCart = cartItems.flatMap((item) => {
+          if (!duoIds.has(item.id)) return [item];
+          const remainingQuantity = item.quantity - duoQuantity;
+          return remainingQuantity > 0 ? [{ ...item, quantity: remainingQuantity }] : [];
+        });
+        localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+      }
       window.dispatchEvent(new Event('cartUpdated'));
       refreshCartCount();
       toast.success('Signature Duo removed from your cart');
@@ -117,7 +137,7 @@ const CartContent: React.FC<CartContentProps> = ({
         <div className="flex-grow">
           {cartItems.length > 0 ? (
             <div className="space-y-4">
-              {isSignatureDuo ? (
+              {isSignatureDuo && (
                 <div className="flex items-center gap-4 rounded-lg border border-gold/30 bg-darker p-4">
                   <img
                     src="/images/signature-duo-together.png"
@@ -130,8 +150,8 @@ const CartContent: React.FC<CartContentProps> = ({
                       <h3 className="font-serif text-lg text-white">The Signature Duo</h3>
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">313 + 424 · 2 × 100 ml</p>
-                    <p className="mt-2 text-lg font-medium text-gold">AED {OFFERS.SIGNATURE_DUO.PRICE}</p>
-                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-green-300"><ShieldCheck className="h-3.5 w-3.5" />You save AED {OFFERS.SIGNATURE_DUO.SAVINGS} on this order</p>
+                    <p className="mt-2 text-lg font-medium text-gold">AED {(OFFERS.SIGNATURE_DUO.PRICE * duoQuantity).toFixed(2)}</p>
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-green-300"><ShieldCheck className="h-3.5 w-3.5" />You save AED {(OFFERS.SIGNATURE_DUO.SAVINGS * duoQuantity).toFixed(2)} on this order</p>
                   </div>
                   <Button
                     variant="outline"
@@ -143,13 +163,16 @@ const CartContent: React.FC<CartContentProps> = ({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
-              ) : cartItems.map((item) => (
+              )}
+              {remainingItems.map(({ item, displayQuantity, reservedQuantity }) => (
                 <CartItem 
                   key={item.id} 
                   item={item} 
                   onItemUpdate={onItemUpdate}
                   onItemRemove={onItemRemove}
                   refreshCartCount={refreshCartCount}
+                  displayQuantity={displayQuantity}
+                  reservedQuantity={reservedQuantity}
                 />
               ))}
             </div>

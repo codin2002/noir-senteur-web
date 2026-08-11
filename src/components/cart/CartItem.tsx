@@ -25,13 +25,17 @@ interface CartItemProps {
   onItemUpdate: (item: CartItemType) => void;
   onItemRemove: (id: string) => void;
   refreshCartCount: () => void;
+  displayQuantity?: number;
+  reservedQuantity?: number;
 }
 
 const CartItem: React.FC<CartItemProps> = ({ 
   item, 
   onItemUpdate, 
   onItemRemove, 
-  refreshCartCount 
+  refreshCartCount,
+  displayQuantity,
+  reservedQuantity = 0,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { user } = useAuth();
@@ -41,8 +45,11 @@ const CartItem: React.FC<CartItemProps> = ({
     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
   };
 
+  const visibleQuantity = displayQuantity ?? item.quantity;
+
   const handleUpdateQuantity = async (newQuantity: number) => {
     if (newQuantity < 1) return;
+    const actualQuantity = newQuantity + reservedQuantity;
     
     setIsUpdating(true);
     
@@ -51,14 +58,14 @@ const CartItem: React.FC<CartItemProps> = ({
         // Update in database for authenticated users
         const { error } = await supabase
           .from('cart')
-          .update({ quantity: newQuantity })
+          .update({ quantity: actualQuantity })
           .eq('id', item.id);
         
         if (error) throw error;
       }
       
       // Update local state and localStorage
-      const updatedItem = { ...item, quantity: newQuantity };
+      const updatedItem = { ...item, quantity: actualQuantity };
       onItemUpdate(updatedItem);
       
       // Update localStorage for persistence
@@ -81,7 +88,19 @@ const CartItem: React.FC<CartItemProps> = ({
     setIsUpdating(true);
     
     try {
-      if (user) {
+      if (reservedQuantity > 0) {
+        if (user) {
+          const { error } = await supabase
+            .from('cart')
+            .update({ quantity: reservedQuantity })
+            .eq('id', item.id);
+          if (error) throw error;
+        }
+        const updatedItem = { ...item, quantity: reservedQuantity };
+        onItemUpdate(updatedItem);
+        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        updateLocalStorage(cartItems.map((cartItem: CartItemType) => cartItem.id === item.id ? updatedItem : cartItem));
+      } else if (user) {
         // Remove from database for authenticated users
         const { error } = await supabase
           .from('cart')
@@ -91,13 +110,13 @@ const CartItem: React.FC<CartItemProps> = ({
         if (error) throw error;
       }
       
-      // Update local state and localStorage
-      onItemRemove(item.id);
-      
-      // Update localStorage
-      const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-      const updatedCart = cartItems.filter((cartItem: CartItemType) => cartItem.id !== item.id);
-      updateLocalStorage(updatedCart);
+      if (reservedQuantity === 0) {
+        // Update local state and localStorage
+        onItemRemove(item.id);
+        const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        const updatedCart = cartItems.filter((cartItem: CartItemType) => cartItem.id !== item.id);
+        updateLocalStorage(updatedCart);
+      }
       
       refreshCartCount();
       toast.success('Item removed from cart');
@@ -140,19 +159,19 @@ const CartItem: React.FC<CartItemProps> = ({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleUpdateQuantity(item.quantity - 1)}
-          disabled={isUpdating || item.quantity <= 1}
+          onClick={() => handleUpdateQuantity(visibleQuantity - 1)}
+          disabled={isUpdating || visibleQuantity <= 1}
           className="h-8 w-8 p-0 border-gold/30"
         >
           <Minus className="h-4 w-4" />
         </Button>
         
-        <span className="w-8 text-center">{item.quantity}</span>
+        <span className="w-8 text-center">{visibleQuantity}</span>
         
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleUpdateQuantity(item.quantity + 1)}
+          onClick={() => handleUpdateQuantity(visibleQuantity + 1)}
           disabled={isUpdating}
           className="h-8 w-8 p-0 border-gold/30"
         >

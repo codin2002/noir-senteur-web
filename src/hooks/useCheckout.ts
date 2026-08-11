@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { fbqInitiateCheckout, fbqPurchase, fbqAdvancedMatch } from '@/utils/metaPixel';
-import { OFFERS } from '@/utils/constants';
+import { OFFERS, getCartSubtotal, getSignatureDuoQuantity } from '@/utils/constants';
 
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -106,9 +106,17 @@ export const useCheckout = () => {
       }));
       let pixelTotal = pixelItems.reduce((s, i) => s + i.price * i.quantity, 0);
       if (options?.offerId === OFFERS.SIGNATURE_DUO.ID && pixelItems.length > 0) {
-        const allocatedPrice = OFFERS.SIGNATURE_DUO.PRICE / pixelItems.length;
-        pixelItems = pixelItems.map((item) => ({ ...item, price: allocatedPrice }));
-        pixelTotal = OFFERS.SIGNATURE_DUO.PRICE;
+        const duoQuantity = getSignatureDuoQuantity(itemsToProcess);
+        const discountPerBottle = duoQuantity > 0 ? OFFERS.SIGNATURE_DUO.SAVINGS / 2 : 0;
+        let duoDiscountsRemaining = duoQuantity;
+        pixelItems = pixelItems.map((item) => {
+          if (OFFERS.SIGNATURE_DUO.PRODUCT_IDS.includes(item.id) && duoDiscountsRemaining > 0) {
+            duoDiscountsRemaining -= 1;
+            return { ...item, price: item.price - discountPerBottle };
+          }
+          return item;
+        });
+        pixelTotal = getCartSubtotal(itemsToProcess);
       }
       fbqInitiateCheckout(pixelItems, pixelTotal);
       // Save snapshot for Purchase event after redirect
