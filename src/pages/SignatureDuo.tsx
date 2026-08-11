@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, ShieldCheck, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
@@ -12,6 +12,7 @@ import { PerfumeClassificationData } from '@/types/perfumeDetail';
 import { useAuth } from '@/context/AuthContext';
 import { useCartCount } from '@/hooks/useCartCount';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface BundleProduct {
   id: string;
@@ -37,6 +38,7 @@ const SignatureDuo = () => {
   const [loading, setLoading] = useState(true);
   const [isLoadingClassification, setIsLoadingClassification] = useState(true);
   const [error, setError] = useState(false);
+  const [showCartConfirmation, setShowCartConfirmation] = useState(false);
 
   useEffect(() => {
     document.title = '313 + 424 Signature Duo | Senteur Fragrances';
@@ -145,7 +147,7 @@ const SignatureDuo = () => {
       }
       window.dispatchEvent(new Event('cartUpdated'));
       refreshCartCount();
-      toast.success('313 + 424 added to your cart', { description: 'The Signature Duo price is AED 220.' });
+      setShowCartConfirmation(true);
     } catch (error: any) {
       toast.error('Could not add the Signature Duo to your cart', { description: error.message });
     }
@@ -256,6 +258,53 @@ const SignatureDuo = () => {
 
         </div>
       </main>
+      <Dialog open={showCartConfirmation} onOpenChange={setShowCartConfirmation}>
+        <DialogContent className="max-w-md bg-darker border-gold/30 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-serif text-2xl text-gold">
+              <CheckCircle2 className="h-6 w-6 text-green-400" />
+              Added to your cart
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center gap-4 rounded-lg border border-gold/15 bg-dark/60 p-3">
+            <img
+              src="/images/signature-duo-together.png"
+              alt="The Senteur Signature Duo"
+              className="h-20 w-20 rounded-md object-cover"
+            />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium">The Signature Duo</p>
+              <p className="text-sm text-muted-foreground">313 + 424 · 2 × 100 ml</p>
+              <p className="mt-1 text-sm text-gold">AED {OFFERS.SIGNATURE_DUO.PRICE.toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="flex items-center justify-between border-y border-gold/15 py-3">
+            <span className="text-sm text-muted-foreground">Subtotal</span>
+            <span className="font-semibold text-white">AED {OFFERS.SIGNATURE_DUO.PRICE.toFixed(2)}</span>
+          </div>
+          <p className="text-center text-xs text-green-200">You save AED {OFFERS.SIGNATURE_DUO.SAVINGS.toFixed(2)} on this pair.</p>
+          <div className="flex items-center gap-2 text-xs text-green-200">
+            <ShieldCheck className="h-4 w-4" />
+            Free UAE delivery and secure payment
+          </div>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Button
+              variant="outline"
+              className="border-gold/50 text-gold hover:bg-gold/10"
+              onClick={() => {
+                setShowCartConfirmation(false);
+                navigate('/#collection');
+              }}
+            >
+              Continue Shopping
+            </Button>
+            <Button className="bg-gold text-darker hover:bg-gold/80" onClick={() => navigate('/cart')}>
+              <ShoppingCart className="mr-2 h-4 w-4" />
+              View Cart
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       <Footer />
     </div>
   );
