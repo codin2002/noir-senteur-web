@@ -19,12 +19,12 @@ export const useCheckout = () => {
     options?: { preserveCart?: boolean; offerId?: string }
   ) => {
     setIsLoading(true);
+    // The Signature Duo has a server-priced promotional total, so it must use
+    // the newer checkout path even while ordinary single-bottle checkout
+    // remains on the legacy flow during rollout.
+    const useCheckoutV2 = checkoutV2Enabled || options?.offerId === OFFERS.SIGNATURE_DUO.ID;
 
     try {
-      if (options?.offerId && !checkoutV2Enabled) {
-        toast.error('This bundle is not available in the current checkout yet.');
-        return;
-      }
       console.log('Processing payment with delivery address:', deliveryAddress);
       console.log('User authenticated:', !!user);
       
@@ -50,7 +50,7 @@ export const useCheckout = () => {
         isGuest: isGuest,
         userId: user?.id || null,
         offerId: options?.offerId,
-        meta: checkoutV2Enabled ? {
+        meta: useCheckoutV2 ? {
           fbp: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbp='))?.split('=').slice(1).join('='),
           fbc: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbc='))?.split('=').slice(1).join('='),
         } : undefined,
@@ -63,7 +63,7 @@ export const useCheckout = () => {
       });
 
       // The new webhook-confirmed flow is opt-in during local/staging testing.
-      const { data, error } = await supabase.functions.invoke(checkoutV2Enabled ? 'create-payment-v2' : 'create-payment', {
+      const { data, error } = await supabase.functions.invoke(useCheckoutV2 ? 'create-payment-v2' : 'create-payment', {
         body: requestBody,
         headers: isGuest ? {} : undefined // Don't send auth headers for guest checkout
       });
@@ -145,7 +145,10 @@ export const useCheckout = () => {
     }
     
     try {
-      if (checkoutV2Enabled) {
+      // A returned checkout token is issued only by create-payment-v2. This
+      // keeps bundle confirmation on the webhook-safe path after redirect,
+      // even if the regular checkout rollout flag is still off.
+      if (checkoutV2Enabled || checkoutToken) {
         if (!checkoutToken) return { success: false, message: 'The secure checkout token is missing. Please contact support if you were charged.' };
         // This endpoint only reads the webhook-confirmed order. It never creates
         // an order, records a payment, or changes stock from the browser.
