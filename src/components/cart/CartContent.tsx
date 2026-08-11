@@ -10,6 +10,8 @@ import CartEmpty from './CartEmpty';
 import CheckoutModal from '@/components/checkout/CheckoutModal';
 import { useCartCount } from '@/hooks/useCartCount';
 import { PRICING, OFFERS, isSignatureDuoCart } from '@/utils/constants';
+import { ShieldCheck, ShoppingBag, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface CartContentProps {
   cartItems: CartItemType[];
@@ -29,6 +31,7 @@ const CartContent: React.FC<CartContentProps> = ({
   const { user } = useAuth();
   const { refresh: refreshCartCount } = useCartCount(user?.id);
   const navigate = useNavigate();
+  const isSignatureDuo = isSignatureDuoCart(cartItems);
 
   React.useEffect(() => {
     if (user) {
@@ -73,13 +76,30 @@ const CartContent: React.FC<CartContentProps> = ({
   };
 
   const calculateTotal = () => {
-    if (isSignatureDuoCart(cartItems)) return OFFERS.SIGNATURE_DUO.PRICE;
+    if (isSignatureDuo) return OFFERS.SIGNATURE_DUO.PRICE;
     const subtotal = cartItems.reduce((sum, item) => sum + (item.perfume.price_value * item.quantity), 0);
     const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     
     // Free shipping if 3 or more items, otherwise apply shipping cost
     const shippingCost = subtotal > 0 && totalQuantity < PRICING.FREE_SHIPPING_THRESHOLD ? PRICING.SHIPPING_COST : 0;
     return subtotal + shippingCost;
+  };
+
+  const removeSignatureDuo = async () => {
+    try {
+      if (user) {
+        const { error } = await supabase.from('cart').delete().in('id', cartItems.map((item) => item.id));
+        if (error) throw error;
+      } else {
+        localStorage.setItem('cartItems', JSON.stringify([]));
+      }
+      cartItems.forEach((item) => onItemRemove(item.id));
+      window.dispatchEvent(new Event('cartUpdated'));
+      refreshCartCount();
+      toast.success('Signature Duo removed from your cart');
+    } catch (error: any) {
+      toast.error('Could not remove the Signature Duo', { description: error.message });
+    }
   };
 
   if (isLoading) {
@@ -97,7 +117,33 @@ const CartContent: React.FC<CartContentProps> = ({
         <div className="flex-grow">
           {cartItems.length > 0 ? (
             <div className="space-y-4">
-              {cartItems.map((item) => (
+              {isSignatureDuo ? (
+                <div className="flex items-center gap-4 rounded-lg border border-gold/30 bg-darker p-4">
+                  <img
+                    src="/images/signature-duo-together.png"
+                    alt="The Senteur Signature Duo"
+                    className="h-24 w-24 rounded-md object-cover"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <ShoppingBag className="h-4 w-4 text-gold" />
+                      <h3 className="font-serif text-lg text-white">The Signature Duo</h3>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">313 + 424 · 2 × 100 ml</p>
+                    <p className="mt-2 text-lg font-medium text-gold">AED {OFFERS.SIGNATURE_DUO.PRICE}</p>
+                    <p className="mt-1 inline-flex items-center gap-1 text-xs text-green-300"><ShieldCheck className="h-3.5 w-3.5" />You save AED {OFFERS.SIGNATURE_DUO.SAVINGS} on this order</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={removeSignatureDuo}
+                    className="h-9 w-9 border-red-500/30 p-0 text-red-400 hover:bg-red-500/10"
+                    aria-label="Remove Signature Duo"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : cartItems.map((item) => (
                 <CartItem 
                   key={item.id} 
                   item={item} 

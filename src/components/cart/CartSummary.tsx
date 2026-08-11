@@ -27,6 +27,7 @@ const CartSummary: React.FC<CartSummaryProps> = ({
   };
 
   const subtotal = calculateSubtotal();
+  const isSignatureDuo = isSignatureDuoCart(cartItems);
   const totalQuantity = getTotalQuantity();
   
   // Free shipping if 3 or more items, otherwise apply shipping cost
@@ -41,6 +42,12 @@ const CartSummary: React.FC<CartSummaryProps> = ({
         <span>Subtotal</span>
         <span>{currencySymbol}{subtotal.toFixed(2)}</span>
       </div>
+      {isSignatureDuo && (
+        <div className="flex justify-between text-sm text-green-300">
+          <span>Signature Duo saving</span>
+          <span>- {currencySymbol}{OFFERS.SIGNATURE_DUO.SAVINGS.toFixed(2)}</span>
+        </div>
+      )}
       
       <div className="flex justify-between text-sm text-muted-foreground">
         <span>Shipping</span>

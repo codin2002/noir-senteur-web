@@ -93,7 +93,7 @@ export const useCart = () => {
   };
 
   const handleRemoveItem = (id: string) => {
-    setCartItems(cartItems.filter(item => item.id !== id));
+    setCartItems(currentItems => currentItems.filter(item => item.id !== id));
   };
 
   return {
