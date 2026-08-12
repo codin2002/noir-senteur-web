@@ -118,6 +118,26 @@ Deno.serve(async (request) => {
         orderId = createdOrderId as string;
       }
 
+      // Make the payment record immediately usable as a packing list in the
+      // Supabase dashboard. The order items remain the source of truth.
+      if (orderId) {
+        const { data: orderItems, error: itemsError } = await admin
+          .from("order_items")
+          .select("quantity,perfume:perfumes(name)")
+          .eq("order_id", orderId);
+        if (itemsError) throw itemsError;
+        const productDetails = (orderItems ?? [])
+          .map((item: { quantity: number; perfume: { name?: string } | null }) => `${item.perfume?.name || "Perfume"} (Qty: ${item.quantity})`)
+          .join(" · ");
+        if (productDetails) {
+          const { error: paymentUpdateError } = await admin
+            .from("successful_payments")
+            .update({ product_details: productDetails })
+            .eq("order_id", orderId);
+          if (paymentUpdateError) throw paymentUpdateError;
+        }
+      }
+
       // Email is optional for guests. The email function atomically claims the
       // notification so concurrent provider retries cannot send it twice.
       if (orderId && (checkout.user_id || value("Email:"))) {
