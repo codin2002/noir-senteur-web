@@ -237,6 +237,7 @@ export type Database = {
           created_at: string
           delivery_address: string | null
           delivery_email_sent: boolean | null
+          fulfillment_status: string
           guest_email: string | null
           guest_name: string | null
           guest_phone: string | null
@@ -253,6 +254,7 @@ export type Database = {
           created_at?: string
           delivery_address?: string | null
           delivery_email_sent?: boolean | null
+          fulfillment_status?: string
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           created_at?: string
           delivery_address?: string | null
           delivery_email_sent?: boolean | null
+          fulfillment_status?: string
           guest_email?: string | null
           guest_name?: string | null
           guest_phone?: string | null
@@ -806,6 +809,7 @@ export type Database = {
           guest_email: string
           guest_name: string
           guest_phone: string
+          fulfillment_status: string
           id: string
           items: Json
           notes: string

@@ -5,11 +5,12 @@ import AdminOrdersHeader from '@/components/admin/AdminOrdersHeader';
 import AdminOrderAnalytics from '@/components/admin/AdminOrderAnalytics';
 import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
+import FulfillmentQueue from '@/components/admin/FulfillmentQueue';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useAdminOrders } from '@/hooks/useAdminOrders';
 
 const AdminOrders = () => {
-  const { isAuthenticated, isCheckingAuth, handleAuthenticated, handleLogout } = useAdminAuth();
+  const { isAuthenticated, isCheckingAuth, handleLogout } = useAdminAuth();
   const { orders, isLoading, forceRefresh } = useAdminOrders(isAuthenticated);
   const handleOrderUpdate = async () => {
     console.log('🔄 Order updated - forcing immediate refresh with extended delays...');
@@ -35,7 +36,7 @@ const AdminOrders = () => {
   }
 
   if (!isAuthenticated) {
-    return <AdminAuth onAuthenticated={handleAuthenticated} />;
+    return <AdminAuth />;
   }
 
   if (isLoading) {
@@ -53,6 +54,7 @@ const AdminOrders = () => {
     <div className="admin-light min-h-screen bg-stone-50 px-4 py-6 text-gray-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px] space-y-6">
         <AdminOrdersHeader onLogout={handleLogout} />
+        <FulfillmentQueue orders={orders || []} onRefresh={handleOrderUpdate} />
         <AdminOrderAnalytics orders={orders || []} />
         <AdminOrdersTable 
           orders={orders || []} 

@@ -1,43 +1,13 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { useAuth } from '@/context/AuthContext';
 
-interface AdminAuthProps {
-  onAuthenticated: () => void;
-}
-
-const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    console.log('Admin login attempt:', { username, password: password.length > 0 ? '***' : 'empty' });
-
-    try {
-      // Check credentials
-      if (username === 'senteur' && password === 'SenteurSAF@2025') {
-        console.log('Admin credentials verified successfully');
-        toast.success('Admin access granted');
-        sessionStorage.setItem('admin_authenticated', 'true');
-        onAuthenticated();
-      } else {
-        console.log('Invalid admin credentials provided');
-        toast.error('Invalid credentials');
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Login failed');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const AdminAuth: React.FC = () => {
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
 
   return (
     <div className="admin-light min-h-screen bg-white flex items-center justify-center p-6 text-gray-900">
@@ -46,39 +16,17 @@ const AdminAuth: React.FC<AdminAuthProps> = ({ onAuthenticated }) => {
           <CardTitle className="text-gray-900 text-center">Admin Access</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block text-gray-700">Username</label>
-              <Input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
-                placeholder="Enter username"
-                required
-              />
+          {user ? (
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-gray-600">{user.email} is signed in, but does not have administrator access.</p>
+              <Button type="button" variant="outline" onClick={() => void signOut()} className="w-full">Sign out</Button>
             </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block text-gray-700">Password</label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="bg-white border-gray-300 text-gray-900 placeholder:text-gray-400"
-                placeholder="Enter password"
-                required
-              />
+          ) : (
+            <div className="space-y-4 text-center">
+              <p className="text-sm text-gray-600">Sign in with the Supabase account assigned to Senteur operations.</p>
+              <Button type="button" onClick={() => navigate('/auth', { state: { from: '/admin/orders' } })} className="w-full bg-gray-900 text-white hover:bg-gray-800">Sign in to admin</Button>
             </div>
-            
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-gray-900 text-white hover:bg-gray-800"
-            >
-              {isLoading ? 'Authenticating...' : 'Access Admin Panel'}
-            </Button>
-          </form>
+          )}
         </CardContent>
       </Card>
     </div>

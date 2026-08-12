@@ -14,6 +14,7 @@ export interface AdminOrder {
   user_id: string | null;
   total: number;
   status: string;
+  fulfillment_status: 'new' | 'packed' | 'shipped' | 'delivered';
   created_at: string;
   guest_name: string | null;
   guest_email: string | null;

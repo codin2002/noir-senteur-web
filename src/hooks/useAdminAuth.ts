@@ -1,28 +1,46 @@
 
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useAdminAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const { user, isLoading: isAuthLoading, signOut } = useAuth();
 
   useEffect(() => {
-    console.log('AdminOrders: Checking authentication status...');
-    const adminAuth = sessionStorage.getItem('admin_authenticated');
-    console.log('AdminOrders: Found auth status:', adminAuth);
-    
-    setIsAuthenticated(adminAuth === 'true');
-    setIsCheckingAuth(false);
-  }, []);
+    let active = true;
+    const checkRole = async () => {
+      if (isAuthLoading) return;
+      if (!user) {
+        if (active) {
+          setIsAuthenticated(false);
+          setIsCheckingAuth(false);
+        }
+        return;
+      }
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .eq('role', 'admin')
+        .maybeSingle();
+      if (active) {
+        setIsAuthenticated(!error && Boolean(data));
+        setIsCheckingAuth(false);
+      }
+    };
+    setIsCheckingAuth(true);
+    void checkRole();
+    return () => { active = false; };
+  }, [user, isAuthLoading]);
 
   const handleAuthenticated = () => {
-    console.log('AdminOrders: Authentication successful');
     setIsAuthenticated(true);
-    sessionStorage.setItem('admin_authenticated', 'true');
   };
 
-  const handleLogout = () => {
-    console.log('AdminOrders: Logging out');
-    sessionStorage.removeItem('admin_authenticated');
+  const handleLogout = async () => {
+    await signOut();
     setIsAuthenticated(false);
   };
 
@@ -30,6 +48,7 @@ export const useAdminAuth = () => {
     isAuthenticated,
     isCheckingAuth,
     handleAuthenticated,
-    handleLogout
+    handleLogout,
+    user
   };
 };
