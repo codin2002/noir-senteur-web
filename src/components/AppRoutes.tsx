@@ -9,6 +9,7 @@ import Wishlist from '@/pages/Wishlist';
 import PerfumeDetail from '@/pages/PerfumeDetail';
 import PaymentFailed from '@/pages/PaymentFailed';
 import AuthCallback from '@/pages/AuthCallback';
+import ResetPassword from '@/pages/ResetPassword';
 import ContactUs from '@/pages/ContactUs';
 import TermsConditions from '@/pages/TermsConditions';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
@@ -32,6 +33,7 @@ const AppRoutes = () => {
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route path="/auth/reset-password" element={<ResetPassword />} />
       <Route path="/contact-us" element={<ContactUs />} />
       <Route path="/terms-conditions" element={<TermsConditions />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
