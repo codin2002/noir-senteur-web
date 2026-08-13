@@ -15,6 +15,9 @@ interface PaymentSuccessContentProps {
 const PaymentSuccessContent: React.FC<PaymentSuccessContentProps> = ({ orderDetails }) => {
   const { user } = useAuth();
   const isTestPayment = orderDetails?.test === true;
+  const orderReference = orderDetails?.orderId
+    ? `SEN-${String(orderDetails.orderId).slice(0, 8).toUpperCase()}`
+    : null;
 
   return (
     <div className="min-h-screen bg-dark text-white flex flex-col">
@@ -29,6 +32,14 @@ const PaymentSuccessContent: React.FC<PaymentSuccessContentProps> = ({ orderDeta
               ? 'Ziina and the secure webhook both confirmed this test payment. No order, stock, email, or live purchase record was created.'
               : 'Thank you for your purchase. Your order has been confirmed.'}
           </p>
+
+          {!isTestPayment && orderReference && (
+            <div className="mx-auto mb-8 max-w-md rounded-lg border border-gold/40 bg-darker px-6 py-5">
+              <p className="text-xs font-medium uppercase tracking-[0.2em] text-gold">Your order reference</p>
+              <p className="mt-2 text-2xl font-semibold tracking-wide text-white">{orderReference}</p>
+              <p className="mt-2 text-sm text-muted-foreground">Please save this reference. We will use it for any order support.</p>
+            </div>
+          )}
 
           {!isTestPayment && <OrderDetailsCard orderDetails={orderDetails} />}
 

@@ -9,6 +9,9 @@ interface OrderDetailsCardProps {
 
 const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ orderDetails }) => {
   if (!orderDetails) return null;
+  const orderReference = orderDetails.orderId
+    ? `SEN-${String(orderDetails.orderId).slice(0, 8).toUpperCase()}`
+    : null;
   const items = Array.isArray(orderDetails.items) ? orderDetails.items : [];
   const duoProductIds = OFFERS.SIGNATURE_DUO.PRODUCT_IDS;
   const duoItems = duoProductIds.map((productId) => items.find((item: any) => item.perfume_id === productId));
@@ -35,7 +38,7 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ orderDetails }) => 
             Order Details
           </h3>
           <p className="text-muted-foreground mb-1">
-            Order ID: #{orderDetails.orderId?.substring(0, 8)}
+            Order reference: <span className="font-medium text-white">{orderReference}</span>
           </p>
           <p className="text-muted-foreground mb-1">
             Payment Method: {orderDetails.paymentMethod || 'Ziina'}
