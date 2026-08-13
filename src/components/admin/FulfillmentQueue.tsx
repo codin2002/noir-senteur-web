@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { CheckCircle2, ChevronRight, PackageCheck, Truck } from 'lucide-react';
+import { CheckCircle2, ChevronRight, PackageCheck, Search, Truck, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { supabase } from '@/integrations/supabase/client';
 import { AdminOrder } from '@/types/adminOrder';
 import { getCustomerInfo, getDeliveryAddress } from '@/utils/orderUtils';
@@ -18,7 +19,22 @@ const stages: Record<FulfillmentStatus, { label: string; next?: FulfillmentStatu
 
 const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }> = ({ orders, onRefresh }) => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const activeOrders = orders.filter((order) => order.fulfillment_status !== 'delivered').slice(0, 8);
+  const [search, setSearch] = useState('');
+  const activeOrders = orders.filter((order) => order.fulfillment_status !== 'delivered');
+  const normalizedSearch = search.trim().toLowerCase().replace(/^sen-/, '');
+  const visibleOrders = normalizedSearch
+    ? activeOrders.filter((order) => {
+        const customer = getCustomerInfo(order);
+        const searchableText = [
+          order.id.slice(0, 8),
+          customer.name,
+          customer.phone,
+          customer.email,
+          getDeliveryAddress(order),
+        ].join(' ').toLowerCase();
+        return searchableText.includes(normalizedSearch);
+      })
+    : activeOrders.slice(0, 8);
 
   const updateFulfillment = async (order: AdminOrder) => {
     const nextStatus = stages[order.fulfillment_status].next;
@@ -57,18 +73,39 @@ const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }
         </div>
       </CardHeader>
       <CardContent>
+        <div className="relative mb-4 max-w-xl">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-500" />
+          <Input
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search reference, customer name, phone, email, or address"
+            className="border-stone-300 bg-white pl-9 pr-10 text-stone-950 placeholder:text-stone-500"
+          />
+          {search && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-500 hover:text-stone-900"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         {activeOrders.length === 0 ? (
           <div className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50 p-6 text-center text-sm text-emerald-800">All orders are delivered.</div>
+        ) : visibleOrders.length === 0 ? (
+          <div className="rounded-lg border border-dashed border-stone-300 bg-white p-6 text-center text-sm text-stone-600">No active order matches that search.</div>
         ) : (
           <div className="grid gap-3 lg:grid-cols-2">
-            {activeOrders.map((order) => {
+            {visibleOrders.map((order) => {
               const customer = getCustomerInfo(order);
               const stage = stages[order.fulfillment_status];
               return (
                 <div key={order.id} className="rounded-lg border border-stone-200 bg-white p-4 shadow-sm">
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <p className="font-mono text-xs text-stone-500">#{order.id.slice(0, 8)}</p>
+                      <p className="font-mono text-xs text-stone-500">SEN-{order.id.slice(0, 8).toUpperCase()}</p>
                       <p className="mt-1 font-semibold text-stone-950">{customer.name}</p>
                       <p className="text-sm text-stone-600">{customer.phone}</p>
                     </div>
