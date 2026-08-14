@@ -37,7 +37,8 @@ const PaymentSuccessContent: React.FC<PaymentSuccessContentProps> = ({ orderDeta
             <div className="mx-auto mb-8 max-w-md rounded-lg border border-gold/40 bg-darker px-6 py-5">
               <p className="text-xs font-medium uppercase tracking-[0.2em] text-gold">Your order reference</p>
               <p className="mt-2 text-2xl font-semibold tracking-wide text-white">{orderReference}</p>
-              <p className="mt-2 text-sm text-muted-foreground">Please save this reference. We will use it for any order support.</p>
+              <p className="mt-2 text-sm text-muted-foreground">Please save this reference. You can use it with your checkout mobile number to track delivery.</p>
+              <Link to={`/track-order?ref=${orderReference}`} className="mt-4 inline-block text-sm font-medium text-gold underline underline-offset-4">Track this order</Link>
             </div>
           )}
 

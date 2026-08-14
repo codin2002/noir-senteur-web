@@ -8,6 +8,8 @@ export function createConfirmationEmailTemplate(
   order: any,
   itemsList: string
 ): EmailTemplate {
+  const orderReference = `SEN-${order.id.substring(0, 8).toUpperCase()}`;
+  const trackingUrl = `https://senteurfragrances.com/track-order?ref=${orderReference}`;
   return {
     subject: "Thank you for your order - Senteur Fragrances",
     html: `
@@ -31,7 +33,7 @@ export function createConfirmationEmailTemplate(
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <tr>
               <td style="padding: 8px 0; color: #333; font-weight: bold;">Order ID:</td>
-              <td style="padding: 8px 0; color: #666;">#${order.id.substring(0, 8)}</td>
+              <td style="padding: 8px 0; color: #666;">${orderReference}</td>
               <td style="padding: 8px 0; color: #333; font-weight: bold;">Email:</td>
               <td style="padding: 8px 0; color: #666;">${order.user_id ? 'Account email' : order.guest_email || 'N/A'}</td>
             </tr>
@@ -110,6 +112,10 @@ export function createConfirmationEmailTemplate(
             <li>Have your confirmation email ready</li>
             <li>Ensure someone is available at the delivery address</li>
           </ul>
+          <div style="margin-top: 20px; text-align: center;">
+            <a href="${trackingUrl}" style="display: inline-block; background-color: #412300; color: white; padding: 12px 20px; text-decoration: none; font-weight: bold;">Track your order</a>
+            <p style="margin: 10px 0 0 0; color: #666; font-size: 13px;">Use reference ${orderReference} and the mobile number used at checkout.</p>
+          </div>
           
           <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #ddd;">
             <p style="margin: 0 0 10px 0; color: #333; font-weight: bold;">For further inquiries, contact:</p>
