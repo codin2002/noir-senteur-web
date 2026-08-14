@@ -74,6 +74,9 @@ const Navbar = () => {
           <button onClick={() => scrollToSection('contact')} className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
             Contact
           </button>
+          <Link to="/track-order" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
+            Track Order
+          </Link>
           
           {/* Wishlist and Cart Icons */}
           <div className="flex items-center space-x-4">
@@ -150,6 +153,9 @@ const Navbar = () => {
             <button onClick={() => scrollToSection('contact')} className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
               Contact
             </button>
+            <Link to="/track-order" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider" onClick={() => setIsMobileMenuOpen(false)}>
+              Track Order
+            </Link>
             
             {user ? <>
                 <Link to="/profile" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
