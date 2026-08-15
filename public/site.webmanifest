@@ -1,0 +1,8 @@
+{
+  "name": "Senteur Fragrances",
+  "short_name": "Senteur",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }],
+  "theme_color": "#080808",
+  "background_color": "#080808",
+  "display": "standalone"
+}
