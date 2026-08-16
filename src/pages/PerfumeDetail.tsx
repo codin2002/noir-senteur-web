@@ -15,8 +15,6 @@ const PerfumeDetail = () => {
     perfume,
     perfumeImages,
     loading,
-    isInWishlist,
-    setIsInWishlist,
     classificationData,
     isLoadingClassification
   } = usePerfumeDetail();
@@ -71,8 +69,6 @@ const PerfumeDetail = () => {
         <PerfumeDetailContent
           perfume={perfume}
           perfumeImages={perfumeImages}
-          isInWishlist={isInWishlist}
-          setIsInWishlist={setIsInWishlist}
           classificationData={classificationData}
           isLoadingClassification={isLoadingClassification}
         />

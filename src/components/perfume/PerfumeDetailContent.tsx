@@ -9,8 +9,6 @@ import { PerfumeImage, PerfumeClassificationData, Perfume } from '@/types/perfum
 interface PerfumeDetailContentProps {
   perfume: Perfume;
   perfumeImages: PerfumeImage[];
-  isInWishlist: boolean;
-  setIsInWishlist: (value: boolean) => void;
   classificationData: PerfumeClassificationData | null;
   isLoadingClassification: boolean;
 }
@@ -18,8 +16,6 @@ interface PerfumeDetailContentProps {
 const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
   perfume,
   perfumeImages,
-  isInWishlist,
-  setIsInWishlist,
   classificationData,
   isLoadingClassification
 }) => {
@@ -41,8 +37,6 @@ const PerfumeDetailContent: React.FC<PerfumeDetailContentProps> = ({
           <PerfumeActions 
             perfume={perfume}
             perfumeId={perfume.id}
-            isInWishlist={isInWishlist}
-            setIsInWishlist={setIsInWishlist}
           />
         </div>
       </div>

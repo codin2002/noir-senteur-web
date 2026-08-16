@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/context/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, Heart, ShieldCheck, ShoppingCart } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, ShoppingCart } from 'lucide-react';
 import { useCartCount } from '@/hooks/useCartCount';
 import { usePreorderInfo } from '@/hooks/usePreorderInfo';
 import PreorderBadge from './PreorderBadge';
@@ -26,21 +26,16 @@ interface Perfume {
 interface PerfumeActionsProps {
   perfume: Perfume;
   perfumeId: string;
-  isInWishlist: boolean;
-  setIsInWishlist: (value: boolean) => void;
 }
 
 const PerfumeActions: React.FC<PerfumeActionsProps> = ({ 
   perfume, 
-  perfumeId, 
-  isInWishlist, 
-  setIsInWishlist 
+  perfumeId
 }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [addingToCart, setAddingToCart] = useState(false);
   const [startingCheckout, setStartingCheckout] = useState(false);
-  const [addingToWishlist, setAddingToWishlist] = useState(false);
   const [showCartConfirmation, setShowCartConfirmation] = useState(false);
   const [confirmedQuantity, setConfirmedQuantity] = useState(1);
   const [cartSubtotal, setCartSubtotal] = useState(perfume.price_value);
@@ -51,46 +46,6 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
     : perfumeId === PERFUMES.FOUR_TWO_FOUR.ID
       ? PERFUMES.THREE_ONE_THREE
       : null;
-
-  const addToWishlist = async () => {
-    if (!user) {
-      toast.error('Please sign in to add items to your wishlist');
-      return;
-    }
-
-    if (!perfumeId) return;
-
-    setAddingToWishlist(true);
-    try {
-      if (isInWishlist) {
-        // Remove from wishlist
-        const { error } = await supabase
-          .from('wishlist')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('perfume_id', perfumeId);
-
-        if (error) throw error;
-        setIsInWishlist(false);
-        toast.success('Removed from wishlist');
-      } else {
-        // Add to wishlist
-        const { error } = await supabase
-          .from('wishlist')
-          .insert([{ user_id: user.id, perfume_id: perfumeId }]);
-
-        if (error) throw error;
-        setIsInWishlist(true);
-        toast.success('Added to wishlist');
-      }
-    } catch (error: any) {
-      toast.error('Failed to update wishlist', {
-        description: error.message
-      });
-    } finally {
-      setAddingToWishlist(false);
-    }
-  };
 
   const buyNow = () => {
     setStartingCheckout(true);
@@ -251,18 +206,6 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
           </Button>
         </div>
       )}
-      
-      <div className="grid grid-cols-1 gap-4">
-        <Button 
-          variant="outline"
-          className={`border-gold/50 ${isInWishlist ? 'bg-gold/10 text-gold' : 'text-gold hover:bg-gold/10'}`}
-          onClick={addToWishlist}
-          disabled={addingToWishlist}
-        >
-          <Heart className={`h-5 w-5 mr-2 ${isInWishlist ? 'fill-gold stroke-gold' : ''}`} />
-          {isInWishlist ? 'Wishlisted' : 'Add to Wishlist'}
-        </Button>
-      </div>
     </div>
     <Dialog open={showCartConfirmation} onOpenChange={setShowCartConfirmation}>
       <DialogContent className="max-w-md bg-darker border-gold/30 text-white">
