@@ -214,19 +214,24 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
     <>
     <div className="space-y-4">
       {isPreorder && preorderInfo && <PreorderBadge info={preorderInfo} />}
-      <Button 
+      {!isPreorder && (
+        <Button
+          onClick={buyNow}
+          disabled={addingToCart || startingCheckout}
+          className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6"
+        >
+          {startingCheckout ? 'Opening checkout...' : `Buy now AED ${perfume.price_value.toFixed(2)}`}
+        </Button>
+      )}
+      <Button
         onClick={addToCart}
         disabled={addingToCart}
-        className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6"
+        variant="outline"
+        className="w-full border-gold/50 text-gold hover:bg-gold/10 text-lg py-6"
       >
         <ShoppingCart className="h-5 w-5 mr-2" />
         {addingToCart ? 'Adding...' : isPreorder ? 'Preorder Now' : 'Add to Cart'}
       </Button>
-      {!isPreorder && (
-        <Button onClick={buyNow} disabled={addingToCart || startingCheckout} variant="outline" className="w-full border-gold/50 text-gold hover:bg-gold/10">
-          {startingCheckout ? 'Opening checkout...' : `Buy now AED ${perfume.price_value.toFixed(2)}`}
-        </Button>
-      )}
 
       {duoPartner && (
         <div className="rounded-md border border-gold/25 bg-gold/[0.03] px-4 py-3">

@@ -227,11 +227,11 @@ const SignatureDuo = () => {
               </div>
 
               <div className="space-y-4">
-                <Button onClick={addToCart} className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6">
-                  <ShoppingCart className="h-5 w-5 mr-2" />Add the Signature Duo to Cart
-                </Button>
-                <Button onClick={buyNow} variant="outline" className="w-full border-gold/50 text-gold hover:bg-gold/10">
+                <Button onClick={buyNow} className="w-full bg-gold text-darker hover:bg-gold/80 text-lg py-6">
                   Buy now AED {OFFERS.SIGNATURE_DUO.PRICE.toFixed(2)}
+                </Button>
+                <Button onClick={addToCart} variant="outline" className="w-full border-gold/50 text-gold hover:bg-gold/10 text-lg py-6">
+                  <ShoppingCart className="h-5 w-5 mr-2" />Add the Signature Duo to Cart
                 </Button>
                 <p className="flex items-center justify-center gap-2 text-xs text-muted-foreground"><ShieldCheck className="h-4 w-4 text-gold" />Free UAE delivery and secure payment</p>
               </div>
