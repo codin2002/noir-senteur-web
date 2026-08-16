@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Heart, ShoppingCart, History, User } from 'lucide-react';
+import { ShoppingCart, History, User } from 'lucide-react';
 import { useCartCount } from '@/hooks/useCartCount';
 import CartBadge from '@/components/ui/cart-badge';
 import RegionBanner from '@/components/RegionBanner';
@@ -78,12 +78,8 @@ const Navbar = () => {
             Track Order
           </Link>
           
-          {/* Wishlist and Cart Icons */}
+          {/* Cart */}
           <div className="flex items-center space-x-4">
-            <Link to="/wishlist" className="text-white hover:text-gold transition-colors relative">
-              <Heart className="h-5 w-5" />
-            </Link>
-            
             <Link to="/cart" className="text-white hover:text-gold transition-colors relative">
               <ShoppingCart className="h-5 w-5" />
               <CartBadge count={cartCount} />
@@ -122,10 +118,6 @@ const Navbar = () => {
 
         {/* Mobile Menu Toggle */}
         <div className="md:hidden flex items-center space-x-4">
-          <Link to="/wishlist" className="text-white hover:text-gold transition-colors">
-            <Heart className="h-5 w-5" />
-          </Link>
-          
           <Link to="/cart" className="text-white hover:text-gold transition-colors relative">
             <ShoppingCart className="h-5 w-5" />
             <CartBadge count={cartCount} className="-top-1 -right-1" />

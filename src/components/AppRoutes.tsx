@@ -5,7 +5,6 @@ import Index from '@/pages/Index';
 import Auth from '@/pages/Auth';
 import Profile from '@/pages/Profile';
 import Cart from '@/pages/Cart';
-import Wishlist from '@/pages/Wishlist';
 import PerfumeDetail from '@/pages/PerfumeDetail';
 import PaymentFailed from '@/pages/PaymentFailed';
 import AuthCallback from '@/pages/AuthCallback';
@@ -28,7 +27,6 @@ const AppRoutes = () => {
       <Route path="/auth" element={<Auth />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/cart" element={<Cart />} />
-      <Route path="/wishlist" element={<Wishlist />} />
       <Route path="/perfume/:id" element={<PerfumeDetail />} />
       <Route path="/offers/signature-duo" element={<SignatureDuo />} />
       <Route path="/track-order" element={<TrackOrder />} />
