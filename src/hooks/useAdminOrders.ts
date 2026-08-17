@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { AdminOrder, AdminOrderItem, ProductAudience } from '@/types/adminOrder';
+import { AdminOrder, AdminOrderItem } from '@/types/adminOrder';
 
 export const useAdminOrders = (isAuthenticated: boolean) => {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -36,32 +36,6 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
 
       console.log('✅ Fetched orders successfully:', data?.length, 'orders');
       
-      const perfumeIds = Array.from(new Set((data || []).flatMap((order) =>
-        (Array.isArray(order.items) ? order.items : [])
-          .map((item: unknown) => (item as { perfume_id?: string }).perfume_id)
-          .filter((id): id is string => Boolean(id))
-      )));
-      const audienceByPerfume = new Map<string, ProductAudience>();
-
-      if (perfumeIds.length > 0) {
-        const { data: classifications, error: classificationError } = await supabase
-          .from('perfume_classifications')
-          .select('perfume_id, audience_masculine, audience_feminine')
-          .in('perfume_id', perfumeIds);
-
-        if (classificationError) {
-          console.warn('Unable to load product audience classifications:', classificationError);
-        } else {
-          classifications?.forEach((classification) => {
-            const difference = classification.audience_masculine - classification.audience_feminine;
-            audienceByPerfume.set(
-              classification.perfume_id,
-              Math.abs(difference) <= 5 ? 'Unisex' : difference > 0 ? 'Men' : 'Women'
-            );
-          });
-        }
-      }
-
       const transformedOrders: AdminOrder[] = (data || []).map(order => {
         console.log(`📦 Order ${order.id}:`, {
           user_id: order.user_id,
@@ -75,10 +49,7 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
           ...order,
           notes: order.notes || null,
           items: Array.isArray(order.items)
-            ? (order.items as unknown as AdminOrderItem[]).map((item) => ({
-                ...item,
-                audience: audienceByPerfume.get(item.perfume_id) || 'Unisex'
-              }))
+            ? (order.items as unknown as AdminOrderItem[])
             : []
         };
       });

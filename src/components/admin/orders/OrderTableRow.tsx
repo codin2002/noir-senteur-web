@@ -30,11 +30,6 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
           <div key={item.id} className="mb-1.5 whitespace-nowrap text-sm last:mb-0">
             <span className="font-medium text-stone-900">{item.perfume.name}</span>
             <span className="ml-1 text-stone-500">×{item.quantity}</span>
-            <span className={`ml-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-              item.audience === 'Men' ? 'bg-sky-100 text-sky-700' :
-              item.audience === 'Women' ? 'bg-fuchsia-100 text-fuchsia-700' :
-              'bg-violet-100 text-violet-700'
-            }`}>{item.audience || 'Unisex'}</span>
           </div>
         ))}
       </TableCell>

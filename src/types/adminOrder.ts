@@ -1,12 +1,9 @@
-export type ProductAudience = 'Men' | 'Women' | 'Unisex';
-
 export interface AdminOrderItem {
   id: string;
   perfume_id: string;
   quantity: number;
   price: number;
   perfume: { name: string; price: string };
-  audience?: ProductAudience;
 }
 
 export interface AdminOrder {
