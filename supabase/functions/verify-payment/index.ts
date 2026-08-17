@@ -9,6 +9,7 @@ import { createOrder } from './orderCreator.ts';
 import { recordSuccessfulPayment } from './paymentRecorder.ts';
 import { sendOrderConfirmation } from './emailService.ts';
 import { resolveUserId } from './userResolver.ts';
+import { sendMetaPurchase } from '../_shared/metaConversions.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,7 +24,7 @@ serve(async (req) => {
   try {
     console.log('=== VERIFY PAYMENT FUNCTION CALLED ===');
     
-    const { paymentIntentId, deliveryAddress, isGuest, userId, cartItems } = await req.json();
+    const { paymentIntentId, deliveryAddress, isGuest, userId, cartItems, meta } = await req.json();
     
     console.log('Payment Intent ID:', paymentIntentId);
     console.log('Is Guest:', isGuest);
@@ -84,6 +85,29 @@ serve(async (req) => {
       actualUserId,
       supabaseService
     );
+
+    const [firstName, ...remainingNames] = customerInfo.customerName.trim().split(/\s+/);
+    await sendMetaPurchase({
+      orderId,
+      value: orderCalculation.totalAmount,
+      items: orderCartItems.map((item: any) => {
+        const perfume = item.perfume || item;
+        return {
+          id: perfume.id || item.perfume_id,
+          quantity: Number(item.quantity || 1),
+          price: Number(perfume.price_value || item.price || 0),
+        };
+      }),
+      email: customerInfo.customerEmail.endsWith('@example.com') ? null : customerInfo.customerEmail,
+      phone: customerInfo.customerPhone,
+      firstName,
+      lastName: remainingNames.join(' '),
+      externalId: actualUserId,
+      fbp: typeof meta?.fbp === 'string' ? meta.fbp.slice(0, 255) : null,
+      fbc: typeof meta?.fbc === 'string' ? meta.fbc.slice(0, 255) : null,
+      clientIpAddress: req.headers.get('cf-connecting-ip') || req.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+      clientUserAgent: req.headers.get('user-agent'),
+    });
 
     // Send email confirmation
     await sendOrderConfirmation(orderId, supabaseService);

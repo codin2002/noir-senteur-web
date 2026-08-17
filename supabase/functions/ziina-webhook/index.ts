@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { sendMetaPurchase } from "../_shared/metaConversions.ts";
 
 const textEncoder = new TextEncoder();
 
@@ -123,7 +124,7 @@ Deno.serve(async (request) => {
       if (orderId) {
         const { data: orderItems, error: itemsError } = await admin
           .from("order_items")
-          .select("quantity,perfume:perfumes(name)")
+          .select("quantity,price,perfume_id,perfume:perfumes(name)")
           .eq("order_id", orderId);
         if (itemsError) throw itemsError;
         const productDetails = (orderItems ?? [])
@@ -136,6 +137,28 @@ Deno.serve(async (request) => {
             .eq("order_id", orderId);
           if (paymentUpdateError) throw paymentUpdateError;
         }
+
+        const customerName = value("Contact:", "Guest Customer").trim();
+        const [firstName, ...remainingNames] = customerName.split(/\s+/);
+        const meta = (checkout.meta_context || {}) as Record<string, string | null>;
+        await sendMetaPurchase({
+          orderId,
+          value: Number(checkout.amount),
+          items: (orderItems ?? []).map((item: { quantity: number; price: number; perfume_id: string }) => ({
+            id: item.perfume_id,
+            quantity: Number(item.quantity),
+            price: Number(item.price),
+          })),
+          email: value("Email:"),
+          phone: value("Phone:"),
+          firstName,
+          lastName: remainingNames.join(" "),
+          externalId: checkout.user_id,
+          fbp: meta.fbp,
+          fbc: meta.fbc,
+          clientIpAddress: meta.client_ip_address,
+          clientUserAgent: meta.client_user_agent,
+        });
       }
 
       // Email is optional for guests. The email function atomically claims the

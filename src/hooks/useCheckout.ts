@@ -208,7 +208,11 @@ export const useCheckout = () => {
         deliveryAddress,
         isGuest,
         userId: isGuest ? null : user?.id,
-        cartItems: isGuest ? cartItems : undefined
+        cartItems: isGuest ? cartItems : undefined,
+        meta: {
+          fbp: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbp='))?.split('=').slice(1).join('='),
+          fbc: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbc='))?.split('=').slice(1).join('='),
+        },
       };
 
       console.log('Request body:', requestBody);
