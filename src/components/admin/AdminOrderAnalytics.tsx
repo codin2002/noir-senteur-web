@@ -7,7 +7,11 @@ import { getOrderEmirate } from '@/utils/orderUtils';
 const AdminOrderAnalytics: React.FC<{ orders: AdminOrder[] }> = ({ orders }) => {
   const delivered = orders.filter((order) => order.status === 'delivered');
   const dispatched = orders.filter((order) => order.status === 'dispatched');
-  const pending = orders.filter((order) => !['delivered', 'returned'].includes(order.status));
+  // Only paid orders that are still in the pre-dispatch fulfilment stage need action.
+  // Refunded, cancelled, returned and dispatched orders must not inflate this count.
+  const pending = orders.filter(
+    (order) => order.status === 'processing' && order.fulfillment_status !== 'delivered'
+  );
   const revenue = delivered.reduce((sum, order) => sum + Number(order.total), 0);
   const units = orders.reduce((sum, order) => sum + order.items.reduce((itemSum, item) => itemSum + item.quantity, 0), 0);
 
