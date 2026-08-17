@@ -24,7 +24,9 @@ Deno.serve(async (req) => {
 
     const startOfToday = new Date();
     startOfToday.setUTCHours(0, 0, 0, 0);
-    const [paymentsRes, logsRes, perfumesRes, visitorTotalRes, visitorTodayRes] = await Promise.all([
+    const startOfVisitorWindow = new Date(startOfToday);
+    startOfVisitorWindow.setUTCDate(startOfVisitorWindow.getUTCDate() - 29);
+    const [paymentsRes, logsRes, perfumesRes, visitorTotalRes, visitorTodayRes, visitorRecentRes] = await Promise.all([
       supabase
         .from('successful_payments')
         .select('id, amount, created_at, order_id')
@@ -41,11 +43,32 @@ Deno.serve(async (req) => {
         .from('site_visitors')
         .select('*', { count: 'exact', head: true })
         .gte('first_seen_at', startOfToday.toISOString()),
+      supabase
+        .from('site_visitors')
+        .select('first_seen_at')
+        .gte('first_seen_at', startOfVisitorWindow.toISOString())
+        .order('first_seen_at', { ascending: true })
+        .limit(10000),
     ]);
 
     const payments = paymentsRes.data || [];
     const logs = logsRes.data || [];
     const perfumes = perfumesRes.data || [];
+    const visitorCounts = new Map<string, number>();
+    (visitorRecentRes.data || []).forEach((visit: { first_seen_at: string }) => {
+      const day = visit.first_seen_at.slice(0, 10);
+      visitorCounts.set(day, (visitorCounts.get(day) || 0) + 1);
+    });
+    const visitorDaily = Array.from({ length: 30 }, (_, index) => {
+      const date = new Date(startOfVisitorWindow);
+      date.setUTCDate(date.getUTCDate() + index);
+      const day = date.toISOString().slice(0, 10);
+      return {
+        date: day,
+        label: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }),
+        visitors: visitorCounts.get(day) || 0,
+      };
+    });
 
     const orderIds = Array.from(new Set(payments.map((p: any) => p.order_id).filter(Boolean)));
     let orderItems: any[] = [];
@@ -66,6 +89,7 @@ Deno.serve(async (req) => {
         visitors: {
           total: visitorTotalRes.count || 0,
           today: visitorTodayRes.count || 0,
+          daily: visitorDaily,
         },
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

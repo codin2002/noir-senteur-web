@@ -70,6 +70,11 @@ export interface AnalyticsData {
   visitors: {
     total: number;
     today: number;
+    daily: Array<{
+      date: string;
+      label: string;
+      visitors: number;
+    }>;
   };
 }
 
@@ -97,7 +102,7 @@ export const useAnalyticsData = () => {
       const logs = result?.logs || [];
       const perfumes = result?.perfumes || [];
       const orderItems = result?.orderItems || [];
-      const visitors = result?.visitors || { total: 0, today: 0 };
+      const visitors = result?.visitors || { total: 0, today: 0, daily: [] };
       const perfumeMap = new Map(perfumes.map((p: any) => [p.id, p]));
 
       // ---- Monthly revenue ----

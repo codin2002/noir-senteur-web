@@ -11,6 +11,7 @@ import InventoryMovementChart from '@/components/admin/analytics/InventoryMoveme
 import ProductPerformanceChart from '@/components/admin/analytics/ProductPerformanceChart';
 import ActivityHeatmap from '@/components/admin/analytics/ActivityHeatmap';
 import AIInsights from '@/components/admin/analytics/AIInsights';
+import VisitorTrafficChart from '@/components/admin/analytics/VisitorTrafficChart';
 
 const formatAed = (n: number) =>
   n >= 1000 ? `AED ${(n / 1000).toFixed(1)}k` : `AED ${n.toFixed(0)}`;
@@ -82,6 +83,8 @@ const AdminAnalytics: React.FC = () => {
             </div>
 
             {/* Row 2 — Revenue (2/3) + Insights (1/3) */}
+            <VisitorTrafficChart data={data.visitors.daily} />
+
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <RevenueChart data={data.monthlyRevenue} />
