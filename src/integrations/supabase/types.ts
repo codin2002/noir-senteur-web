@@ -244,6 +244,14 @@ export type Database = {
           id: string
           is_preorder: boolean
           notes: string | null
+          traffic_source: string
+          meta_click_id: string | null
+          meta_fbc: string | null
+          meta_fbp: string | null
+          utm_source: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          landing_url: string | null
           payment_status: string
           processing_email_sent: boolean | null
           status: string
@@ -261,6 +269,14 @@ export type Database = {
           id?: string
           is_preorder?: boolean
           notes?: string | null
+          traffic_source?: string
+          meta_click_id?: string | null
+          meta_fbc?: string | null
+          meta_fbp?: string | null
+          utm_source?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          landing_url?: string | null
           payment_status?: string
           processing_email_sent?: boolean | null
           status?: string
@@ -278,6 +294,14 @@ export type Database = {
           id?: string
           is_preorder?: boolean
           notes?: string | null
+          traffic_source?: string
+          meta_click_id?: string | null
+          meta_fbc?: string | null
+          meta_fbp?: string | null
+          utm_source?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          landing_url?: string | null
           payment_status?: string
           processing_email_sent?: boolean | null
           status?: string

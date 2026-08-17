@@ -13,6 +13,7 @@ const OrderTableHeader: React.FC = () => {
         <TableHead className="text-gray-900">Emirate</TableHead>
         <TableHead className="text-gray-900">Products ordered</TableHead>
         <TableHead className="text-gray-900">Total</TableHead>
+        <TableHead className="text-gray-900">Source</TableHead>
         <TableHead className="text-gray-900">Status</TableHead>
         <TableHead className="text-gray-900">Date</TableHead>
         <TableHead className="text-gray-900">Actions</TableHead>

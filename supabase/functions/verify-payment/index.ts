@@ -86,6 +86,19 @@ serve(async (req) => {
       supabaseService
     );
 
+    const trafficSource = meta?.trafficSource === 'meta_ads' || meta?.trafficSource === 'direct' ? meta.trafficSource : 'unknown';
+    const { error: attributionError } = await supabaseService.from('orders').update({
+      traffic_source: trafficSource,
+      meta_click_id: typeof meta?.metaClickId === 'string' ? meta.metaClickId.slice(0, 500) : null,
+      meta_fbc: typeof meta?.fbc === 'string' ? meta.fbc.slice(0, 255) : null,
+      meta_fbp: typeof meta?.fbp === 'string' ? meta.fbp.slice(0, 255) : null,
+      utm_source: typeof meta?.utmSource === 'string' ? meta.utmSource.slice(0, 255) : null,
+      utm_campaign: typeof meta?.utmCampaign === 'string' ? meta.utmCampaign.slice(0, 255) : null,
+      utm_content: typeof meta?.utmContent === 'string' ? meta.utmContent.slice(0, 255) : null,
+      landing_url: typeof meta?.landingUrl === 'string' ? meta.landingUrl.slice(0, 1000) : null,
+    }).eq('id', orderId);
+    if (attributionError) console.error('Order attribution was not saved', attributionError);
+
     const [firstName, ...remainingNames] = customerInfo.customerName.trim().split(/\s+/);
     await sendMetaPurchase({
       orderId,

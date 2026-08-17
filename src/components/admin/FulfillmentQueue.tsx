@@ -115,6 +115,14 @@ const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }
                     </div>
                     <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700">{stage.label}</span>
                   </div>
+                  <div className="mt-2">
+                    <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${
+                      order.traffic_source === 'meta_ads' ? 'bg-blue-100 text-blue-800' :
+                      order.traffic_source === 'direct' ? 'bg-stone-100 text-stone-700' : 'bg-amber-50 text-amber-800'
+                    }`} title="Meta click means a click signal was recorded; final ad attribution is reported by Meta.">
+                      {order.traffic_source === 'meta_ads' ? 'Meta click' : order.traffic_source === 'direct' ? 'Direct' : 'Unknown source'}
+                    </span>
+                  </div>
                   <p className="mt-3 text-sm text-stone-600">{getDeliveryAddress(order)}</p>
                   <div className="mt-3 border-t border-stone-100 pt-3 text-sm text-stone-800">
                     {order.items.map((item) => <p key={item.id}><span className="font-semibold">{item.perfume.name}</span> × {item.quantity}</p>)}

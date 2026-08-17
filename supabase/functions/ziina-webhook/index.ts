@@ -141,6 +141,17 @@ Deno.serve(async (request) => {
         const customerName = value("Contact:", "Guest Customer").trim();
         const [firstName, ...remainingNames] = customerName.split(/\s+/);
         const meta = (checkout.meta_context || {}) as Record<string, string | null>;
+        const { error: attributionError } = await admin.from("orders").update({
+          traffic_source: meta.traffic_source === "meta_ads" || meta.traffic_source === "direct" ? meta.traffic_source : "unknown",
+          meta_click_id: meta.meta_click_id || null,
+          meta_fbc: meta.fbc || null,
+          meta_fbp: meta.fbp || null,
+          utm_source: meta.utm_source || null,
+          utm_campaign: meta.utm_campaign || null,
+          utm_content: meta.utm_content || null,
+          landing_url: meta.landing_url || null,
+        }).eq("id", orderId);
+        if (attributionError) console.error("Order attribution was not saved", attributionError);
         await sendMetaPurchase({
           orderId,
           value: Number(checkout.amount),

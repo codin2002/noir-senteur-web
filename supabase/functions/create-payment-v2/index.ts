@@ -87,6 +87,12 @@ Deno.serve(async (request) => {
         fbc: typeof meta?.fbc === "string" ? meta.fbc.slice(0, 255) : null,
         client_user_agent: request.headers.get("user-agent")?.slice(0, 500) ?? null,
         client_ip_address: request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || null,
+        traffic_source: meta?.trafficSource === "meta_ads" || meta?.trafficSource === "direct" ? meta.trafficSource : "unknown",
+        meta_click_id: typeof meta?.metaClickId === "string" ? meta.metaClickId.slice(0, 500) : null,
+        utm_source: typeof meta?.utmSource === "string" ? meta.utmSource.slice(0, 255) : null,
+        utm_campaign: typeof meta?.utmCampaign === "string" ? meta.utmCampaign.slice(0, 255) : null,
+        utm_content: typeof meta?.utmContent === "string" ? meta.utmContent.slice(0, 255) : null,
+        landing_url: typeof meta?.landingUrl === "string" ? meta.landingUrl.slice(0, 1000) : null,
       },
     }).select("id,lookup_token").single();
     if (pendingError) throw new Error("Could not prepare the checkout safely.");

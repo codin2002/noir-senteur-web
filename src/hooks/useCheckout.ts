@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { fbqInitiateCheckout, fbqPurchase, fbqAdvancedMatch } from '@/utils/metaPixel';
 import { OFFERS, getCartSubtotal, getSignatureDuoQuantity } from '@/utils/constants';
+import { getCheckoutAttribution } from '@/utils/attribution';
 
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -50,10 +51,7 @@ export const useCheckout = () => {
         isGuest: isGuest,
         userId: user?.id || null,
         offerId: options?.offerId,
-        meta: useCheckoutV2 ? {
-          fbp: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbp='))?.split('=').slice(1).join('='),
-          fbc: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbc='))?.split('=').slice(1).join('='),
-        } : undefined,
+        meta: getCheckoutAttribution(),
       };
 
       console.log('Sending payment request:', { 
@@ -209,10 +207,7 @@ export const useCheckout = () => {
         isGuest,
         userId: isGuest ? null : user?.id,
         cartItems: isGuest ? cartItems : undefined,
-        meta: {
-          fbp: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbp='))?.split('=').slice(1).join('='),
-          fbc: document.cookie.split('; ').find((cookie) => cookie.startsWith('_fbc='))?.split('=').slice(1).join('='),
-        },
+        meta: getCheckoutAttribution(),
       };
 
       console.log('Request body:', requestBody);

@@ -21,5 +21,10 @@ export interface AdminOrder {
   guest_phone: string | null;
   delivery_address: string | null;
   notes: string | null;
+  traffic_source: 'meta_ads' | 'direct' | 'unknown';
+  meta_click_id: string | null;
+  utm_source: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
   items: AdminOrderItem[];
 }

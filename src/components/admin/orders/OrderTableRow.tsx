@@ -40,6 +40,22 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
       </TableCell>
       <TableCell className="font-semibold text-stone-900">AED {order.total}</TableCell>
       <TableCell>
+        {order.traffic_source === 'meta_ads' ? (
+          <div title="A Meta click was detected for this order. Final attribution remains in Meta Ads Manager.">
+            <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">Meta click</span>
+            {(order.utm_campaign || order.utm_content) && (
+              <p className="mt-1 max-w-[150px] truncate text-[11px] text-stone-500" title={[order.utm_campaign, order.utm_content].filter(Boolean).join(' / ')}>
+                {[order.utm_campaign, order.utm_content].filter(Boolean).join(' / ')}
+              </p>
+            )}
+          </div>
+        ) : order.traffic_source === 'direct' ? (
+          <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700">Direct</span>
+        ) : (
+          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">Unknown</span>
+        )}
+      </TableCell>
+      <TableCell>
         <span className={`rounded px-2 py-1 text-xs capitalize ${getStatusBadgeClasses(order.status)}`}>{order.status}</span>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-stone-500">
