@@ -20,7 +20,11 @@ const stages: Record<FulfillmentStatus, { label: string; next?: FulfillmentStatu
 const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }> = ({ orders, onRefresh }) => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const activeOrders = orders.filter((order) => order.fulfillment_status !== 'delivered');
+  const activeOrders = orders.filter(
+    (order) =>
+      order.fulfillment_status !== 'delivered' &&
+      !['refunded', 'refund', 'returned', 'cancelled'].includes(order.status)
+  );
   const normalizedSearch = search.trim().toLowerCase().replace(/^sen-/, '');
   const visibleOrders = normalizedSearch
     ? activeOrders.filter((order) => {
