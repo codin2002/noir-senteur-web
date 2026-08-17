@@ -45,7 +45,7 @@ const AdminAnalytics: React.FC = () => {
         ) : (
           <>
             {/* Row 1 — KPIs */}
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
               <MetricCard
                 label="Revenue"
                 value={formatAed(data.totals.totalRevenue)}
@@ -73,6 +73,11 @@ const AdminAnalytics: React.FC = () => {
                 delta={data.totals.aovGrowthPct}
                 prevValue={data.totals.prevAov > 0 ? `AED ${data.totals.prevAov.toFixed(2)}` : undefined}
                 hint="Revenue ÷ orders"
+              />
+              <MetricCard
+                label="Website Visitors"
+                value={String(data.visitors.total)}
+                hint={`Unique browsers since tracking began · Today: ${data.visitors.today}`}
               />
             </div>
 

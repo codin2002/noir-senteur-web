@@ -67,6 +67,10 @@ export interface AnalyticsData {
   heatmap: HeatmapCell[];
   totals: KpiSummary;
   peak: PeakActivity;
+  visitors: {
+    total: number;
+    today: number;
+  };
 }
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -93,6 +97,7 @@ export const useAnalyticsData = () => {
       const logs = result?.logs || [];
       const perfumes = result?.perfumes || [];
       const orderItems = result?.orderItems || [];
+      const visitors = result?.visitors || { total: 0, today: 0 };
       const perfumeMap = new Map(perfumes.map((p: any) => [p.id, p]));
 
       // ---- Monthly revenue ----
@@ -260,6 +265,7 @@ export const useAnalyticsData = () => {
         productPerformance,
         heatmap,
         peak,
+        visitors,
         totals: {
           totalRevenue,
           totalOrders,

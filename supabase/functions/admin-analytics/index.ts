@@ -22,7 +22,9 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    const [paymentsRes, logsRes, perfumesRes] = await Promise.all([
+    const startOfToday = new Date();
+    startOfToday.setUTCHours(0, 0, 0, 0);
+    const [paymentsRes, logsRes, perfumesRes, visitorTotalRes, visitorTodayRes] = await Promise.all([
       supabase
         .from('successful_payments')
         .select('id, amount, created_at, order_id')
@@ -34,6 +36,11 @@ Deno.serve(async (req) => {
         .order('created_at', { ascending: true })
         .limit(5000),
       supabase.from('perfumes').select('id, name, price_value'),
+      supabase.from('site_visitors').select('*', { count: 'exact', head: true }),
+      supabase
+        .from('site_visitors')
+        .select('*', { count: 'exact', head: true })
+        .gte('first_seen_at', startOfToday.toISOString()),
     ]);
 
     const payments = paymentsRes.data || [];
@@ -51,7 +58,16 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ payments, logs, perfumes, orderItems }),
+      JSON.stringify({
+        payments,
+        logs,
+        perfumes,
+        orderItems,
+        visitors: {
+          total: visitorTotalRes.count || 0,
+          today: visitorTodayRes.count || 0,
+        },
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (e: any) {
