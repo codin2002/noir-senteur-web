@@ -38,7 +38,25 @@ interface Order {
   delivery_address: string | null;
   notes: string | null;
   items: OrderItem[];
+  order_source?: 'online' | 'manual';
+  traffic_source?: 'meta_ads' | 'direct' | 'unknown';
 }
+
+export type OrderAttributionCategory = 'meta_ads' | 'direct' | 'manual' | 'not_recorded' | 'unknown';
+
+// Order attribution started being recorded on 17 August 2026. Older orders
+// cannot be reliably classified as Meta or Direct after the fact.
+const ATTRIBUTION_TRACKING_STARTED_AT = Date.parse('2026-08-17T17:00:00Z');
+
+export const getOrderAttributionCategory = (
+  order: Pick<Order, 'created_at' | 'order_source' | 'traffic_source'>
+): OrderAttributionCategory => {
+  if (order.order_source === 'manual') return 'manual';
+  if (order.traffic_source === 'meta_ads') return 'meta_ads';
+  if (order.traffic_source === 'direct') return 'direct';
+  if (Date.parse(order.created_at) < ATTRIBUTION_TRACKING_STARTED_AT) return 'not_recorded';
+  return 'unknown';
+};
 
 export const parseDeliveryInfo = (deliveryAddress: string): DeliveryInfo | null => {
   if (!deliveryAddress) return null;

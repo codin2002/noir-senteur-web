@@ -1,11 +1,11 @@
 import React from 'react';
-import { formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { TableCell, TableRow } from '@/components/ui/table';
 import CustomerInfoCell from './CustomerInfoCell';
 import OrderActionsCell from './OrderActionsCell';
 import ReturnInfoCell from './ReturnInfoCell';
 import { AdminOrder } from '@/types/adminOrder';
-import { getCustomerInfo, getDeliveryAddress, getOrderEmirate, getStatusBadgeClasses } from '@/utils/orderUtils';
+import { getCustomerInfo, getDeliveryAddress, getOrderAttributionCategory, getOrderEmirate, getStatusBadgeClasses } from '@/utils/orderUtils';
 
 interface OrderTableRowProps {
   order: AdminOrder;
@@ -16,6 +16,8 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
   const customer = getCustomerInfo(order);
   const deliveryAddress = getDeliveryAddress(order);
   const emirate = getOrderEmirate(order);
+  const attributionCategory = getOrderAttributionCategory(order);
+  const createdAt = new Date(order.created_at);
 
   return (
     <TableRow className="border-stone-200">
@@ -46,7 +48,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
       </TableCell>
       <TableCell className="font-semibold text-stone-900">AED {order.total}</TableCell>
       <TableCell>
-        {order.traffic_source === 'meta_ads' ? (
+        {attributionCategory === 'meta_ads' ? (
           <div title="A Meta click was detected for this order. Final attribution remains in Meta Ads Manager.">
             <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-semibold text-blue-800">Meta click</span>
             {(order.utm_campaign || order.utm_content) && (
@@ -55,8 +57,12 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
               </p>
             )}
           </div>
-        ) : order.traffic_source === 'direct' ? (
+        ) : attributionCategory === 'direct' ? (
           <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-700">Direct</span>
+        ) : attributionCategory === 'manual' ? (
+          <span className="rounded-full bg-violet-100 px-2.5 py-1 text-xs font-semibold text-violet-800">Manual entry</span>
+        ) : attributionCategory === 'not_recorded' ? (
+          <span className="rounded-full bg-stone-100 px-2.5 py-1 text-xs font-semibold text-stone-600" title="Source tracking was not active when this order was placed. This group may include Meta orders.">Historical source unavailable</span>
         ) : (
           <span className="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">Unknown</span>
         )}
@@ -65,7 +71,8 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
         <span className={`rounded px-2 py-1 text-xs capitalize ${getStatusBadgeClasses(order.status)}`}>{order.status}</span>
       </TableCell>
       <TableCell className="whitespace-nowrap text-sm text-stone-500">
-        {formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
+        <div className="font-medium text-stone-700">{format(createdAt, 'dd MMM yyyy, h:mm a')}</div>
+        <div className="text-xs">{formatDistanceToNow(createdAt, { addSuffix: true })}</div>
       </TableCell>
       <OrderActionsCell orderId={order.id} currentStatus={order.status} onOrderUpdate={onOrderUpdate} />
       <ReturnInfoCell order={order} />

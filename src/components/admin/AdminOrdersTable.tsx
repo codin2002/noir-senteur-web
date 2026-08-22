@@ -5,7 +5,7 @@ import OrdersSearchBar from '@/components/admin/OrdersSearchBar';
 import OrderTableHeader from '@/components/admin/orders/OrderTableHeader';
 import OrderTableRow from '@/components/admin/orders/OrderTableRow';
 import { AdminOrder } from '@/types/adminOrder';
-import { getCustomerInfo, getOrderEmirate } from '@/utils/orderUtils';
+import { getCustomerInfo, getOrderAttributionCategory, getOrderEmirate } from '@/utils/orderUtils';
 
 interface AdminOrdersTableProps {
   orders: AdminOrder[];
@@ -16,7 +16,13 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [emirateFilter, setEmirateFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
   const emirates = useMemo(() => Array.from(new Set(orders.map(getOrderEmirate))).sort(), [orders]);
+  const sourceCounts = useMemo(() => orders.reduce<Record<string, number>>((counts, order) => {
+    const source = getOrderAttributionCategory(order);
+    counts[source] = (counts[source] || 0) + 1;
+    return counts;
+  }, {}), [orders]);
 
   const filteredOrders = useMemo(() => {
     const query = searchTerm.toLowerCase().trim();
@@ -33,9 +39,10 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
           : order.status === statusFilter
       );
       const matchesEmirate = emirateFilter === 'all' || getOrderEmirate(order) === emirateFilter;
-      return matchesSearch && matchesStatus && matchesEmirate;
-    });
-  }, [orders, searchTerm, statusFilter, emirateFilter]);
+      const matchesSource = sourceFilter === 'all' || getOrderAttributionCategory(order) === sourceFilter;
+      return matchesSearch && matchesStatus && matchesEmirate && matchesSource;
+    }).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+  }, [orders, searchTerm, statusFilter, emirateFilter, sourceFilter]);
 
   return (
     <Card className="border-stone-200 bg-white shadow-sm">
@@ -44,6 +51,9 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
           <div>
             <CardTitle className="text-xl text-stone-950">All orders</CardTitle>
             <p className="mt-1 text-sm text-stone-500">{filteredOrders.length} of {orders.length} orders shown</p>
+            <p className="mt-1 text-xs text-stone-500">
+              {sourceCounts.meta_ads || 0} confirmed Meta clicks · {sourceCounts.not_recorded || 0} historical sources unavailable (may include Meta)
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <select aria-label="Filter by order status" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} className="h-10 rounded-md border border-stone-200 bg-white px-3 text-sm">
@@ -57,6 +67,14 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
             <select aria-label="Filter by Emirate" value={emirateFilter} onChange={(event) => setEmirateFilter(event.target.value)} className="h-10 rounded-md border border-stone-200 bg-white px-3 text-sm">
               <option value="all">All Emirates</option>
               {emirates.map((emirate) => <option key={emirate} value={emirate}>{emirate}</option>)}
+            </select>
+            <select aria-label="Filter by order source" value={sourceFilter} onChange={(event) => setSourceFilter(event.target.value)} className="h-10 rounded-md border border-stone-200 bg-white px-3 text-sm">
+              <option value="all">All sources</option>
+              <option value="meta_ads">Confirmed Meta clicks</option>
+              <option value="direct">Direct</option>
+              <option value="manual">Manual entries</option>
+              <option value="not_recorded">Historical source unavailable</option>
+              <option value="unknown">Unknown</option>
             </select>
           </div>
         </div>
