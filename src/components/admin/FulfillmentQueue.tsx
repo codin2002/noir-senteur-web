@@ -125,7 +125,9 @@ const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }
                   </div>
                   <p className="mt-3 text-sm text-stone-600">{getDeliveryAddress(order)}</p>
                   <div className="mt-3 border-t border-stone-100 pt-3 text-sm text-stone-800">
-                    {order.items.map((item) => <p key={item.id}><span className="font-semibold">{item.perfume.name}</span> × {item.quantity}</p>)}
+                    {order.order_source === 'manual' && order.manual_lines && order.manual_lines.length > 0
+                      ? order.manual_lines.map((line, index) => <p key={`${line.label}-${index}`}><span className="font-semibold">{line.label}</span> × {line.quantity}</p>)
+                      : order.items.map((item) => <p key={item.id}><span className="font-semibold">{item.perfume.name}</span> × {item.quantity}</p>)}
                   </div>
                   <div className="mt-4 flex items-center justify-between gap-3">
                     <span className="font-semibold text-stone-950">AED {Number(order.total).toFixed(2)}</span>

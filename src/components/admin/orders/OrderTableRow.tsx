@@ -29,7 +29,15 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
         <div className="max-w-[180px] truncate text-xs text-stone-500" title={deliveryAddress}>{deliveryAddress}</div>
       </TableCell>
       <TableCell>
-        {order.items.map((item) => (
+        {order.order_source === 'manual' && order.manual_lines && order.manual_lines.length > 0
+          ? order.manual_lines.map((line, index) => (
+          <div key={`${line.label}-${index}`} className="mb-1.5 whitespace-nowrap text-sm last:mb-0">
+            <span className="font-medium text-stone-900">{line.label}</span>
+            <span className="ml-1 text-stone-500">×{line.quantity}</span>
+            <span className="ml-2 text-stone-500">AED {Number(line.unit_price).toFixed(2)}</span>
+          </div>
+          ))
+          : order.items.map((item) => (
           <div key={item.id} className="mb-1.5 whitespace-nowrap text-sm last:mb-0">
             <span className="font-medium text-stone-900">{item.perfume.name}</span>
             <span className="ml-1 text-stone-500">×{item.quantity}</span>

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { AdminOrder, AdminOrderItem } from '@/types/adminOrder';
+import { AdminOrder, AdminOrderItem, ManualOrderLine } from '@/types/adminOrder';
 
 export const useAdminOrders = (isAuthenticated: boolean) => {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -27,7 +27,7 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
       // Add a longer delay to ensure database consistency
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      const { data, error } = await supabase.rpc('get_orders_with_items');
+      const { data, error } = await supabase.rpc('get_orders_with_items_v2' as never);
 
       if (error) {
         console.error('❌ Error fetching orders:', error);
@@ -48,6 +48,7 @@ export const useAdminOrders = (isAuthenticated: boolean) => {
         return {
           ...order,
           notes: order.notes || null,
+          manual_lines: Array.isArray(order.manual_lines) ? order.manual_lines as unknown as ManualOrderLine[] : [],
           items: Array.isArray(order.items)
             ? (order.items as unknown as AdminOrderItem[])
             : []

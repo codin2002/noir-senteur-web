@@ -6,6 +6,12 @@ export interface AdminOrderItem {
   perfume: { name: string; price: string };
 }
 
+export interface ManualOrderLine {
+  label: string;
+  quantity: number;
+  unit_price: number;
+}
+
 export interface AdminOrder {
   id: string;
   user_id: string | null;
@@ -24,5 +30,6 @@ export interface AdminOrder {
   utm_source: string | null;
   utm_campaign: string | null;
   utm_content: string | null;
+  manual_lines?: ManualOrderLine[];
   items: AdminOrderItem[];
 }
