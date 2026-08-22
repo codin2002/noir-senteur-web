@@ -85,25 +85,35 @@ export const parseDeliveryInfo = (deliveryAddress: string): DeliveryInfo | null 
 };
 
 export const getCustomerInfo = (order: Order): CustomerInfo => {
+  const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+
   // If user_id exists, this is a registered user
   if (order.user_id) {
-    // Check if guest info is available (might be filled for registered users too)
-    if (order.guest_name || order.guest_email || order.guest_phone) {
+    // Use the actual delivery name first. Older signed-in orders may have a
+    // phone number stored but keep the name inside the structured address.
+    if (order.guest_name) {
       return {
-        name: order.guest_name || 'Registered User',
+        name: order.guest_name,
         email: order.guest_email || 'Via user account',
         phone: order.guest_phone || 'Via user account',
         isGuest: false
       };
     }
-    
-    // Check parsed delivery info for registered users
-    const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
+
     if (deliveryInfo && deliveryInfo.contactName) {
       return {
         name: deliveryInfo.contactName,
         email: deliveryInfo.email || 'Via user account',
         phone: deliveryInfo.phone || 'Via user account',
+        isGuest: false
+      };
+    }
+
+    if (order.guest_email || order.guest_phone) {
+      return {
+        name: 'Registered User',
+        email: order.guest_email || 'Via user account',
+        phone: order.guest_phone || 'Via user account',
         isGuest: false
       };
     }
@@ -128,7 +138,6 @@ export const getCustomerInfo = (order: Order): CustomerInfo => {
   }
   
   // Check parsed delivery info for guests
-  const deliveryInfo = parseDeliveryInfo(order.delivery_address || '');
   if (deliveryInfo && deliveryInfo.contactName) {
     return {
       name: deliveryInfo.contactName,
