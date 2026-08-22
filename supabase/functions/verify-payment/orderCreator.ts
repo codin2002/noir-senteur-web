@@ -24,7 +24,10 @@ export async function createOrder(
       user_uuid: isGuest ? null : actualUserId,
       guest_name: isGuest ? customerInfo.customerName : null,
       guest_email: isGuest ? customerInfo.customerEmail : null,
-      guest_phone: isGuest ? customerInfo.customerPhone : null,
+      // guest_phone is the historical column name, but it stores the checkout
+      // contact number for both guest and signed-in orders so order tracking
+      // can verify the customer consistently.
+      guest_phone: customerInfo.customerPhone === 'Not provided' ? null : customerInfo.customerPhone,
       delivery_address: deliveryAddress
     });
 
@@ -109,7 +112,7 @@ export async function createOrder(
           user_id: isGuest ? null : actualUserId,
           guest_name: isGuest ? customerInfo.customerName : null,
           guest_email: isGuest ? customerInfo.customerEmail : null,
-          guest_phone: isGuest ? customerInfo.customerPhone : null,
+          guest_phone: customerInfo.customerPhone === 'Not provided' ? null : customerInfo.customerPhone,
           quantity: item.quantity,
           order_id: orderId,
           status: 'pending',

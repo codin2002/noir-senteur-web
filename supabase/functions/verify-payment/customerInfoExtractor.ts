@@ -11,9 +11,20 @@ export async function extractCustomerInfo(
   deliveryAddress: string, 
   supabaseService: any
 ): Promise<CustomerInfo> {
-  let customerName = 'Guest Customer';
-  let customerEmail = 'guest@example.com';
-  let customerPhone = 'Not provided';
+  const addressParts = deliveryAddress.split('|');
+  const addressValue = (prefix: string) =>
+    addressParts
+      .map((part) => part.trim())
+      .find((part) => part.startsWith(prefix))
+      ?.slice(prefix.length)
+      .trim() || '';
+
+  const checkoutName = addressValue('Contact:');
+  const checkoutEmail = addressValue('Email:');
+  const checkoutPhone = addressValue('Phone:');
+  let customerName = checkoutName || 'Guest Customer';
+  let customerEmail = checkoutEmail || 'guest@example.com';
+  let customerPhone = checkoutPhone || 'Not provided';
 
   if (!isGuest && actualUserId) {
     // Get user profile for authenticated users
@@ -24,27 +35,14 @@ export async function extractCustomerInfo(
       .single();
 
     if (!profileError && profile) {
-      customerName = profile.full_name || 'User';
-      customerPhone = profile.phone || 'Not provided';
+      customerName = checkoutName || profile.full_name || 'User';
+      customerPhone = checkoutPhone || profile.phone || 'Not provided';
     }
 
     // Get user email from auth
     const { data: { user }, error: userError } = await supabaseService.auth.admin.getUserById(actualUserId);
     if (!userError && user) {
-      customerEmail = user.email || 'user@example.com';
-    }
-  } else {
-    // For guest orders, extract from the structured delivery address
-    const addressParts = deliveryAddress.split('|');
-    for (const part of addressParts) {
-      const trimmedPart = part.trim();
-      if (trimmedPart.startsWith('Contact:')) {
-        customerName = trimmedPart.replace('Contact:', '').trim();
-      } else if (trimmedPart.startsWith('Email:')) {
-        customerEmail = trimmedPart.replace('Email:', '').trim();
-      } else if (trimmedPart.startsWith('Phone:')) {
-        customerPhone = trimmedPart.replace('Phone:', '').trim();
-      }
+      customerEmail = checkoutEmail || user.email || 'user@example.com';
     }
   }
 
