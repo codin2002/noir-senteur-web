@@ -145,12 +145,12 @@ const Navbar = () => {
             <button onClick={() => scrollToSection('contact')} className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider">
               Contact
             </button>
-            <Link to="/track-order" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link to="/track-order" className="w-full text-center text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider" onClick={() => setIsMobileMenuOpen(false)}>
               Track Order
             </Link>
             
             {user ? <>
-                <Link to="/profile" className="text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider flex items-center" onClick={() => setIsMobileMenuOpen(false)}>
+                <Link to="/profile" className="flex w-full items-center justify-center text-muted-foreground hover:text-gold transition-colors text-sm uppercase tracking-wider" onClick={() => setIsMobileMenuOpen(false)}>
                   <User className="h-4 w-4 mr-2" />
                   Profile
                 </Link>
