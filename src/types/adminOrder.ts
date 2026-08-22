@@ -12,6 +12,7 @@ export interface AdminOrder {
   total: number;
   status: string;
   fulfillment_status: 'new' | 'packed' | 'shipped' | 'delivered';
+  order_source: 'online' | 'manual';
   created_at: string;
   guest_name: string | null;
   guest_email: string | null;

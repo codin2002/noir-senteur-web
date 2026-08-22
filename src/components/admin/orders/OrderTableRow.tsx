@@ -19,7 +19,10 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
 
   return (
     <TableRow className="border-stone-200">
-      <TableCell className="font-mono text-sm text-stone-700">{order.id.split('-')[0]}…</TableCell>
+      <TableCell className="font-mono text-sm text-stone-700">
+        <div>{order.id.split('-')[0]}…</div>
+        {order.order_source === 'manual' && <span className="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900">Manual</span>}
+      </TableCell>
       <CustomerInfoCell customer={customer} />
       <TableCell>
         <div className="text-sm font-medium text-stone-900">{emirate}</div>

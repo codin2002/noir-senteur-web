@@ -2,12 +2,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart3 } from 'lucide-react';
+import ManualOrderDialog from '@/components/admin/ManualOrderDialog';
 
 interface AdminOrdersHeaderProps {
   onLogout: () => void;
+  onManualOrderCreated: () => void;
 }
 
-const AdminOrdersHeader: React.FC<AdminOrdersHeaderProps> = ({ onLogout }) => {
+const AdminOrdersHeader: React.FC<AdminOrdersHeaderProps> = ({ onLogout, onManualOrderCreated }) => {
   return (
     <div className="flex flex-col gap-4 border-b border-stone-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
       <div>
@@ -16,6 +18,7 @@ const AdminOrdersHeader: React.FC<AdminOrdersHeaderProps> = ({ onLogout }) => {
         <p className="mt-1 text-sm text-stone-500">Live overview of sales, customers and deliveries across the UAE.</p>
       </div>
       <div className="flex items-center gap-4">
+        <ManualOrderDialog onCreated={onManualOrderCreated} />
         <Link
           to="/admin/analytics"
           className="flex items-center gap-1.5 rounded-md border border-gray-300 px-3 py-1.5 text-sm text-gray-900 transition hover:bg-gray-100"

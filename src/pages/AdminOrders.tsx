@@ -53,7 +53,7 @@ const AdminOrders = () => {
   return (
     <div className="admin-light min-h-screen bg-stone-50 px-4 py-6 text-gray-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px] space-y-6">
-        <AdminOrdersHeader onLogout={handleLogout} />
+        <AdminOrdersHeader onLogout={handleLogout} onManualOrderCreated={handleOrderUpdate} />
         <FulfillmentQueue orders={orders || []} onRefresh={handleOrderUpdate} />
         <AdminOrderAnalytics orders={orders || []} />
         <AdminOrdersTable 
