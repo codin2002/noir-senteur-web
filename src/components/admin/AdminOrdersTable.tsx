@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Table, TableBody } from '@/components/ui/table';
 import OrdersSearchBar from '@/components/admin/OrdersSearchBar';
 import OrderTableHeader from '@/components/admin/orders/OrderTableHeader';
@@ -17,6 +18,8 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
   const [statusFilter, setStatusFilter] = useState('all');
   const [emirateFilter, setEmirateFilter] = useState('all');
   const [sourceFilter, setSourceFilter] = useState('all');
+  const [fromDate, setFromDate] = useState('');
+  const [toDate, setToDate] = useState('');
   const emirates = useMemo(() => Array.from(new Set(orders.map(getOrderEmirate))).sort(), [orders]);
   const sourceCounts = useMemo(() => orders.reduce<Record<string, number>>((counts, order) => {
     const source = getOrderAttributionCategory(order);
@@ -40,9 +43,13 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
       );
       const matchesEmirate = emirateFilter === 'all' || getOrderEmirate(order) === emirateFilter;
       const matchesSource = sourceFilter === 'all' || getOrderAttributionCategory(order) === sourceFilter;
-      return matchesSearch && matchesStatus && matchesEmirate && matchesSource;
+      const createdAt = Date.parse(order.created_at);
+      const rangeStart = fromDate ? new Date(`${fromDate}T00:00:00`).getTime() : Number.NEGATIVE_INFINITY;
+      const rangeEnd = toDate ? new Date(`${toDate}T23:59:59.999`).getTime() : Number.POSITIVE_INFINITY;
+      const matchesDate = createdAt >= rangeStart && createdAt <= rangeEnd;
+      return matchesSearch && matchesStatus && matchesEmirate && matchesSource && matchesDate;
     }).sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-  }, [orders, searchTerm, statusFilter, emirateFilter, sourceFilter]);
+  }, [orders, searchTerm, statusFilter, emirateFilter, sourceFilter, fromDate, toDate]);
 
   return (
     <Card className="border-stone-200 bg-white shadow-sm">
@@ -76,6 +83,19 @@ const AdminOrdersTable: React.FC<AdminOrdersTableProps> = ({ orders, onRefresh }
               <option value="not_recorded">Historical source unavailable</option>
               <option value="unknown">Unknown</option>
             </select>
+            <label className="flex h-10 items-center gap-2 rounded-md border border-stone-200 bg-white px-3 text-xs text-stone-500">
+              From
+              <input aria-label="Orders from date" type="date" value={fromDate} max={toDate || undefined} onChange={(event) => setFromDate(event.target.value)} className="w-[125px] border-0 bg-transparent p-0 text-sm text-stone-900 outline-none" />
+            </label>
+            <label className="flex h-10 items-center gap-2 rounded-md border border-stone-200 bg-white px-3 text-xs text-stone-500">
+              To
+              <input aria-label="Orders to date" type="date" value={toDate} min={fromDate || undefined} onChange={(event) => setToDate(event.target.value)} className="w-[125px] border-0 bg-transparent p-0 text-sm text-stone-900 outline-none" />
+            </label>
+            {(fromDate || toDate) && (
+              <Button type="button" variant="outline" className="h-10 border-stone-200 bg-white !text-stone-700 hover:bg-stone-100" onClick={() => { setFromDate(''); setToDate(''); }}>
+                Clear dates
+              </Button>
+            )}
           </div>
         </div>
       </CardHeader>
