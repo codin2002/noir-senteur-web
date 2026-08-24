@@ -21,8 +21,10 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
 
   return (
     <TableRow className="border-stone-200">
-      <TableCell className="font-mono text-sm text-stone-700">
-        <div>{order.id.split('-')[0]}…</div>
+      <TableCell className="whitespace-nowrap text-sm text-stone-700">
+        <div className="font-mono">{order.id.split('-')[0]}…</div>
+        <div className="mt-1 text-xs font-medium text-stone-700">{format(createdAt, 'dd MMM yyyy')}</div>
+        <div className="text-[11px] text-stone-400">{format(createdAt, 'h:mm a')} · {formatDistanceToNow(createdAt, { addSuffix: true })}</div>
         {order.order_source === 'manual' && <span className="mt-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900">Manual</span>}
       </TableCell>
       <CustomerInfoCell customer={customer} />
@@ -69,10 +71,6 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
       </TableCell>
       <TableCell>
         <span className={`rounded px-2 py-1 text-xs capitalize ${getStatusBadgeClasses(order.status)}`}>{order.status}</span>
-      </TableCell>
-      <TableCell className="whitespace-nowrap text-sm text-stone-500">
-        <div className="font-medium text-stone-700">{format(createdAt, 'dd MMM yyyy, h:mm a')}</div>
-        <div className="text-xs">{formatDistanceToNow(createdAt, { addSuffix: true })}</div>
       </TableCell>
       <OrderActionsCell orderId={order.id} currentStatus={order.status} onOrderUpdate={onOrderUpdate} />
       <ReturnInfoCell order={order} />
