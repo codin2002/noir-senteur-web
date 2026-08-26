@@ -6,14 +6,18 @@ import AdminOrderAnalytics from '@/components/admin/AdminOrderAnalytics';
 import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
 import FulfillmentQueue from '@/components/admin/FulfillmentQueue';
+import AdminStockSummary from '@/components/admin/AdminStockSummary';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useAdminOrders } from '@/hooks/useAdminOrders';
+import { useQueryClient } from '@tanstack/react-query';
 
 const AdminOrders = () => {
+  const queryClient = useQueryClient();
   const { isAuthenticated, isCheckingAuth, handleLogout } = useAdminAuth();
   const { orders, isLoading, forceRefresh } = useAdminOrders(isAuthenticated);
   const handleOrderUpdate = async () => {
     console.log('🔄 Order updated - forcing immediate refresh with extended delays...');
+    queryClient.invalidateQueries({ queryKey: ['admin-stock-summary'] });
     
     // Immediate refresh
     forceRefresh();
@@ -22,12 +26,14 @@ const AdminOrders = () => {
     setTimeout(() => {
       console.log('🔄 Secondary refresh after extended database sync delay...');
       forceRefresh();
+      queryClient.invalidateQueries({ queryKey: ['admin-stock-summary'] });
     }, 3000);
     
     // Final refresh with longer delay
     setTimeout(() => {
       console.log('🔄 Final refresh to ensure complete database propagation...');
       forceRefresh();
+      queryClient.invalidateQueries({ queryKey: ['admin-stock-summary'] });
     }, 7000);
   };
 
@@ -54,6 +60,7 @@ const AdminOrders = () => {
     <div className="admin-light min-h-screen bg-stone-50 px-4 py-6 text-gray-900 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-[1600px] space-y-6">
         <AdminOrdersHeader onLogout={handleLogout} onManualOrderCreated={handleOrderUpdate} />
+        <AdminStockSummary />
         <FulfillmentQueue orders={orders || []} onRefresh={handleOrderUpdate} />
         <AdminOrderAnalytics orders={orders || []} />
         <AdminOrdersTable 
