@@ -17,6 +17,16 @@ const stages: Record<FulfillmentStatus, { label: string; next?: FulfillmentStatu
   delivered: { label: 'Delivered' },
 };
 
+const formatPlacedAt = (createdAt: string) => new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Dubai',
+  day: '2-digit',
+  month: 'short',
+  year: 'numeric',
+  hour: 'numeric',
+  minute: '2-digit',
+  hour12: true,
+}).format(new Date(createdAt));
+
 const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }> = ({ orders, onRefresh }) => {
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
@@ -110,6 +120,7 @@ const FulfillmentQueue: React.FC<{ orders: AdminOrder[]; onRefresh: () => void }
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <p className="font-mono text-xs text-stone-500">SEN-{order.id.slice(0, 8).toUpperCase()}</p>
+                      <p className="mt-1 text-xs font-medium text-stone-500">Placed: {formatPlacedAt(order.created_at)} UAE</p>
                       <p className="mt-1 font-semibold text-stone-950">{customer.name}</p>
                       <p className="text-sm text-stone-600">{customer.phone}</p>
                     </div>
