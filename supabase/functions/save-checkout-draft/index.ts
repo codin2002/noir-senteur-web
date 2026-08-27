@@ -19,6 +19,11 @@ const offers = {
 
 const isUuid = (value: unknown) => typeof value === "string" && /^[0-9a-f-]{36}$/i.test(value);
 
+const deliveryValue = (deliveryAddress: string, label: string) => {
+  const match = deliveryAddress.match(new RegExp(`(?:^|\\|\\s*)${label}:\\s*([^|]*)`, "i"));
+  return match?.[1]?.trim() || null;
+};
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response(null, { headers: cors });
   if (request.method !== "POST") return new Response("Method not allowed", { status: 405 });
@@ -61,6 +66,9 @@ Deno.serve(async (request) => {
       is_guest: !user,
       cart_items: cart,
       delivery_address: deliveryAddress.trim(),
+      customer_name: deliveryValue(deliveryAddress, "Contact"),
+      customer_phone: deliveryValue(deliveryAddress, "Phone"),
+      customer_email: deliveryValue(deliveryAddress, "Email"),
       amount,
       currency: "AED",
       offer_id: offerId || null,
