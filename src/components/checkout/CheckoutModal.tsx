@@ -86,7 +86,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               <Button
                 onClick={handleCheckout}
                 disabled={isLoading || !selectedAddress.trim() || !isAddressValid}
-                className="w-full bg-gold text-dark hover:bg-gold/90 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full min-h-11 h-auto whitespace-normal bg-gold px-3 py-3 text-center leading-tight text-dark hover:bg-gold/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {isLoading ? (
                   <>
@@ -94,7 +94,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     Processing...
                   </>
                 ) : (
-                  `Continue to secure payment · AED ${calculateTotal().toFixed(2)}`
+                  <span>Continue to secure payment <span className="whitespace-nowrap">· AED {calculateTotal().toFixed(2)}</span></span>
                 )}
               </Button>
               <div className="mt-3 space-y-1 text-center text-xs text-white/55">

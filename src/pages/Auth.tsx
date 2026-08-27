@@ -223,7 +223,7 @@ const Auth = () => {
                       <Button
                         type="submit"
                         disabled={!isGuestFormValid() || checkoutLoading}
-                        className="w-full bg-gradient-to-r from-gold to-gold-light text-dark hover:from-gold/90 hover:to-gold-light/90 h-14 text-lg font-medium rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-gold/20"
+                        className="w-full min-h-14 h-auto whitespace-normal bg-gradient-to-r from-gold to-gold-light px-3 py-3 text-center text-base font-medium leading-tight text-dark hover:from-gold/90 hover:to-gold-light/90 sm:px-4 sm:text-lg rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-gold/20"
                       >
                         {checkoutLoading ? (
                           <div className="flex items-center justify-center space-x-2">
@@ -231,7 +231,7 @@ const Auth = () => {
                             <span>Processing...</span>
                           </div>
                         ) : (
-                          `Continue to secure payment · AED ${checkoutTotal.toFixed(2)}`
+                          <span>Continue to secure payment <span className="whitespace-nowrap">· AED {checkoutTotal.toFixed(2)}</span></span>
                         )}
                       </Button>
                       <div className="mt-3 space-y-1 text-center text-xs text-white/55">
