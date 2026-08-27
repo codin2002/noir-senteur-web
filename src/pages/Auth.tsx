@@ -21,6 +21,7 @@ import {
 } from '@/utils/checkoutDetails';
 import { CreditCard, ShieldCheck } from 'lucide-react';
 import { trackCheckoutFormOpened } from '@/utils/checkoutTracking';
+import { useCheckoutDraft } from '@/hooks/useCheckoutDraft';
 
 // Define validation schemas
 const loginSchema = z.object({
@@ -79,6 +80,7 @@ const Auth = () => {
   }, [isCheckoutFlow, cartItems, offerId]);
 
   const [guestDetails, setGuestDetails] = useState<CheckoutDetails>(() => emptyCheckoutDetails());
+  const { draftToken } = useCheckoutDraft(cartItems, guestDetails, offerId, Boolean(isCheckoutFlow));
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -112,6 +114,7 @@ const Auth = () => {
       preserveCart: Boolean(location.state?.preserveCart),
       offerId,
       reminderConsent: guestDetails.reminderConsent,
+      draftToken,
     });
   };
 

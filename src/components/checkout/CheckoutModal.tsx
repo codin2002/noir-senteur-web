@@ -8,6 +8,8 @@ import OrderSummary from './OrderSummary';
 import { useCheckout } from '@/hooks/useCheckout';
 import { toast } from 'sonner';
 import { PRICING, OFFERS, getCartSubtotal, isSignatureDuoCart } from '@/utils/constants';
+import { CheckoutDetails, emptyCheckoutDetails } from '@/utils/checkoutDetails';
+import { useCheckoutDraft } from '@/hooks/useCheckoutDraft';
 
 interface CheckoutModalProps {
   isOpen: boolean;
@@ -24,7 +26,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [isAddressValid, setIsAddressValid] = useState(false);
+  const [checkoutDetails, setCheckoutDetails] = useState<CheckoutDetails>(() => emptyCheckoutDetails());
   const { processPayment, isLoading } = useCheckout();
+  const offerId = isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined;
+  const { draftToken } = useCheckoutDraft(cartItems, checkoutDetails, offerId, isOpen);
 
   const calculateTotal = () => {
     const subtotal = getCartSubtotal(cartItems);
@@ -47,8 +52,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
     }
 
     await processPayment(cartItems, selectedAddress, {
-      offerId: isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined,
+      offerId,
       reminderConsent: false,
+      draftToken,
     });
   };
 
@@ -65,6 +71,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               onAddressChange={setSelectedAddress}
               selectedAddress={selectedAddress}
               onValidationChange={setIsAddressValid}
+              onDetailsChange={setCheckoutDetails}
             />
           </div>
           

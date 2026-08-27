@@ -26,7 +26,7 @@ Deno.serve(async (request) => {
   const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
   let pendingId: string | null = null;
   try {
-    const { cartItems, deliveryAddress, meta, offerId } = await request.json();
+    const { cartItems, deliveryAddress, meta, offerId, draftToken } = await request.json();
     // The server controls whether this is a test or real payment. Never let a
     // browser request decide the payment mode.
     const isTest = Deno.env.get("CHECKOUT_MODE") !== "live";
@@ -98,6 +98,16 @@ Deno.serve(async (request) => {
     }).select("id,lookup_token").single();
     if (pendingError) throw new Error("Could not prepare the checkout safely.");
     pendingId = pending.id;
+
+    // A saved form is only a private draft. Once payment begins, retain its
+    // history but link it to the authoritative pending payment record.
+    if (typeof draftToken === "string" && /^[0-9a-f-]{36}$/i.test(draftToken)) {
+      await admin.from("checkout_drafts").update({
+        status: "payment_started",
+        pending_checkout_id: pending.id,
+        updated_at: new Date().toISOString(),
+      }).eq("draft_token", draftToken).eq("status", "draft");
+    }
 
     const key = Deno.env.get("ZIINA_API_KEY");
     if (!key) throw new Error("Payment service is not configured.");

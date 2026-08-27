@@ -15,7 +15,7 @@ export const useCheckout = () => {
   const processPayment = async (
     cartItems: any[],
     deliveryAddress: string,
-    options?: { preserveCart?: boolean; offerId?: string; reminderConsent?: boolean }
+    options?: { preserveCart?: boolean; offerId?: string; reminderConsent?: boolean; draftToken?: string | null }
   ) => {
     setIsLoading(true);
 
@@ -47,6 +47,7 @@ export const useCheckout = () => {
         isGuest: isGuest,
         userId: user?.id || null,
         offerId: options?.offerId,
+        draftToken: options?.draftToken || undefined,
         meta: {
           ...getCheckoutAttribution(),
           reminderConsent: options?.reminderConsent === true,
