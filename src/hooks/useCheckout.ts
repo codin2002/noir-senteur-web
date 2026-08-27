@@ -18,6 +18,7 @@ export const useCheckout = () => {
     options?: { preserveCart?: boolean; offerId?: string; reminderConsent?: boolean; draftToken?: string | null }
   ) => {
     setIsLoading(true);
+    let checkoutSnapshot: CheckoutPixelSnapshot | null = null;
 
     try {
       console.log('Processing payment with delivery address:', deliveryAddress);
@@ -103,19 +104,9 @@ export const useCheckout = () => {
       fbqCheckoutStage('PaymentPageOpened', checkoutSnapshot.items, checkoutSnapshot.value);
       localStorage.setItem('pixel_pending_purchase', JSON.stringify(checkoutSnapshot));
 
-      if (embeddedCheckoutEnabled && data.embedded_url && data.payment_intent_id && data.checkout_token) {
-        sessionStorage.setItem('ziina_embedded_checkout', JSON.stringify({
-          embeddedUrl: data.embedded_url,
-          paymentUrl: data.payment_url,
-          paymentIntentId: data.payment_intent_id,
-          checkoutToken: data.checkout_token,
-        }));
-        navigate('/secure-payment');
-        return;
-      }
-
-      // Redirect checkout remains the safe fallback until Ziina approves the
-      // website domain for its embedded payment form.
+      // Ziina hosts the card entry page. The payment is already safely staged
+      // on our server before this redirect, so a buyer closing the browser
+      // after reaching Ziina cannot lose the order details.
       window.location.href = data.payment_url;
       
     } catch (error: any) {
