@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
@@ -10,9 +9,7 @@ import { getCheckoutAttribution } from '@/utils/attribution';
 
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const checkoutV2Enabled = import.meta.env.VITE_CHECKOUT_V2 === 'true';
 
   const processPayment = async (
     cartItems: any[],
@@ -20,10 +17,6 @@ export const useCheckout = () => {
     options?: { preserveCart?: boolean; offerId?: string }
   ) => {
     setIsLoading(true);
-    // The Signature Duo has a server-priced promotional total, so it must use
-    // the newer checkout path even while ordinary single-bottle checkout
-    // remains on the legacy flow during rollout.
-    const useCheckoutV2 = checkoutV2Enabled || options?.offerId === OFFERS.SIGNATURE_DUO.ID;
 
     try {
       console.log('Processing payment with delivery address:', deliveryAddress);
@@ -60,8 +53,10 @@ export const useCheckout = () => {
         hasDeliveryAddress: !!deliveryAddress.trim() 
       });
 
-      // The new webhook-confirmed flow is opt-in during local/staging testing.
-      const { data, error } = await supabase.functions.invoke(useCheckoutV2 ? 'create-payment-v2' : 'create-payment', {
+      // Every checkout is staged on the server before the buyer leaves for
+      // Ziina. The signed webhook can therefore create the order even when the
+      // browser is closed or the success-page redirect never completes.
+      const { data, error } = await supabase.functions.invoke('create-payment-v2', {
         body: requestBody,
         headers: isGuest ? {} : undefined // Don't send auth headers for guest checkout
       });
@@ -151,11 +146,10 @@ export const useCheckout = () => {
     }
     
     try {
-      // A returned checkout token is issued only by create-payment-v2. This
-      // keeps bundle confirmation on the webhook-safe path after redirect,
-      // even if the regular checkout rollout flag is still off.
-      if (checkoutV2Enabled || checkoutToken) {
-        if (!checkoutToken) return { success: false, message: 'The secure checkout token is missing. Please contact support if you were charged.' };
+      // All newly created payments carry this server-issued token. Payments
+      // created before the rollout do not, so they continue through the legacy
+      // verification path below until those old payment links expire.
+      if (checkoutToken) {
         // This endpoint only reads the webhook-confirmed order. It never creates
         // an order, records a payment, or changes stock from the browser.
         let result: any = null;
