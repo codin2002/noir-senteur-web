@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useForm } from 'react-hook-form';
@@ -10,9 +10,17 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Label } from '@/components/ui/label';
 import { useCheckout } from '@/hooks/useCheckout';
 import { OFFERS, getCartSubtotal, getSignatureDuoSavings } from '@/utils/constants';
+import CheckoutDetailsForm from '@/components/checkout/CheckoutDetailsForm';
+import {
+  CheckoutDetails,
+  emptyCheckoutDetails,
+  formatCheckoutDeliveryAddress,
+  isCheckoutDetailsValid,
+} from '@/utils/checkoutDetails';
+import { CreditCard, ShieldCheck } from 'lucide-react';
+import { trackCheckoutFormOpened } from '@/utils/checkoutTracking';
 
 // Define validation schemas
 const loginSchema = z.object({
@@ -34,18 +42,10 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type SignupFormValues = z.infer<typeof signupSchema>;
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
-interface GuestDetails {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  buildingName: string;
-  area: string;
-  emirate: string;
-}
-
 const Auth = () => {
   const { user, isLoading, signIn, signUp, signInWithGoogle, forgotPassword } = useAuth();
   const [activeTab, setActiveTab] = useState('login');
+  const checkoutTracked = useRef(false);
   const { processPayment, isLoading: checkoutLoading } = useCheckout();
   const navigate = useNavigate();
   const location = useLocation();
@@ -71,14 +71,14 @@ const Auth = () => {
     }
   }, [user, isLoading, isCheckoutFlow, navigate, from]);
 
-  const [guestDetails, setGuestDetails] = useState<GuestDetails>({
-    name: '',
-    email: '',
-    phoneNumber: '',
-    buildingName: '',
-    area: '',
-    emirate: ''
-  });
+  useEffect(() => {
+    if (!checkoutTracked.current && isCheckoutFlow && cartItems.length > 0) {
+      checkoutTracked.current = true;
+      trackCheckoutFormOpened(cartItems, offerId);
+    }
+  }, [isCheckoutFlow, cartItems, offerId]);
+
+  const [guestDetails, setGuestDetails] = useState<CheckoutDetails>(() => emptyCheckoutDetails());
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -104,38 +104,18 @@ const Auth = () => {
     },
   });
 
-  const handleInputChange = (field: keyof GuestDetails) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGuestDetails(prev => ({
-      ...prev,
-      [field]: e.target.value
-    }));
-  };
-
   const handleGuestCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Format the guest address for payment processing
-    const addressParts = [
-      guestDetails.buildingName,
-      guestDetails.area,
-      guestDetails.emirate
-    ].filter(Boolean);
-    
-    const guestAddress = `${addressParts.join(', ')} | Contact: ${guestDetails.name} | Email: ${guestDetails.email} | Phone: ${guestDetails.phoneNumber}`;
+    const guestAddress = formatCheckoutDeliveryAddress(guestDetails);
     
     await processPayment(cartItems, guestAddress, {
       preserveCart: Boolean(location.state?.preserveCart),
       offerId,
+      reminderConsent: guestDetails.reminderConsent,
     });
   };
 
-  const isGuestFormValid = () => {
-    return guestDetails.name.trim() && 
-           guestDetails.phoneNumber.trim() &&
-           guestDetails.buildingName.trim() &&
-           guestDetails.area.trim() &&
-           guestDetails.emirate.trim();
-  };
+  const isGuestFormValid = () => isCheckoutDetailsValid(guestDetails);
 
   const onLoginSubmit = async (data: LoginFormValues) => {
     try {
@@ -229,99 +209,12 @@ const Auth = () => {
                   </div>
 
                   <form onSubmit={handleGuestCheckout} className="space-y-6">
-                    <div className="grid grid-cols-1 gap-8">
-                      {/* Personal Details */}
-                      <div className="space-y-5">
-                        <div className="flex items-center space-x-3 mb-6">
-                          <div className="w-2 h-2 bg-gold rounded-full"></div>
-                          <h4 className="font-medium text-white text-lg">Personal Information</h4>
-                        </div>
-                        
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="guest_name" className="text-sm text-white/80 mb-2 block">Full Name *</Label>
-                            <Input
-                              id="guest_name"
-                              value={guestDetails.name}
-                              onChange={handleInputChange('name')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="Enter your full name"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="guest_email" className="text-sm text-white/80 mb-2 block">Email Address (optional)</Label>
-                            <Input
-                              id="guest_email"
-                              type="email"
-                              value={guestDetails.email}
-                              onChange={handleInputChange('email')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="your.email@example.com"
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="guest_phone" className="text-sm text-white/80 mb-2 block">Phone Number *</Label>
-                            <Input
-                              id="guest_phone"
-                              value={guestDetails.phoneNumber}
-                              onChange={handleInputChange('phoneNumber')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="+971 50 XXX XXXX"
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Address Details */}
-                      <div className="space-y-5">
-                        <div className="flex items-center space-x-3 mb-6">
-                          <div className="w-2 h-2 bg-gold rounded-full"></div>
-                          <h4 className="font-medium text-white text-lg">Delivery Address</h4>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 gap-4">
-                          <div>
-                            <Label htmlFor="guest_building" className="text-sm text-white/80 mb-2 block">Building Name *</Label>
-                            <Input
-                              id="guest_building"
-                              value={guestDetails.buildingName}
-                              onChange={handleInputChange('buildingName')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="e.g., La vista 1"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="guest_area" className="text-sm text-white/80 mb-2 block">Area/Locality *</Label>
-                            <Input
-                              id="guest_area"
-                              value={guestDetails.area}
-                              onChange={handleInputChange('area')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="e.g., Nad Hessa"
-                              required
-                            />
-                          </div>
-
-                          <div>
-                            <Label htmlFor="guest_emirate" className="text-sm text-white/80 mb-2 block">Emirate *</Label>
-                            <Input
-                              id="guest_emirate"
-                              value={guestDetails.emirate}
-                              onChange={handleInputChange('emirate')}
-                              className="bg-white/5 border-white/10 focus:border-gold/50 focus:bg-white/10 text-white placeholder:text-white/40 h-12 rounded-lg transition-all duration-300"
-                              placeholder="e.g., Dubai, Abu Dhabi, Sharjah"
-                              required
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    <CheckoutDetailsForm
+                      details={guestDetails}
+                      onChange={setGuestDetails}
+                      disabled={checkoutLoading}
+                      idPrefix="guest-checkout"
+                    />
 
                     <div className="pt-6">
                       <Button
@@ -335,9 +228,13 @@ const Auth = () => {
                             <span>Processing...</span>
                           </div>
                         ) : (
-                          `Pay AED ${checkoutTotal.toFixed(2)} securely`
+                          `Continue to secure payment · AED ${checkoutTotal.toFixed(2)}`
                         )}
                       </Button>
+                      <div className="mt-3 space-y-1 text-center text-xs text-white/55">
+                        <p className="flex items-center justify-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-gold" />Card, Apple Pay or Google Pay</p>
+                        <p className="flex items-center justify-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-300" />Secure payment powered by Ziina</p>
+                      </div>
                     </div>
 
                     {/* OR Divider - Inside Guest Checkout */}

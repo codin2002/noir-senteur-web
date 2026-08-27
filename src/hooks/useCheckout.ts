@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
-import { fbqInitiateCheckout, fbqPurchase, fbqAdvancedMatch } from '@/utils/metaPixel';
-import { OFFERS, getCartSubtotal, getSignatureDuoQuantity } from '@/utils/constants';
+import { fbqCheckoutStage, fbqPurchase, fbqAdvancedMatch } from '@/utils/metaPixel';
+import { OFFERS } from '@/utils/constants';
 import { getCheckoutAttribution } from '@/utils/attribution';
+import { buildCheckoutPixelSnapshot, CheckoutPixelSnapshot } from '@/utils/checkoutTracking';
 
 export const useCheckout = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +15,7 @@ export const useCheckout = () => {
   const processPayment = async (
     cartItems: any[],
     deliveryAddress: string,
-    options?: { preserveCart?: boolean; offerId?: string }
+    options?: { preserveCart?: boolean; offerId?: string; reminderConsent?: boolean }
   ) => {
     setIsLoading(true);
 
@@ -37,6 +38,8 @@ export const useCheckout = () => {
         }
       }
 
+      checkoutSnapshot = buildCheckoutPixelSnapshot(itemsToProcess, options?.offerId);
+
       // Prepare the request body
       const requestBody = {
         cartItems: itemsToProcess,
@@ -44,7 +47,10 @@ export const useCheckout = () => {
         isGuest: isGuest,
         userId: user?.id || null,
         offerId: options?.offerId,
-        meta: getCheckoutAttribution(),
+        meta: {
+          ...getCheckoutAttribution(),
+          reminderConsent: options?.reminderConsent === true,
+        },
       };
 
       console.log('Sending payment request:', { 
@@ -63,6 +69,7 @@ export const useCheckout = () => {
 
       if (error) {
         console.error('Payment creation error:', error);
+        fbqCheckoutStage('PaymentSessionFailed', checkoutSnapshot.items, checkoutSnapshot.value);
         toast.error('Failed to create payment session', {
           description: error.message
         });
@@ -71,6 +78,7 @@ export const useCheckout = () => {
 
       if (!data.success) {
         console.error('Payment creation failed:', data.error);
+        fbqCheckoutStage('PaymentSessionFailed', checkoutSnapshot.items, checkoutSnapshot.value);
         toast.error('Payment creation failed', {
           description: data.message || data.error?.message || 'Unknown error occurred'
         });
@@ -91,35 +99,27 @@ export const useCheckout = () => {
         localStorage.setItem('checkout_cart_items', JSON.stringify(itemsToProcess));
       }
 
-      // Meta Pixel: InitiateCheckout
-      let pixelItems = itemsToProcess.map((it: any) => ({
-        id: it.perfume?.id ?? it.perfume_id,
-        quantity: it.quantity,
-        price: Number(it.perfume?.price_value ?? 0),
-      }));
-      let pixelTotal = pixelItems.reduce((s, i) => s + i.price * i.quantity, 0);
-      if (options?.offerId === OFFERS.SIGNATURE_DUO.ID && pixelItems.length > 0) {
-        const duoQuantity = getSignatureDuoQuantity(itemsToProcess);
-        const discountPerBottle = duoQuantity > 0 ? OFFERS.SIGNATURE_DUO.SAVINGS / 2 : 0;
-        let duoDiscountsRemaining = duoQuantity;
-        pixelItems = pixelItems.map((item) => {
-          if (OFFERS.SIGNATURE_DUO.PRODUCT_IDS.includes(item.id) && duoDiscountsRemaining > 0) {
-            duoDiscountsRemaining -= 1;
-            return { ...item, price: item.price - discountPerBottle };
-          }
-          return item;
-        });
-        pixelTotal = getCartSubtotal(itemsToProcess);
-      }
-      fbqInitiateCheckout(pixelItems, pixelTotal);
-      // Save snapshot for Purchase event after redirect
-      localStorage.setItem('pixel_pending_purchase', JSON.stringify({ items: pixelItems, value: pixelTotal }));
+      fbqCheckoutStage('PaymentPageOpened', checkoutSnapshot.items, checkoutSnapshot.value);
+      localStorage.setItem('pixel_pending_purchase', JSON.stringify(checkoutSnapshot));
 
-      // Redirect to Ziina payment page
+      if (embeddedCheckoutEnabled && data.embedded_url && data.payment_intent_id && data.checkout_token) {
+        sessionStorage.setItem('ziina_embedded_checkout', JSON.stringify({
+          embeddedUrl: data.embedded_url,
+          paymentUrl: data.payment_url,
+          paymentIntentId: data.payment_intent_id,
+          checkoutToken: data.checkout_token,
+        }));
+        navigate('/secure-payment');
+        return;
+      }
+
+      // Redirect checkout remains the safe fallback until Ziina approves the
+      // website domain for its embedded payment form.
       window.location.href = data.payment_url;
       
     } catch (error: any) {
       console.error('Checkout error:', error);
+      if (checkoutSnapshot) fbqCheckoutStage('PaymentSessionFailed', checkoutSnapshot.items, checkoutSnapshot.value);
       toast.error('Checkout failed', {
         description: error.message || 'An unexpected error occurred'
       });

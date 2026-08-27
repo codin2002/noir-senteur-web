@@ -1,13 +1,31 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { XCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useSearchParams } from 'react-router-dom';
+import { fbqCheckoutStage, PixelItem } from '@/utils/metaPixel';
 
 const PaymentFailed: React.FC = () => {
   const [searchParams] = useSearchParams();
   const error = searchParams.get('error');
   const reason = searchParams.get('reason');
+
+  useEffect(() => {
+    try {
+      const snapshot = JSON.parse(localStorage.getItem('pixel_pending_purchase') || 'null') as {
+        items?: PixelItem[];
+        value?: number;
+      } | null;
+      if (!snapshot?.items?.length) return;
+
+      const signature = JSON.stringify({ items: snapshot.items, value: snapshot.value });
+      if (sessionStorage.getItem('payment_failed_tracked_v1') === signature) return;
+      sessionStorage.setItem('payment_failed_tracked_v1', signature);
+      fbqCheckoutStage('PaymentFailed', snapshot.items, Number(snapshot.value || 0));
+    } catch {
+      // Analytics must never interrupt the customer's retry path.
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-dark text-white flex items-center justify-center px-6">

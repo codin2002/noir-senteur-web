@@ -93,6 +93,7 @@ Deno.serve(async (request) => {
         utm_campaign: typeof meta?.utmCampaign === "string" ? meta.utmCampaign.slice(0, 255) : null,
         utm_content: typeof meta?.utmContent === "string" ? meta.utmContent.slice(0, 255) : null,
         landing_url: typeof meta?.landingUrl === "string" ? meta.landingUrl.slice(0, 1000) : null,
+        reminder_consent: meta?.reminderConsent === true,
       },
     }).select("id,lookup_token").single();
     if (pendingError) throw new Error("Could not prepare the checkout safely.");
@@ -125,7 +126,14 @@ Deno.serve(async (request) => {
 
     const { error: saveError } = await admin.from("pending_ziina_checkouts").update({ payment_intent_id: payment.id, provider_payload: payment }).eq("id", pendingId);
     if (saveError) throw new Error("Could not save the payment session safely.");
-    return json({ success: true, payment_url: payment.redirect_url, payment_intent_id: payment.id, mode: isTest ? "test" : "live" });
+    return json({
+      success: true,
+      payment_url: payment.redirect_url,
+      embedded_url: typeof payment.embedded_url === "string" ? payment.embedded_url : null,
+      payment_intent_id: payment.id,
+      checkout_token: pending.lookup_token,
+      mode: isTest ? "test" : "live",
+    });
   } catch (error) {
     console.error("Staged payment creation failed", error);
     if (pendingId) await admin.from("pending_ziina_checkouts").update({ status: "failed" }).eq("id", pendingId);

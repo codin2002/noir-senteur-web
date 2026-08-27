@@ -12,6 +12,7 @@ import { useCartCount } from '@/hooks/useCartCount';
 import { PRICING, OFFERS, getCartSubtotal, getSignatureDuoQuantity, isSignatureDuoCart } from '@/utils/constants';
 import { ShieldCheck, ShoppingBag, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { trackCheckoutFormOpened } from '@/utils/checkoutTracking';
 
 interface CartContentProps {
   cartItems: CartItemType[];
@@ -68,6 +69,9 @@ const CartContent: React.FC<CartContentProps> = ({
       return;
     }
     
+    const checkoutOfferId = isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined;
+    trackCheckoutFormOpened(cartItems, checkoutOfferId);
+
     if (user) {
       setShowCheckoutModal(true);
     } else {
@@ -75,7 +79,7 @@ const CartContent: React.FC<CartContentProps> = ({
         state: { 
           isCheckout: true, 
           cartItems: cartItems,
-          offerId: isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined,
+          offerId: checkoutOfferId,
           from: '/cart' 
         } 
       });

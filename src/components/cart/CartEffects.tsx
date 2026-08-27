@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { useCartCount } from '@/hooks/useCartCount';
 import { CartItemType } from './CartItem';
+import { fbqCheckoutStage, PixelItem } from '@/utils/metaPixel';
 
 interface CartEffectsProps {
   cartItems: CartItemType[];
@@ -38,6 +39,12 @@ const CartEffects: React.FC<CartEffectsProps> = ({
       localStorage.removeItem('cartItems');
       refreshCartCount();
     } else if (paymentStatus === 'cancelled') {
+      try {
+        const snapshot = JSON.parse(localStorage.getItem('pixel_pending_purchase') || 'null') as { items: PixelItem[]; value: number } | null;
+        if (snapshot?.items?.length) fbqCheckoutStage('PaymentCanceled', snapshot.items, snapshot.value);
+      } catch (error) {
+        console.warn('Payment cancellation tracking could not be recorded', error);
+      }
       toast.error('Payment was cancelled', {
         description: 'Your cart items are still saved.'
       });

@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { CreditCard, Loader2, ShieldCheck } from 'lucide-react';
 import AddressSelection from './AddressSelection';
 import OrderSummary from './OrderSummary';
 import { useCheckout } from '@/hooks/useCheckout';
@@ -24,6 +24,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [isAddressValid, setIsAddressValid] = useState(false);
+  const [reminderConsent, setReminderConsent] = useState(false);
   const { processPayment, isLoading } = useCheckout();
 
   const calculateTotal = () => {
@@ -48,6 +49,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     await processPayment(cartItems, selectedAddress, {
       offerId: isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined,
+      reminderConsent,
     });
   };
 
@@ -64,6 +66,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               onAddressChange={setSelectedAddress}
               selectedAddress={selectedAddress}
               onValidationChange={setIsAddressValid}
+              onReminderConsentChange={setReminderConsent}
             />
           </div>
           
@@ -86,9 +89,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
                     Processing...
                   </>
                 ) : (
-                  `Pay AED ${calculateTotal().toFixed(2)} securely`
+                  `Continue to secure payment · AED ${calculateTotal().toFixed(2)}`
                 )}
               </Button>
+              <div className="mt-3 space-y-1 text-center text-xs text-white/55">
+                <p className="flex items-center justify-center gap-1.5"><CreditCard className="h-3.5 w-3.5 text-gold" />Card, Apple Pay or Google Pay</p>
+                <p className="flex items-center justify-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-300" />Secure payment powered by Ziina</p>
+              </div>
             </div>
           </div>
         </div>

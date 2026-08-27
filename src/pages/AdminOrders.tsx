@@ -7,6 +7,7 @@ import AdminOrdersTable from '@/components/admin/AdminOrdersTable';
 import AdminLoadingState from '@/components/admin/AdminLoadingState';
 import FulfillmentQueue from '@/components/admin/FulfillmentQueue';
 import AdminStockSummary from '@/components/admin/AdminStockSummary';
+import CheckoutRecoveryPanel from '@/components/admin/CheckoutRecoveryPanel';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 import { useAdminOrders } from '@/hooks/useAdminOrders';
 import { useQueryClient } from '@tanstack/react-query';
@@ -61,6 +62,7 @@ const AdminOrders = () => {
       <div className="mx-auto max-w-[1600px] space-y-6">
         <AdminOrdersHeader onLogout={handleLogout} onManualOrderCreated={handleOrderUpdate} />
         <AdminStockSummary />
+        <CheckoutRecoveryPanel />
         <FulfillmentQueue orders={orders || []} onRefresh={handleOrderUpdate} />
         <AdminOrderAnalytics orders={orders || []} />
         <AdminOrdersTable 

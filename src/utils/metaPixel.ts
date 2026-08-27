@@ -9,7 +9,7 @@
 
 declare global {
   interface Window {
-    fbq?: (...args: any[]) => void;
+    fbq?: (...args: unknown[]) => void;
   }
 }
 
@@ -17,7 +17,7 @@ const PIXEL_ID = '1523641402566185';
 const CURRENCY = 'AED';
 const PURCHASED_ORDERS_KEY = 'pixel_purchased_orders_v1';
 
-type PixelItem = { id: string; quantity: number; price: number };
+export type PixelItem = { id: string; quantity: number; price: number };
 
 const round2 = (n: number) => Math.round((Number(n) || 0) * 100) / 100;
 
@@ -30,10 +30,21 @@ const newEventId = (prefix: string, key?: string) => {
   return `${prefix}.${rand}`;
 };
 
-const track = (event: string, params: Record<string, any>, eventID: string) => {
+const track = (event: string, params: Record<string, unknown>, eventID: string) => {
   try {
     if (typeof window === 'undefined' || typeof window.fbq !== 'function') return false;
     window.fbq('track', event, params, { eventID });
+    return true;
+  } catch (e) {
+    console.warn(`Meta Pixel ${event} failed`, e);
+    return false;
+  }
+};
+
+const trackCustom = (event: string, params: Record<string, unknown>, eventID: string) => {
+  try {
+    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return false;
+    window.fbq('trackCustom', event, params, { eventID });
     return true;
   } catch (e) {
     console.warn(`Meta Pixel ${event} failed`, e);
@@ -100,6 +111,22 @@ export const fbqInitiateCheckout = (items: PixelItem[], total: number) => {
       currency: CURRENCY,
     },
     newEventId('ic'),
+  );
+};
+
+export type CheckoutStage = 'CheckoutFormOpened' | 'PaymentPageOpened' | 'PaymentSessionFailed' | 'PaymentFailed' | 'PaymentCanceled';
+
+export const fbqCheckoutStage = (stage: CheckoutStage, items: PixelItem[], total: number) => {
+  trackCustom(
+    stage,
+    {
+      content_ids: items.map((item) => item.id),
+      contents: items.map((item) => ({ id: item.id, quantity: item.quantity, item_price: round2(item.price) })),
+      num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+      value: round2(total),
+      currency: CURRENCY,
+    },
+    newEventId(stage.toLowerCase()),
   );
 };
 

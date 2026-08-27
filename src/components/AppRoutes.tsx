@@ -19,6 +19,7 @@ import AdminAnalytics from '@/pages/AdminAnalytics';
 import PaymentSuccess from '@/components/PaymentSuccess';
 import SignatureDuo from '@/pages/SignatureDuo';
 import TrackOrder from '@/pages/TrackOrder';
+import SecurePayment from '@/pages/SecurePayment';
 
 const AppRoutes = () => {
   return (
@@ -31,6 +32,7 @@ const AppRoutes = () => {
       <Route path="/offers/signature-duo" element={<SignatureDuo />} />
       <Route path="/track-order" element={<TrackOrder />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/secure-payment" element={<SecurePayment />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/auth/reset-password" element={<ResetPassword />} />
