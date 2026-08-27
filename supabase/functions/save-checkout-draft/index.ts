@@ -56,9 +56,6 @@ Deno.serve(async (request) => {
     const cart = ids.map((perfume_id) => ({ perfume_id, quantity: quantities.get(perfume_id)! }));
     const isTest = Deno.env.get("CHECKOUT_MODE") !== "live";
 
-    // Opportunistically purge expired drafts. The admin queue never exposes an expired draft.
-    await admin.from("checkout_drafts").delete().lt("expires_at", new Date().toISOString());
-
     const values = {
       user_id: user?.id ?? null,
       is_guest: !user,
@@ -71,7 +68,6 @@ Deno.serve(async (request) => {
       status: "draft",
       meta_context: { offer_name: offer?.name || null, traffic_source: meta?.trafficSource === "meta_ads" ? "meta_ads" : "unknown" },
       updated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 72 * 60 * 60 * 1_000).toISOString(),
     };
 
     const existingToken = isUuid(draftToken) ? draftToken : null;

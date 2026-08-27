@@ -8,7 +8,7 @@ interface CheckoutDraft {
   id: string;
   created_at: string;
   updated_at: string;
-  expires_at: string;
+  expires_at: string | null;
   amount: number;
   currency: string;
   customer_name: string | null;
@@ -71,7 +71,7 @@ const CheckoutDraftsPanel: React.FC = () => {
                 {draft.delivery_address && <p className="mt-1 text-xs text-stone-500">{draft.delivery_address}</p>}
                 <p className="mt-2 text-xs text-stone-500">Last saved {new Date(draft.updated_at).toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' })}</p>
               </div>
-              <p className="mt-3 flex items-start gap-2 text-xs text-stone-500"><LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />Private operational data. It expires from this list after 72 hours and no reminder is sent automatically.</p>
+              <p className="mt-3 flex items-start gap-2 text-xs text-stone-500"><LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />Private operational data, saved for your records. It is not an order and no reminder is sent automatically.</p>
             </article>
           ))}
         </div>
