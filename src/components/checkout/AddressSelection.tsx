@@ -15,13 +15,11 @@ interface AddressSelectionProps {
   onAddressChange: (address: string) => void;
   selectedAddress: string;
   onValidationChange: (isValid: boolean) => void;
-  onReminderConsentChange?: (consented: boolean) => void;
 }
 
 const AddressSelection: React.FC<AddressSelectionProps> = ({
   onAddressChange,
   onValidationChange,
-  onReminderConsentChange,
 }) => {
   const { user } = useAuth();
   const [details, setDetails] = useState<CheckoutDetails>(() => ({
@@ -39,7 +37,6 @@ const AddressSelection: React.FC<AddressSelectionProps> = ({
     setDetails(nextDetails);
     onAddressChange(formatCheckoutDeliveryAddress(nextDetails));
     onValidationChange(isCheckoutDetailsValid(nextDetails));
-    onReminderConsentChange?.(nextDetails.reminderConsent);
   };
 
   return (

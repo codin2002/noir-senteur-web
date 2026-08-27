@@ -24,7 +24,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 }) => {
   const [selectedAddress, setSelectedAddress] = useState('');
   const [isAddressValid, setIsAddressValid] = useState(false);
-  const [reminderConsent, setReminderConsent] = useState(false);
   const { processPayment, isLoading } = useCheckout();
 
   const calculateTotal = () => {
@@ -49,7 +48,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
 
     await processPayment(cartItems, selectedAddress, {
       offerId: isSignatureDuoCart(cartItems) ? OFFERS.SIGNATURE_DUO.ID : undefined,
-      reminderConsent,
+      reminderConsent: false,
     });
   };
 
@@ -66,7 +65,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
               onAddressChange={setSelectedAddress}
               selectedAddress={selectedAddress}
               onValidationChange={setIsAddressValid}
-              onReminderConsentChange={setReminderConsent}
             />
           </div>
           

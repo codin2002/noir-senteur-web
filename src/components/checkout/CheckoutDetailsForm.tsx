@@ -1,5 +1,4 @@
 import React from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -104,16 +103,6 @@ const CheckoutDetailsForm: React.FC<CheckoutDetailsFormProps> = ({ details, onCh
         {emailInvalid && <p className="mt-1 text-xs text-amber-300">Enter a valid email or leave this blank.</p>}
       </div>
 
-      <label htmlFor={`${idPrefix}-reminder`} className="flex cursor-pointer items-start gap-3 rounded-lg border border-gold/15 bg-gold/5 p-3 text-sm text-white/70">
-        <Checkbox
-          id={`${idPrefix}-reminder`}
-          checked={details.reminderConsent}
-          onCheckedChange={(checked) => setField('reminderConsent', checked === true)}
-          className="mt-0.5 border-gold/50 data-[state=checked]:bg-gold data-[state=checked]:text-dark"
-          disabled={disabled}
-        />
-        <span>Send me order updates and one WhatsApp reminder if payment is not completed.</span>
-      </label>
     </div>
   );
 };
