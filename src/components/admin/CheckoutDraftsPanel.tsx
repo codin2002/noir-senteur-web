@@ -1,8 +1,9 @@
 import React from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { FileClock, LockKeyhole } from 'lucide-react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { FileClock, LockKeyhole, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { OFFERS } from '@/utils/constants';
+import { toast } from 'sonner';
 
 interface CheckoutDraft {
   id: string;
@@ -25,6 +26,7 @@ const perfumeNames: Record<string, string> = {
 };
 
 const CheckoutDraftsPanel: React.FC = () => {
+  const queryClient = useQueryClient();
   const { data: drafts = [], isLoading, isError } = useQuery({
     queryKey: ['admin-checkout-drafts'],
     queryFn: async () => {
@@ -34,6 +36,24 @@ const CheckoutDraftsPanel: React.FC = () => {
     },
     refetchInterval: 60_000,
   });
+
+  const deleteDraft = useMutation({
+    mutationFn: async (draftId: string) => {
+      const { error } = await supabase.rpc('delete_admin_checkout_draft' as never, { p_draft_id: draftId } as never);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-checkout-drafts'] });
+      toast.success('Saved checkout removed');
+    },
+    onError: () => toast.error('Could not remove this saved checkout. Please try again.'),
+  });
+
+  const handleDelete = (draft: CheckoutDraft) => {
+    if (window.confirm(`Remove the saved checkout for ${draft.customer_name || 'this customer'}? This cannot be undone.`)) {
+      deleteDraft.mutate(draft.id);
+    }
+  };
 
   return (
     <section className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 sm:p-5" aria-labelledby="saved-checkouts-heading">
@@ -71,7 +91,18 @@ const CheckoutDraftsPanel: React.FC = () => {
                 {draft.delivery_address && <p className="mt-1 text-xs text-stone-500">{draft.delivery_address}</p>}
                 <p className="mt-2 text-xs text-stone-500">Last saved {new Date(draft.updated_at).toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' })}</p>
               </div>
-              <p className="mt-3 flex items-start gap-2 text-xs text-stone-500"><LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />Private operational data, saved for your records. It is not an order and no reminder is sent automatically.</p>
+              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="flex items-start gap-2 text-xs text-stone-500"><LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />Private operational data, saved for your records. It is not an order and no reminder is sent automatically.</p>
+                <button
+                  type="button"
+                  onClick={() => handleDelete(draft)}
+                  disabled={deleteDraft.isPending}
+                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete after follow-up
+                </button>
+              </div>
             </article>
           ))}
         </div>
