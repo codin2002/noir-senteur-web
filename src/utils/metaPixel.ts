@@ -17,6 +17,9 @@ const PIXEL_ID = '1523641402566185';
 const CURRENCY = 'AED';
 const PURCHASED_ORDERS_KEY = 'pixel_purchased_orders_v1';
 
+const isLiveTrackingHost = () => typeof window !== 'undefined'
+  && ['senteurfragrances.com', 'www.senteurfragrances.com'].includes(window.location.hostname);
+
 export type PixelItem = { id: string; quantity: number; price: number };
 
 const round2 = (n: number) => Math.round((Number(n) || 0) * 100) / 100;
@@ -32,7 +35,7 @@ const newEventId = (prefix: string, key?: string) => {
 
 const track = (event: string, params: Record<string, unknown>, eventID: string) => {
   try {
-    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return false;
+    if (!isLiveTrackingHost() || typeof window.fbq !== 'function') return false;
     window.fbq('track', event, params, { eventID });
     return true;
   } catch (e) {
@@ -43,7 +46,7 @@ const track = (event: string, params: Record<string, unknown>, eventID: string) 
 
 const trackCustom = (event: string, params: Record<string, unknown>, eventID: string) => {
   try {
-    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return false;
+    if (!isLiveTrackingHost() || typeof window.fbq !== 'function') return false;
     window.fbq('trackCustom', event, params, { eventID });
     return true;
   } catch (e) {
@@ -184,7 +187,7 @@ export const fbqAdvancedMatch = (info: {
   externalId?: string | null;
 }) => {
   try {
-    if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
+    if (!isLiveTrackingHost() || typeof window.fbq !== 'function') return;
     const payload: Record<string, string> = {};
     if (info.email) payload.em = info.email.trim().toLowerCase();
     if (info.phone) {
