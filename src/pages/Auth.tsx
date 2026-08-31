@@ -239,29 +239,6 @@ const Auth = () => {
                         <p className="flex items-center justify-center gap-1.5"><ShieldCheck className="h-3.5 w-3.5 text-green-300" />Secure payment powered by Ziina</p>
                       </div>
                     </div>
-
-                    {/* OR Divider - Inside Guest Checkout */}
-                    <div className="relative">
-                      <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t border-gold/20" />
-                      </div>
-                      <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-darker px-3 text-muted-foreground font-medium">or</span>
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <p className="mb-3 text-sm text-white/50">Already have an account?</p>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={signInWithGoogle}
-                        className="w-full border-gold/30 text-white hover:bg-gold/10 h-12"
-                        disabled={isLoading}
-                      >
-                        <FcGoogle className="mr-2 h-5 w-5" />
-                        Continue with Google
-                      </Button>
-                    </div>
                   </form>
                 </div>
               </div>
