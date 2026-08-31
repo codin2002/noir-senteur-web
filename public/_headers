@@ -1,3 +1,6 @@
 /.well-known/apple-developer-merchantid-domain-association
   Content-Type: text/plain
   X-Content-Type-Options: nosniff
+
+/images/signature-duo-together-v2.jpg
+  Cache-Control: public, max-age=31536000, immutable

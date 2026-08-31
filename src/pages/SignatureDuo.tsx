@@ -188,7 +188,7 @@ const SignatureDuo = () => {
           <div className="grid md:grid-cols-2 gap-12 mb-16">
             <div className="flex items-center justify-center h-[500px] lg:h-[700px] p-4">
               <img
-                src="/images/signature-duo-together.png"
+                src="/images/signature-duo-together-v2.jpg"
                 alt="Senteur 313 and 424 Signature Duo"
                 className="max-h-full max-w-full object-contain"
               />
@@ -268,7 +268,7 @@ const SignatureDuo = () => {
           </DialogHeader>
           <div className="flex items-center gap-4 rounded-lg border border-gold/15 bg-dark/60 p-3">
             <img
-              src="/images/signature-duo-together.png"
+              src="/images/signature-duo-together-v2.jpg"
               alt="The Senteur Signature Duo"
               className="h-20 w-20 rounded-md object-cover"
             />

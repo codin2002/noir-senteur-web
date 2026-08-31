@@ -61,7 +61,7 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ orderDetails }) => 
           <div className="space-y-3">
             {hasSignatureDuo && (
               <div className="flex items-center gap-4 rounded-md border border-gold/30 bg-dark/50 p-3">
-                <img src="/images/signature-duo-together.png" alt="The Signature Duo" className="h-16 w-16 rounded object-cover" />
+                <img src="/images/signature-duo-together-v2.jpg" alt="The Signature Duo" className="h-16 w-16 rounded object-cover" />
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-white">The Signature Duo</p>
                   <p className="text-sm text-muted-foreground">313 + 424 · 2 × 100 ml{duoQuantity > 1 ? ` · Qty ${duoQuantity}` : ''}</p>

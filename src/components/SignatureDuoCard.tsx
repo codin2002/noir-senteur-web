@@ -18,7 +18,7 @@ const SignatureDuoCard: React.FC<SignatureDuoCardProps> = ({ products }) => {
     >
       <div className="relative aspect-[2/1] overflow-hidden md:aspect-square">
         <img
-          src="/images/signature-duo-together.png"
+          src="/images/signature-duo-together-v2.jpg"
           alt="Senteur 313 and 424 Signature Duo"
           className="h-full w-full object-cover brightness-110 transition duration-700 group-hover:scale-[1.03]"
         />

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import ResponsiveImage from './ResponsiveImage';
 import { cn } from '@/lib/utils';
+import { getOptimizedProductImageUrl } from '@/utils/imageOptimization';
 
 interface ProductImageProps {
   src: string;
@@ -48,7 +49,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
   );
 
   // Determine the final image source
-  const finalSrc = src || fallbackImage;
+  const finalSrc = src ? getOptimizedProductImageUrl(src) : fallbackImage;
 
   // Handle image loading or error
   const [isLoading, setIsLoading] = useState(true);

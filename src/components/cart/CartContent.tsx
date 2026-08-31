@@ -144,7 +144,7 @@ const CartContent: React.FC<CartContentProps> = ({
               {isSignatureDuo && (
                 <div className="flex items-center gap-4 rounded-lg border border-gold/30 bg-darker p-4">
                   <img
-                    src="/images/signature-duo-together.png"
+                    src="/images/signature-duo-together-v2.jpg"
                     alt="The Senteur Signature Duo"
                     className="h-24 w-24 rounded-md object-cover"
                   />
