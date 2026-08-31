@@ -15,6 +15,7 @@ interface ResponsiveImageProps {
   onError?: () => void;
   fallbackSrc?: string;
   showLoadingIndicator?: boolean;
+  loading?: 'eager' | 'lazy';
 }
 
 const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
@@ -28,6 +29,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
   onError,
   fallbackSrc = '/placeholder.svg',
   showLoadingIndicator = true,
+  loading = 'lazy',
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
@@ -63,7 +65,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
             hover && "transition-transform duration-500 hover:scale-105",
             isLoading ? "opacity-0" : "opacity-100"
           )}
-          loading="lazy"
+          loading={loading}
           onLoad={handleLoad}
           onError={handleError}
         />
@@ -88,7 +90,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
           hover && "transition-transform duration-500 hover:scale-105",
           isLoading ? "opacity-0" : "opacity-100"
         )}
-        loading="lazy"
+        loading={loading}
         onLoad={handleLoad}
         onError={handleError}
       />

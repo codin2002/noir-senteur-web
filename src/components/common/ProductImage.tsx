@@ -14,6 +14,7 @@ interface ProductImageProps {
   objectFit?: "cover" | "contain" | "fill" | "none" | "scale-down";
   showPlaceholderOnError?: boolean;
   hover?: boolean;
+  loading?: 'eager' | 'lazy';
 }
 
 const ProductImage: React.FC<ProductImageProps> = ({ 
@@ -25,7 +26,8 @@ const ProductImage: React.FC<ProductImageProps> = ({
   aspectRatio = "auto", // Changed default to "auto" to prevent cropping
   objectFit = "contain",
   showPlaceholderOnError = true,
-  hover = false
+  hover = false,
+  loading = 'lazy'
 }) => {
   // Check if image is from Supabase storage or other common cloud providers
   const isSupabaseStorage = src && (
@@ -83,6 +85,7 @@ const ProductImage: React.FC<ProductImageProps> = ({
         )}
         fallbackSrc={fallbackImage}
         showLoadingIndicator={true}
+        loading={loading}
         onLoad={() => setIsLoading(false)}
         onError={() => {
           setIsLoading(false);

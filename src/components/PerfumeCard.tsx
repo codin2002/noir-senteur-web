@@ -3,7 +3,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductImage from './common/ProductImage';
 import { getPerfumeDisplayName, PRICING } from '@/utils/constants';
-import { usePerfumeImages } from '@/hooks/usePerfumeImages';
 
 interface PerfumeCardProps {
   id: string;
@@ -31,7 +30,11 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
   preorderEnabled,
 }) => {
   const navigate = useNavigate();
-  const { primaryImage } = usePerfumeImages(id);
+  const collectionImage = id === '890882bb-0dba-4712-a5a9-380cf9e7ff58'
+    ? '/images/collection-313-v2.jpg'
+    : id === '37b4d1ef-6589-4852-a74d-c4a10bc04302'
+      ? '/images/collection-424-v2.jpg'
+      : image;
   const isOutOfStock = stockQuantity !== undefined && stockQuantity <= 0;
   const isPreorder = isOutOfStock || productType === 'preorder' || preorderEnabled === true;
   const buttonLabel = isPreorder ? 'PREORDER' : 'BUY';
@@ -48,13 +51,14 @@ const PerfumeCard: React.FC<PerfumeCardProps> = ({
     >
       <div className="relative aspect-square overflow-hidden bg-transparent [filter:drop-shadow(0_25px_30px_rgba(0,0,0,0.55))_drop-shadow(0_0_18px_rgba(212,175,55,0.08))]">
         <ProductImage
-          src={primaryImage || image}
+          src={collectionImage}
           alt={name}
           fullWidth={true}
           hover={true}
           aspectRatio={1}
           objectFit="contain"
           className="w-full h-full p-4"
+          loading="eager"
         />
         {isPreorder && (
           <div className="absolute top-2 right-2 bg-gold text-black text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded">
