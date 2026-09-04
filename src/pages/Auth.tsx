@@ -79,8 +79,17 @@ const Auth = () => {
     }
   }, [isCheckoutFlow, cartItems, offerId]);
 
-  const [guestDetails, setGuestDetails] = useState<CheckoutDetails>(() => emptyCheckoutDetails());
-  const { draftToken } = useCheckoutDraft(cartItems, guestDetails, offerId, Boolean(isCheckoutFlow));
+  const resumeDetails = location.state?.resumeDetails as CheckoutDetails | undefined;
+  const resumeDraftToken = location.state?.resumeDraftToken as string | null | undefined;
+  const isResumedCheckout = Boolean(location.state?.isResumedCheckout);
+  const [guestDetails, setGuestDetails] = useState<CheckoutDetails>(() => resumeDetails || emptyCheckoutDetails());
+  const { draftToken } = useCheckoutDraft(
+    cartItems,
+    guestDetails,
+    offerId,
+    Boolean(isCheckoutFlow),
+    isResumedCheckout ? resumeDraftToken || null : undefined,
+  );
 
   const loginForm = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -209,6 +218,7 @@ const Auth = () => {
                     </div>
                     <h3 className="text-2xl font-serif text-gold mb-3">Checkout as Guest</h3>
                     <p className="text-white/60 leading-relaxed">Complete your order quickly without creating an account</p>
+                    {isResumedCheckout && <p className="mt-3 text-sm text-green-300">Your saved details are ready to review.</p>}
                   </div>
 
                   <form onSubmit={handleGuestCheckout} className="space-y-6">

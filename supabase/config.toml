@@ -20,3 +20,9 @@ verify_jwt = false
 
 [functions.track-visit]
 verify_jwt = false
+
+[functions.resume-checkout]
+verify_jwt = false
+
+[functions.send-checkout-recovery-emails]
+verify_jwt = false

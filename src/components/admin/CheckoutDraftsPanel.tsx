@@ -1,6 +1,6 @@
 import React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FileClock, LockKeyhole, Trash2 } from 'lucide-react';
+import { Copy, FileClock, LockKeyhole, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { OFFERS } from '@/utils/constants';
 import { toast } from 'sonner';
@@ -18,6 +18,9 @@ interface CheckoutDraft {
   delivery_address: string | null;
   offer_name: string | null;
   cart_items: Array<{ perfume_id: string; quantity: number }>;
+  resume_token: string;
+  recovery_email_status: 'sending' | 'sent' | 'failed' | 'skipped' | null;
+  recovery_email_sent_at: string | null;
 }
 
 const perfumeNames: Record<string, string> = {
@@ -55,6 +58,12 @@ const CheckoutDraftsPanel: React.FC = () => {
     }
   };
 
+  const copyResumeLink = async (draft: CheckoutDraft) => {
+    const link = `${window.location.origin}/resume-checkout?source=draft&token=${draft.resume_token}`;
+    await navigator.clipboard.writeText(link);
+    toast.success('Secure checkout link copied');
+  };
+
   return (
     <section className="rounded-xl border border-sky-200 bg-sky-50/70 p-4 sm:p-5" aria-labelledby="saved-checkouts-heading">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -90,18 +99,24 @@ const CheckoutDraftsPanel: React.FC = () => {
                 <p className="mt-1">{(draft.cart_items || []).map((item) => `${perfumeNames[item.perfume_id] || 'Perfume'} × ${item.quantity}`).join(' · ')}</p>
                 {draft.delivery_address && <p className="mt-1 text-xs text-stone-500">{draft.delivery_address}</p>}
                 <p className="mt-2 text-xs text-stone-500">Last saved {new Date(draft.updated_at).toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                {draft.recovery_email_status === 'sent' && <p className="mt-2 text-xs font-medium text-green-700">Recovery email sent {draft.recovery_email_sent_at ? new Date(draft.recovery_email_sent_at).toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' }) : ''}</p>}
               </div>
               <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="flex items-start gap-2 text-xs text-stone-500"><LockKeyhole className="mt-0.5 h-3.5 w-3.5 shrink-0" />Private operational data, saved for your records. It is not an order and no reminder is sent automatically.</p>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(draft)}
-                  disabled={deleteDraft.isPending}
-                  className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Delete after follow-up
-                </button>
+                <div className="flex shrink-0 flex-wrap gap-2">
+                  <button type="button" onClick={() => void copyResumeLink(draft)} className="inline-flex items-center justify-center gap-1.5 rounded-md border border-sky-200 px-3 py-2 text-xs font-semibold text-sky-800 transition hover:bg-sky-50">
+                    <Copy className="h-3.5 w-3.5" />Copy secure checkout link
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(draft)}
+                    disabled={deleteDraft.isPending}
+                    className="inline-flex items-center justify-center gap-1.5 rounded-md border border-red-200 px-3 py-2 text-xs font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-60"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Delete after follow-up
+                  </button>
+                </div>
               </div>
             </article>
           ))}

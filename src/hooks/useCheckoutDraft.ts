@@ -6,9 +6,25 @@ import { CheckoutDetails, formatCheckoutDeliveryAddress, isCheckoutDetailsValid 
 
 const STORAGE_KEY = 'senteur_checkout_draft_token';
 
-export const useCheckoutDraft = (cartItems: CartItemType[], details: CheckoutDetails, offerId?: string, enabled = true) => {
-  const [draftToken, setDraftToken] = useState<string | null>(() => localStorage.getItem(STORAGE_KEY));
+export const useCheckoutDraft = (
+  cartItems: CartItemType[],
+  details: CheckoutDetails,
+  offerId?: string,
+  enabled = true,
+  draftTokenOverride?: string | null,
+) => {
+  const [draftToken, setDraftToken] = useState<string | null>(() => (
+    draftTokenOverride === undefined ? localStorage.getItem(STORAGE_KEY) : draftTokenOverride
+  ));
   const lastPayload = useRef('');
+
+  useEffect(() => {
+    if (draftTokenOverride === undefined) return;
+    setDraftToken(draftTokenOverride);
+    lastPayload.current = '';
+    if (draftTokenOverride) localStorage.setItem(STORAGE_KEY, draftTokenOverride);
+    else localStorage.removeItem(STORAGE_KEY);
+  }, [draftTokenOverride]);
 
   useEffect(() => {
     if (!enabled || !cartItems.length || !isCheckoutDetailsValid(details)) return;

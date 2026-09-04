@@ -20,6 +20,7 @@ import PaymentSuccess from '@/components/PaymentSuccess';
 import SignatureDuo from '@/pages/SignatureDuo';
 import TrackOrder from '@/pages/TrackOrder';
 import SecurePayment from '@/pages/SecurePayment';
+import ResumeCheckout from '@/pages/ResumeCheckout';
 
 const AppRoutes = () => {
   return (
@@ -33,6 +34,7 @@ const AppRoutes = () => {
       <Route path="/track-order" element={<TrackOrder />} />
       <Route path="/payment-success" element={<PaymentSuccess />} />
       <Route path="/secure-payment" element={<SecurePayment />} />
+      <Route path="/resume-checkout" element={<ResumeCheckout />} />
       <Route path="/payment-failed" element={<PaymentFailed />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
       <Route path="/auth/reset-password" element={<ResetPassword />} />

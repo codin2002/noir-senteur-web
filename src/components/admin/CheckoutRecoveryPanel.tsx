@@ -1,6 +1,6 @@
 import React from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, CheckCircle2, Clock3, MessageCircle, X } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Clock3, Copy, MessageCircle, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +21,9 @@ interface RecoveryCheckout {
   offer_name: string | null;
   reminder_consent: boolean;
   cart_items: Array<{ perfume_id: string; quantity: number; price: number }>;
+  resume_token: string;
+  recovery_email_status: 'sending' | 'sent' | 'failed' | 'skipped' | null;
+  recovery_email_sent_at: string | null;
 }
 
 const perfumeNames: Record<string, string> = {
@@ -67,6 +70,12 @@ const CheckoutRecoveryPanel: React.FC = () => {
     return `https://wa.me/${whatsappNumber(checkout.customer_phone || '')}?text=${encodeURIComponent(message)}`;
   };
 
+  const copyResumeLink = async (checkout: RecoveryCheckout) => {
+    const link = `${window.location.origin}/resume-checkout?source=checkout&token=${checkout.resume_token}`;
+    await navigator.clipboard.writeText(link);
+    toast.success('Secure checkout link copied');
+  };
+
   return (
     <section className="rounded-xl border border-amber-200 bg-amber-50/60 p-4 sm:p-5" aria-labelledby="checkout-recovery-heading">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -75,7 +84,7 @@ const CheckoutRecoveryPanel: React.FC = () => {
             <Clock3 className="h-5 w-5 text-amber-700" />
             <h2 id="checkout-recovery-heading" className="font-serif text-xl text-stone-950">Incomplete checkouts</h2>
           </div>
-          <p className="mt-1 text-sm text-stone-600">Live payment attempts older than 15 minutes. No reminder is sent automatically.</p>
+          <p className="mt-1 text-sm text-stone-600">A one-time recovery email is sent after three hours when an email address was provided.</p>
         </div>
         <div className="rounded-full bg-white px-3 py-1 text-sm font-medium text-stone-700 shadow-sm">
           {eligible.length} allowed WhatsApp follow-up{eligible.length === 1 ? '' : 's'}
@@ -107,11 +116,15 @@ const CheckoutRecoveryPanel: React.FC = () => {
                   <p className="font-medium">{checkout.offer_name || 'Website checkout'} · AED {Number(checkout.amount).toFixed(2)}</p>
                   <p className="mt-1">{(checkout.cart_items || []).map((item) => `${perfumeNames[item.perfume_id] || 'Perfume'} × ${item.quantity}`).join(' · ')}</p>
                   <p className="mt-1 text-xs text-stone-500">{new Date(checkout.created_at).toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' })}</p>
+                  {checkout.recovery_email_status === 'sent' && <p className="mt-2 text-xs font-medium text-green-700">Recovery email sent {checkout.recovery_email_sent_at ? new Date(checkout.recovery_email_sent_at).toLocaleString('en-AE', { dateStyle: 'medium', timeStyle: 'short' }) : ''}</p>}
                 </div>
                 {!checkout.reminder_consent && (
                   <p className="mt-3 flex items-start gap-2 text-xs text-stone-500"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />Customer did not opt in to a WhatsApp payment reminder.</p>
                 )}
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <Button type="button" size="sm" variant="outline" className="border-amber-300 bg-white text-amber-900 hover:bg-amber-50" onClick={() => void copyResumeLink(checkout)}>
+                    <Copy className="mr-1 h-4 w-4" />Copy secure checkout link
+                  </Button>
                   {checkout.reminder_consent && checkout.customer_phone && checkout.recovery_status === 'new' && (
                     <Button asChild size="sm" className="bg-green-700 text-white hover:bg-green-800">
                       <a href={reminderHref(checkout)} target="_blank" rel="noreferrer" onClick={() => void setRecoveryStatus(checkout.id, 'contacted')}>
@@ -119,7 +132,7 @@ const CheckoutRecoveryPanel: React.FC = () => {
                       </a>
                     </Button>
                   )}
-                  {checkout.recovery_status === 'contacted' && <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700"><CheckCircle2 className="h-4 w-4" />Follow-up opened</span>}
+                  {checkout.recovery_status === 'contacted' && <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700"><CheckCircle2 className="h-4 w-4" />Follow-up sent</span>}
                   <Button type="button" size="sm" variant="outline" className="border-stone-200 bg-white text-stone-700 hover:bg-stone-100" onClick={() => void setRecoveryStatus(checkout.id, 'dismissed')}>
                     <X className="mr-1 h-4 w-4" />Dismiss
                   </Button>
