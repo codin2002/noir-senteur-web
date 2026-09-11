@@ -6,6 +6,7 @@ import OrderActionsCell from './OrderActionsCell';
 import ReturnInfoCell from './ReturnInfoCell';
 import { AdminOrder } from '@/types/adminOrder';
 import { getCustomerInfo, getDeliveryAddress, getOrderAttributionCategory, getOrderEmirate, getStatusBadgeClasses } from '@/utils/orderUtils';
+import { OFFERS } from '@/utils/constants';
 
 interface OrderTableRowProps {
   order: AdminOrder;
@@ -18,6 +19,16 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
   const emirate = getOrderEmirate(order);
   const attributionCategory = getOrderAttributionCategory(order);
   const createdAt = new Date(order.created_at);
+  const manualUnits = order.manual_lines?.reduce((sum, line) => sum + Number(line.quantity || 0), 0) || 0;
+  const itemUnits = order.items.reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const totalUnits = order.order_source === 'manual' ? manualUnits : itemUnits;
+  const isSignatureCollection = order.offer_id === OFFERS.SIGNATURE_DUO.ID
+    || Boolean(order.manual_lines?.some((line) => /signature|duo/i.test(line.label)));
+  const purchaseType = isSignatureCollection
+    ? 'Signature Collection'
+    : totalUnits > 1
+      ? 'Separate perfumes'
+      : null;
 
   return (
     <TableRow className="border-stone-200">
@@ -33,6 +44,11 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({ order, onOrderUpdate }) =
         <div className="max-w-[180px] truncate text-xs text-stone-500" title={deliveryAddress}>{deliveryAddress}</div>
       </TableCell>
       <TableCell>
+        {purchaseType && (
+          <span className={`mb-2 inline-block rounded-full px-2.5 py-1 text-xs font-semibold ${isSignatureCollection ? 'bg-amber-100 text-amber-900' : 'bg-stone-100 text-stone-700'}`}>
+            {purchaseType}
+          </span>
+        )}
         {order.order_source === 'manual' && order.manual_lines && order.manual_lines.length > 0
           ? order.manual_lines.map((line, index) => (
           <div key={`${line.label}-${index}`} className="mb-1.5 whitespace-nowrap text-sm last:mb-0">

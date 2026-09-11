@@ -30,6 +30,7 @@ export interface AdminOrder {
   utm_source: string | null;
   utm_campaign: string | null;
   utm_content: string | null;
+  offer_id: string | null;
   manual_lines?: ManualOrderLine[];
   items: AdminOrderItem[];
 }
