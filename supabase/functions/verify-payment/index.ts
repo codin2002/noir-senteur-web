@@ -9,7 +9,7 @@ import { createOrder } from './orderCreator.ts';
 import { recordSuccessfulPayment } from './paymentRecorder.ts';
 import { sendOrderConfirmation } from './emailService.ts';
 import { resolveUserId } from './userResolver.ts';
-import { sendMetaPurchase } from '../_shared/metaConversions.ts';
+import { sendMetaPurchaseOnce } from '../_shared/metaConversions.ts';
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -100,7 +100,7 @@ serve(async (req) => {
     if (attributionError) console.error('Order attribution was not saved', attributionError);
 
     const [firstName, ...remainingNames] = customerInfo.customerName.trim().split(/\s+/);
-    await sendMetaPurchase({
+    await sendMetaPurchaseOnce(supabaseService, {
       orderId,
       value: orderCalculation.totalAmount,
       items: orderCartItems.map((item: any) => {

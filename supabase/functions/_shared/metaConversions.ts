@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
 type MetaItem = {
   id: string;
   quantity: number;
@@ -108,4 +110,52 @@ export async function sendMetaPurchase(purchase: MetaPurchase): Promise<boolean>
     console.error("Meta CAPI Purchase failed", { orderId: purchase.orderId, error });
     return false;
   }
+}
+
+/**
+ * Claims an order before sending its Purchase event, then persists the result.
+ * A failed send releases the claim so a later webhook retry can try again.
+ */
+export async function sendMetaPurchaseOnce(
+  store: SupabaseClient,
+  purchase: MetaPurchase,
+): Promise<boolean> {
+  const { data: claimed, error: claimError } = await store.rpc("claim_meta_purchase", {
+    p_order_id: purchase.orderId,
+  });
+
+  if (claimError) {
+    console.error("Meta CAPI Purchase could not be claimed", {
+      orderId: purchase.orderId,
+      error: claimError.message || "Unknown database error",
+    });
+    return false;
+  }
+
+  if (claimed !== true) {
+    console.log("Meta CAPI Purchase skipped because it was already sent or is being processed", {
+      orderId: purchase.orderId,
+    });
+    return true;
+  }
+
+  const sent = await sendMetaPurchase(purchase);
+  const status = sent
+    ? { meta_purchase_sent: true, meta_purchase_claimed_at: new Date().toISOString() }
+    : { meta_purchase_claimed_at: null };
+  const { error: statusError } = await store
+    .from("orders")
+    .update(status)
+    .eq("id", purchase.orderId);
+
+  if (statusError) {
+    console.error("Meta CAPI Purchase status was not saved", {
+      orderId: purchase.orderId,
+      sent,
+      error: statusError.message || "Unknown database error",
+    });
+    return false;
+  }
+
+  return sent;
 }

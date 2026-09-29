@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import { sendMetaPurchase } from "../_shared/metaConversions.ts";
+import { sendMetaPurchaseOnce } from "../_shared/metaConversions.ts";
 
 const textEncoder = new TextEncoder();
 
@@ -152,7 +152,7 @@ Deno.serve(async (request) => {
           landing_url: meta.landing_url || null,
         }).eq("id", orderId);
         if (attributionError) console.error("Order attribution was not saved", attributionError);
-        await sendMetaPurchase({
+        await sendMetaPurchaseOnce(admin, {
           orderId,
           value: Number(checkout.amount),
           items: (orderItems ?? []).map((item: { quantity: number; price: number; perfume_id: string }) => ({
