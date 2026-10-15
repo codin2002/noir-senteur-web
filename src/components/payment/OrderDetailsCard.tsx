@@ -2,6 +2,7 @@
 import React from 'react';
 import { Package } from 'lucide-react';
 import { getPerfumeDisplayName, OFFERS } from '@/utils/constants';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 interface OrderDetailsCardProps {
   orderDetails: any;
@@ -73,7 +74,7 @@ const OrderDetailsCard: React.FC<OrderDetailsCardProps> = ({ orderDetails }) => 
             {remainingItems.map((item: any) => (
               <div key={item.id || item.perfume_id} className="flex items-center gap-4 rounded-md bg-dark/50 p-3">
                 {item.perfume?.image && (
-                  <img src={item.perfume.image} alt={getPerfumeDisplayName(item.perfume)} className="h-16 w-16 rounded object-cover" />
+                  <img src={getOptimizedMediaUrl(item.perfume.image)} alt={getPerfumeDisplayName(item.perfume)} className="h-16 w-16 rounded object-cover" loading="lazy" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-white">{item.perfume ? getPerfumeDisplayName(item.perfume) : 'Perfume'}</p>

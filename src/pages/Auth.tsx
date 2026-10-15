@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useCheckout } from '@/hooks/useCheckout';
 import { OFFERS, getCartSubtotal, getSignatureDuoSavings } from '@/utils/constants';
+import { getOptimizedMediaUrl } from '@/utils/media';
 import CheckoutDetailsForm from '@/components/checkout/CheckoutDetailsForm';
 import {
   CheckoutDetails,
@@ -192,7 +193,7 @@ const Auth = () => {
               <div className="space-y-3">
                 {cartItems.map((item: any) => (
                   <div key={item.id ?? item.perfume?.id} className="flex items-center gap-3 text-left">
-                    {item.perfume?.image && <img src={item.perfume.image} alt={item.perfume.name} className="h-12 w-12 rounded object-cover" />}
+                    {item.perfume?.image && <img src={getOptimizedMediaUrl(item.perfume.image)} alt={item.perfume.name} className="h-12 w-12 rounded object-cover" loading="lazy" />}
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm text-white">{item.perfume?.name}</p>
                       <p className="text-xs text-white/60">100 ml · Quantity: {item.quantity || 1}</p>

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { cn } from "@/lib/utils";
 import { Loader } from 'lucide-react';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 interface ResponsiveImageProps {
   src: string;
@@ -33,6 +34,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const optimizedSrc = getOptimizedMediaUrl(src);
   
   // Function to handle image load
   const handleLoad = () => {
@@ -58,7 +60,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
         )}
         
         <img 
-          src={hasError ? fallbackSrc : src} 
+          src={hasError ? fallbackSrc : optimizedSrc}
           alt={alt} 
           className={cn(
             `w-auto h-auto max-w-full max-h-full m-auto object-${objectFit} transition-opacity duration-300`,
@@ -83,7 +85,7 @@ const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
       )}
       
       <img 
-        src={hasError ? fallbackSrc : src} 
+        src={hasError ? fallbackSrc : optimizedSrc}
         alt={alt} 
         className={cn(
           `w-full h-full object-${objectFit} transition-opacity duration-300`,

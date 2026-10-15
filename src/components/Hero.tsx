@@ -53,7 +53,8 @@ const Hero = () => {
         disablePictureInPicture
         disableRemotePlayback
         onLoadedData={() => setIsVideoLoaded(true)} 
-        preload="auto" 
+        preload="metadata"
+        poster="/images/hero-poster.webp"
         style={{
           width: '100%',
           height: '100%',
@@ -61,7 +62,7 @@ const Hero = () => {
         }}
       >
         <source 
-          src="https://gzddmdwgzcnikqurtnsy.supabase.co/storage/v1/object/public/video-hero//Final%20Confession.mp4" 
+          src="/videos/final-confession.mp4"
           type="video/mp4" 
         />
         Your browser does not support video playback.

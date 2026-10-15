@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/context/AuthContext';
 import { usePreorderInfo } from '@/hooks/usePreorderInfo';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 export interface CartItemType {
   id: string;
@@ -131,9 +132,10 @@ const CartItem: React.FC<CartItemProps> = ({
   return (
     <div className="flex items-center gap-4 p-4 bg-darker border border-gold/20 rounded-lg">
       <img 
-        src={item.perfume.image} 
+        src={getOptimizedMediaUrl(item.perfume.image)}
         alt={item.perfume.name}
         className="w-20 h-20 object-cover rounded"
+        loading="lazy"
       />
       
       <div className="flex-grow">

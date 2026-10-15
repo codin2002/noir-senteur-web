@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { CartItemType } from '@/components/cart/CartItem';
 import { Package2, Truck, ShieldCheck } from 'lucide-react';
 import { PRICING, getCartSubtotal, getSignatureDuoSavings } from '@/utils/constants';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 interface OrderSummaryProps {
   cartItems: CartItemType[];
@@ -31,9 +32,10 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ cartItems, currencySymbol, 
           <div key={item.id} className="flex items-center justify-between py-3 border-b border-gold/10 last:border-b-0">
             <div className="flex items-center space-x-3">
               <img
-                src={item.perfume.image}
+                src={getOptimizedMediaUrl(item.perfume.image)}
                 alt={item.perfume.name}
                 className="w-12 h-12 object-cover rounded-lg border border-gold/20"
+                loading="lazy"
               />
               <div className="flex-1">
                 <p className="font-medium text-white text-sm leading-tight">{item.perfume.name}</p>

@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from '@/components/ui/carousel';
 import { cn } from '@/lib/utils';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 interface PerfumeImage {
   id: string;
@@ -28,10 +29,10 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
   const [api, setApi] = useState<CarouselApi>();
 
   // Extract image URLs from the PerfumeImage objects
-  const imageUrls = images.map(img => img.image_url);
+  const imageUrls = images.map(img => getOptimizedMediaUrl(img.image_url));
   
   // If no images, use fallback
-  const displayImages = imageUrls.length > 0 ? imageUrls : (fallbackImage ? [fallbackImage] : []);
+  const displayImages = imageUrls.length > 0 ? imageUrls : (fallbackImage ? [getOptimizedMediaUrl(fallbackImage)] : []);
 
   // Sync currentIndex with carousel API
   useEffect(() => {
@@ -67,6 +68,7 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
           src={displayImages[0]} 
           alt={perfumeName} 
           className="max-w-full max-h-full object-contain"
+          loading="eager"
         />
       </div>
     );
@@ -83,6 +85,7 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
                   src={imageUrl} 
                   alt={`${perfumeName} - Image ${index + 1}`} 
                   className="max-w-full max-h-full object-contain"
+                  loading={index === 0 ? "eager" : "lazy"}
                 />
               </div>
             </CarouselItem>
@@ -112,6 +115,7 @@ const PerfumeImageSlider: React.FC<PerfumeImageSliderProps> = ({
                 src={imageUrl} 
                 alt={`${perfumeName} thumbnail ${index + 1}`}
                 className="w-full h-full object-cover"
+                loading="lazy"
               />
             </button>
           ))}

@@ -6,6 +6,7 @@ import { Package, User, Mail, Phone, MapPin } from 'lucide-react';
 import { useOrderDetails } from '@/hooks/useOrderDetails';
 import OrderStatusManager from '@/components/admin/OrderStatusManager';
 import OrderStatusTimeline from '@/components/profile/OrderStatusTimeline';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 interface OrderDetailsModalProps {
   isOpen: boolean;
@@ -184,9 +185,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   <div key={item.id} className="bg-dark border border-gold/10 rounded-lg p-4">
                     <div className="flex items-center space-x-4">
                       <img
-                        src={item.perfume.image}
+                        src={getOptimizedMediaUrl(item.perfume.image)}
                         alt={item.perfume.name}
                         className="w-16 h-16 object-cover rounded-lg"
+                        loading="lazy"
                       />
                       <div className="flex-1">
                         <h4 className="font-medium">{item.perfume.name}</h4>

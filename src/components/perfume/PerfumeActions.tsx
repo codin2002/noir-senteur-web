@@ -12,6 +12,7 @@ import PreorderBadge from './PreorderBadge';
 import { fbqAddToCart } from '@/utils/metaPixel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { getPerfumeDisplayName, OFFERS, PERFUMES } from '@/utils/constants';
+import { getOptimizedMediaUrl } from '@/utils/media';
 
 interface Perfume {
   id: string;
@@ -217,9 +218,10 @@ const PerfumeActions: React.FC<PerfumeActionsProps> = ({
         </DialogHeader>
         <div className="flex items-center gap-4 rounded-lg border border-gold/15 bg-dark/60 p-3">
           <img
-            src={perfume.image}
+            src={getOptimizedMediaUrl(perfume.image)}
             alt={getPerfumeDisplayName(perfume)}
             className="h-16 w-16 rounded-md object-cover"
+            loading="lazy"
           />
           <div className="min-w-0 flex-1">
             <p className="font-medium">{getPerfumeDisplayName(perfume)}</p>
