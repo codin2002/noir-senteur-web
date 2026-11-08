@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.3"
   }
   public: {
     Tables: {
@@ -45,6 +45,119 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      checkout_drafts: {
+        Row: {
+          amount: number
+          cart_items: Json
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          delivery_address: string
+          draft_token: string
+          expires_at: string | null
+          id: string
+          is_guest: boolean
+          meta_context: Json | null
+          mode: string
+          offer_id: string | null
+          pending_checkout_id: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          cart_items: Json
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivery_address: string
+          draft_token?: string
+          expires_at?: string | null
+          id?: string
+          is_guest?: boolean
+          meta_context?: Json | null
+          mode: string
+          offer_id?: string | null
+          pending_checkout_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cart_items?: Json
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          delivery_address?: string
+          draft_token?: string
+          expires_at?: string | null
+          id?: string
+          is_guest?: boolean
+          meta_context?: Json | null
+          mode?: string
+          offer_id?: string | null
+          pending_checkout_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "checkout_drafts_pending_checkout_id_fkey"
+            columns: ["pending_checkout_id"]
+            isOneToOne: false
+            referencedRelation: "pending_ziina_checkouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      checkout_recovery_email_log: {
+        Row: {
+          checkout_id: string
+          created_at: string
+          error_message: string | null
+          id: string
+          recipient_email: string
+          resend_email_id: string | null
+          sent_at: string | null
+          source: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          checkout_id: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          resend_email_id?: string | null
+          sent_at?: string | null
+          source: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          checkout_id?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          resend_email_id?: string | null
+          sent_at?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       inventory: {
         Row: {
@@ -236,6 +349,7 @@ export type Database = {
         Row: {
           created_at: string
           delivery_address: string | null
+          delivery_email_claimed_at: string | null
           delivery_email_sent: boolean | null
           fulfillment_status: string
           guest_email: string | null
@@ -243,24 +357,31 @@ export type Database = {
           guest_phone: string | null
           id: string
           is_preorder: boolean
-          notes: string | null
-          traffic_source: string
+          landing_url: string | null
+          manual_lines: Json
           meta_click_id: string | null
           meta_fbc: string | null
           meta_fbp: string | null
-          utm_source: string | null
-          utm_campaign: string | null
-          utm_content: string | null
-          landing_url: string | null
+          meta_purchase_claimed_at: string | null
+          meta_purchase_sent: boolean
+          notes: string | null
+          order_source: string
+          payment_intent_id: string | null
           payment_status: string
+          processing_email_claimed_at: string | null
           processing_email_sent: boolean | null
           status: string
           total: number
+          traffic_source: string
           user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_source: string | null
         }
         Insert: {
           created_at?: string
           delivery_address?: string | null
+          delivery_email_claimed_at?: string | null
           delivery_email_sent?: boolean | null
           fulfillment_status?: string
           guest_email?: string | null
@@ -268,24 +389,31 @@ export type Database = {
           guest_phone?: string | null
           id?: string
           is_preorder?: boolean
-          notes?: string | null
-          traffic_source?: string
+          landing_url?: string | null
+          manual_lines?: Json
           meta_click_id?: string | null
           meta_fbc?: string | null
           meta_fbp?: string | null
-          utm_source?: string | null
-          utm_campaign?: string | null
-          utm_content?: string | null
-          landing_url?: string | null
+          meta_purchase_claimed_at?: string | null
+          meta_purchase_sent?: boolean
+          notes?: string | null
+          order_source?: string
+          payment_intent_id?: string | null
           payment_status?: string
+          processing_email_claimed_at?: string | null
           processing_email_sent?: boolean | null
           status?: string
           total: number
+          traffic_source?: string
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_source?: string | null
         }
         Update: {
           created_at?: string
           delivery_address?: string | null
+          delivery_email_claimed_at?: string | null
           delivery_email_sent?: boolean | null
           fulfillment_status?: string
           guest_email?: string | null
@@ -293,22 +421,99 @@ export type Database = {
           guest_phone?: string | null
           id?: string
           is_preorder?: boolean
-          notes?: string | null
-          traffic_source?: string
+          landing_url?: string | null
+          manual_lines?: Json
           meta_click_id?: string | null
           meta_fbc?: string | null
           meta_fbp?: string | null
-          utm_source?: string | null
-          utm_campaign?: string | null
-          utm_content?: string | null
-          landing_url?: string | null
+          meta_purchase_claimed_at?: string | null
+          meta_purchase_sent?: boolean
+          notes?: string | null
+          order_source?: string
+          payment_intent_id?: string | null
           payment_status?: string
+          processing_email_claimed_at?: string | null
           processing_email_sent?: boolean | null
           status?: string
           total?: number
+          traffic_source?: string
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_source?: string | null
         }
         Relationships: []
+      }
+      pending_ziina_checkouts: {
+        Row: {
+          amount: number
+          cart_items: Json
+          created_at: string
+          currency: string
+          delivery_address: string
+          id: string
+          is_guest: boolean
+          lookup_token: string
+          meta_context: Json | null
+          mode: string
+          operation_id: string
+          order_id: string | null
+          payment_intent_id: string | null
+          processed_at: string | null
+          provider_payload: Json | null
+          recovery_status: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          cart_items: Json
+          created_at?: string
+          currency?: string
+          delivery_address: string
+          id?: string
+          is_guest: boolean
+          lookup_token?: string
+          meta_context?: Json | null
+          mode: string
+          operation_id?: string
+          order_id?: string | null
+          payment_intent_id?: string | null
+          processed_at?: string | null
+          provider_payload?: Json | null
+          recovery_status?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cart_items?: Json
+          created_at?: string
+          currency?: string
+          delivery_address?: string
+          id?: string
+          is_guest?: boolean
+          lookup_token?: string
+          meta_context?: Json | null
+          mode?: string
+          operation_id?: string
+          order_id?: string | null
+          payment_intent_id?: string | null
+          processed_at?: string | null
+          provider_payload?: Json | null
+          recovery_status?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pending_ziina_checkouts_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       perfume_classifications: {
         Row: {
@@ -670,12 +875,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visitors: {
+        Row: {
+          first_seen_at: string
+          last_seen_at: string
+          visitor_id: string
+        }
+        Insert: {
+          first_seen_at?: string
+          last_seen_at?: string
+          visitor_id: string
+        }
+        Update: {
+          first_seen_at?: string
+          last_seen_at?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       successful_payments: {
         Row: {
           amount: number
           created_at: string
           currency: string
-          customer_email: string
+          customer_email: string | null
           customer_name: string | null
           delivery_address: string | null
           email_sent: boolean
@@ -694,7 +917,7 @@ export type Database = {
           amount: number
           created_at?: string
           currency?: string
-          customer_email: string
+          customer_email?: string | null
           customer_name?: string | null
           delivery_address?: string | null
           email_sent?: boolean
@@ -713,7 +936,7 @@ export type Database = {
           amount?: number
           created_at?: string
           currency?: string
-          customer_email?: string
+          customer_email?: string | null
           customer_name?: string | null
           delivery_address?: string | null
           email_sent?: boolean
@@ -801,6 +1024,56 @@ export type Database = {
     }
     Functions: {
       cancel_preorder_order: { Args: { _order_id: string }; Returns: undefined }
+      claim_meta_purchase: { Args: { p_order_id: string }; Returns: boolean }
+      claim_order_email: {
+        Args: { p_email_type: string; p_order_id: string }
+        Returns: boolean
+      }
+      create_manual_order:
+        | {
+            Args: {
+              p_already_handed_over?: boolean
+              p_customer_email?: string
+              p_customer_name: string
+              p_customer_phone?: string
+              p_delivery_address?: string
+              p_lines: Json
+              p_notes?: string
+            }
+            Returns: {
+              order_id: string
+            }[]
+          }
+        | {
+            Args: {
+              p_already_handed_over?: boolean
+              p_customer_email?: string
+              p_customer_name: string
+              p_customer_phone?: string
+              p_delivery_address?: string
+              p_notes?: string
+              p_perfume_id: string
+              p_quantity: number
+              p_unit_price: number
+            }
+            Returns: {
+              order_id: string
+            }[]
+          }
+      create_order_from_ziina_checkout: {
+        Args: {
+          p_amount: number
+          p_cart_items: Json
+          p_customer_email: string
+          p_customer_name: string
+          p_customer_phone: string
+          p_delivery_address: string
+          p_is_guest: boolean
+          p_payment_intent_id: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       create_order_with_items: {
         Args: {
           cart_items: Json
@@ -813,7 +1086,53 @@ export type Database = {
         }
         Returns: string
       }
+      delete_admin_checkout_draft: {
+        Args: { p_draft_id: string }
+        Returns: undefined
+      }
       delete_cart_item: { Args: { cart_id: string }; Returns: undefined }
+      get_admin_checkout_drafts: {
+        Args: never
+        Returns: {
+          amount: number
+          cart_items: Json
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string
+          expires_at: string
+          id: string
+          offer_name: string
+          recovery_email_sent_at: string
+          recovery_email_status: string
+          resume_token: string
+          updated_at: string
+        }[]
+      }
+      get_admin_checkout_recovery: {
+        Args: never
+        Returns: {
+          amount: number
+          cart_items: Json
+          checkout_status: string
+          created_at: string
+          currency: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_address: string
+          id: string
+          offer_name: string
+          provider_status: string
+          recovery_email_sent_at: string
+          recovery_email_status: string
+          recovery_status: string
+          reminder_consent: boolean
+          resume_token: string
+        }[]
+      }
       get_cart_with_perfumes: {
         Args: { user_uuid: string }
         Returns: {
@@ -825,21 +1144,55 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_order_tracking: {
+        Args: { p_order_reference: string; p_phone: string }
+        Returns: {
+          fulfillment_status: string
+          order_reference: string
+          placed_at: string
+        }[]
+      }
       get_orders_with_items: {
         Args: { user_uuid?: string }
         Returns: {
           created_at: string
           delivery_address: string
+          fulfillment_status: string
           guest_email: string
           guest_name: string
           guest_phone: string
-          fulfillment_status: string
           id: string
           items: Json
           notes: string
+          order_source: string
           status: string
           total: number
           user_id: string
+        }[]
+      }
+      get_orders_with_items_v2: {
+        Args: { user_uuid?: string }
+        Returns: {
+          created_at: string
+          delivery_address: string
+          fulfillment_status: string
+          guest_email: string
+          guest_name: string
+          guest_phone: string
+          id: string
+          items: Json
+          manual_lines: Json
+          meta_click_id: string
+          notes: string
+          offer_id: string
+          order_source: string
+          status: string
+          total: number
+          traffic_source: string
+          user_id: string
+          utm_campaign: string
+          utm_content: string
+          utm_source: string
         }[]
       }
       get_wishlist_with_perfumes: {
@@ -866,9 +1219,21 @@ export type Database = {
           remaining_stock: number
         }[]
       }
+      trigger_checkout_recovery_email_delivery: {
+        Args: never
+        Returns: undefined
+      }
       update_cart_item: {
         Args: { cart_id: string; new_quantity: number }
         Returns: undefined
+      }
+      update_checkout_recovery_status: {
+        Args: { p_checkout_id: string; p_status: string }
+        Returns: boolean
+      }
+      verify_checkout_recovery_cron_secret: {
+        Args: { p_secret: string }
+        Returns: boolean
       }
     }
     Enums: {
@@ -888,12 +1253,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -917,11 +1282,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -942,11 +1307,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -967,11 +1332,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -984,11 +1349,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
